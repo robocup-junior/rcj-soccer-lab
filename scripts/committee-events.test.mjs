@@ -141,7 +141,8 @@ test('eight general speakers rotate with equal speaking turns, not equal paired 
 test('damage always belongs to Isa even after frequent prior appearances', () => {
   let history = createCommitteeHistory();
   for (let index = 0; index < 30; index++) {
-    const outcome = outcomes[index % outcomes.length];
+    const practiceOutcomes = outcomes.filter((value) => value !== 'recorded');
+    const outcome = practiceOutcomes[index % practiceOutcomes.length];
     const result = select({ topic: 'damaged', outcome }, history);
     assert.ok(result);
     assert.equal(result.dialogue.character, 'isa', outcome);
@@ -264,6 +265,42 @@ test('certification permits only neutral recorded lines for every topic', () => 
     assert.deepEqual(result.dialogue.outcomes, ['recorded']);
     assert.notEqual(result.dialogue.pose, 'celebrate');
   }
+});
+
+test('neutral character selection cannot reveal the topic or correctness of an assessment', () => {
+  for (const context of ['certification', 'continuous']) {
+    let history = createCommitteeHistory();
+    for (let index = 0; index < 24; index++) {
+      const expected = select(
+        { context, topic: 'general', outcome: 'recorded' },
+        history,
+      );
+      for (const topic of topics) {
+        const actual = select({ context, topic, outcome: 'recorded' }, history);
+        assert.deepEqual(actual, expected, `${context}:${topic}`);
+      }
+      history = expected.history;
+    }
+    for (const character of CHARACTERS)
+      assert.equal(history.turns[character.id], 3);
+  }
+});
+
+test('assessment boundary drops late practice feedback instead of converting it into exam advice', () => {
+  const history = createCommitteeHistory();
+  for (const context of ['practice', 'continuous', 'review'])
+    for (const outcome of outcomes)
+      assert.equal(
+        selectCommitteeDialogue(event({ context, outcome }), history, true),
+        null,
+      );
+  const neutral = selectCommitteeDialogue(
+    event({ context: 'certification', outcome: 'recorded' }),
+    history,
+    true,
+  );
+  assert.ok(neutral);
+  assert.equal(neutral.context, 'certification');
 });
 
 test('replaying a review never produces character commentary', () => {

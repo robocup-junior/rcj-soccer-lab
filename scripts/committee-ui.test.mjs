@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { test } from 'node:test';
+import { compileFunction } from 'node:vm';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import ts from 'typescript';
@@ -66,8 +67,12 @@ const {
   readCommitteePreferences,
   subscribeCommitteeSurface,
 } = await import('../components/committee/CommitteeCompanions.tsx');
-const { COMMITTEE_EVENT_NAME, COMMITTEE_RESET_EVENT_NAME } =
-  await import('../lib/committee/events.ts');
+const {
+  COMMITTEE_EVENT_NAME,
+  COMMITTEE_RESET_EVENT_NAME,
+  createCommitteeHistory,
+  selectCommitteeDialogue,
+} = await import('../lib/committee/events.ts');
 const render = (Component, props = {}) =>
   renderToStaticMarkup(createElement(Component, props));
 
@@ -114,7 +119,10 @@ test('tour explains every main mode without changing navigation or claiming offi
   ])
     assert.ok(html.includes(phrase), phrase);
   assert.match(html, /not an official competition appointment/);
-  assert.match(html, /During certification, we stay quiet/);
+  assert.match(
+    html,
+    /During certification, we cheer you on without hints or verdicts/,
+  );
   assert.doesNotMatch(html, /<a\b|href=/);
 });
 
@@ -142,22 +150,21 @@ test('normal companion shell provides labelled controls, dismissal, and fictiona
     assessmentActive: false,
   });
   assert.match(html, /aria-haspopup="dialog"/);
-  assert.match(html, /Meet the committee/);
+  assert.match(html, /Meet the Characters/);
   assert.match(html, /<dialog[^>]+aria-labelledby="committee-tour-title"/);
   assert.doesNotMatch(html, /<dialog[^>]+\sopen[\s=>]/);
-  assert.match(html, /Close committee tour/);
+  assert.match(html, /Close character tour/);
   assert.match(html, /Skip tour/);
-  assert.match(html, /Committee reactions/);
+  assert.match(html, /Character reactions/);
   assert.match(html, /Character motion/);
   assert.equal((html.match(/role="switch"/g) ?? []).length, 2);
   assert.ok(html.includes(COMMITTEE_VOICE_DISCLAIMER));
 });
 
-test('assessment and embedded contexts render no launcher, tour, hints, or live reactions', () => {
+test('embedded contexts still render no launcher, tour, hints, or live reactions', () => {
   for (const mode of ['rules', 'play', 'referee', 'academy']) {
     for (const [embedded, assessmentActive] of [
       [true, false],
-      [false, true],
       [true, true],
     ]) {
       assert.equal(
@@ -166,6 +173,115 @@ test('assessment and embedded contexts render no launcher, tour, hints, or live 
       );
     }
   }
+});
+
+test('assessments keep the character launcher and optional reaction controls available', () => {
+  for (const mode of ['rules', 'referee', 'academy']) {
+    const html = render(CommitteeCompanions, {
+      mode,
+      embedded: false,
+      assessmentActive: true,
+    });
+    assert.match(html, /Meet the Characters/);
+    assert.match(html, /Character reactions/);
+    assert.match(html, /Character motion/);
+    assert.doesNotMatch(html, /<dialog[^>]+\sopen[\s=>]/);
+    assert.doesNotMatch(html, /Meet the committee|Committee reactions/);
+  }
+});
+
+test('the actual assessment subscription presents recorded answers and ignores practice or verdict events', () => {
+  const text = readFileSync(
+    new URL('../components/committee/CommitteeCompanions.tsx', import.meta.url),
+    'utf8',
+  );
+  const tree = ts.createSourceFile(
+    'CommitteeCompanions.tsx',
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  let effect;
+  function visit(node) {
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText(tree) === 'useEffect' &&
+      node.arguments[0]
+        ?.getText(tree)
+        .includes('return subscribeCommitteeSurface(')
+    )
+      effect = node.arguments[0];
+    ts.forEachChild(node, visit);
+  }
+  visit(tree);
+  assert.ok(effect, 'exercise the real production subscription');
+  const target = new EventTarget();
+  const presented = [];
+  const active = { current: null };
+  const bindings = {
+    ready: true,
+    blocked: false,
+    tourOpen: false,
+    preferences: { reactions: true },
+    assessmentActive: true,
+    mode: 'rules',
+    seenIds: { current: new Set() },
+    history: { current: createCommitteeHistory() },
+    active,
+    pending: { current: [] },
+    present: (reaction) => {
+      presented.push(reaction);
+      active.current = reaction;
+    },
+    clearReactions: () => {
+      active.current = null;
+    },
+    selectCommitteeDialogue,
+    subscribeCommitteeSurface,
+    window: target,
+  };
+  const body = ts.transpileModule(`const effect = ${effect.getText(tree)};`, {
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.ESNext,
+    },
+  }).outputText;
+  const unsubscribe = compileFunction(
+    `${body}\nreturn effect();`,
+    Object.keys(bindings),
+  )(...Object.values(bindings));
+  const dispatch = (id, context, outcome, surface = 'rules') =>
+    target.dispatchEvent(
+      new CustomEvent(COMMITTEE_EVENT_NAME, {
+        detail: { id, context, outcome, surface, topic: 'damaged' },
+      }),
+    );
+  dispatch('old-practice', 'practice', 'correct');
+  dispatch('hidden-verdict', 'certification', 'correct');
+  dispatch('other-surface', 'certification', 'recorded', 'referee');
+  assert.equal(presented.length, 0);
+  dispatch('saved-answer', 'certification', 'recorded');
+  assert.equal(presented.length, 1);
+  assert.equal(presented[0].context, 'certification');
+  assert.deepEqual(presented[0].dialogue.outcomes, ['recorded']);
+  assert.equal(presented[0].dialogue.topic, 'general');
+  dispatch('saved-answer', 'certification', 'recorded');
+  assert.equal(
+    bindings.pending.current.length,
+    0,
+    'duplicate answers never queue twice',
+  );
+  unsubscribe();
+  dispatch('after-unmount', 'certification', 'recorded');
+  assert.equal(bindings.pending.current.length, 0);
+  // These guards also cover the render before the lifecycle cleanup effect runs.
+  assert.match(
+    text,
+    /!assessmentActive\s*\|\|\s*reaction.context === 'certification'/,
+  );
+  assert.match(text, /\[mode, blocked, assessmentActive, clearReactions\]/);
+  assert.match(text, /!blocked && !assessmentActive && mode === 'rules'/);
 });
 
 test('saved reaction and motion choices preserve explicit false values', () => {

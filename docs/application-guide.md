@@ -490,21 +490,24 @@ specification dated 2026-06-03. Dimensions not fixed by the rules, such as wall
 board thickness, follow the accompanying `SoccerField_202605.step` construction
 model and are explicitly labelled as construction values.
 
-## Committee companions
+## Character companions
 
 The optional sideline crew includes Marek, Isa, Tom, Will, Roberto,
 David, Jakub, and Caroline. Each has three illustrated poses and fifteen
 short fictional lines. A skippable first-visit Rules tour introduces everyone;
-**Meet the committee** reopens it, previews poses, and controls reactions and
+**Meet the Characters** reopens it, previews poses, and controls reactions and
 motion. Operating-system reduced-motion preferences are always respected.
 
 Companions react to practice quiz answers, rule sections, submitted referee
 calls, and public play-mode goals/results. Speaking turns rotate across the
-cast, with Isa assigned to damage calls and Caroline always joining Jakub.
+cast, with Isa assigned to damage feedback in practice and Caroline always joining Jakub.
 Short queues, timed dismissal, and mute controls keep the panel optional.
-Certification and saved match reviews hide the crew entirely. During a live
-continuous match, remarks merely acknowledge submitted calls: they never
-reveal hidden incidents or correct answers. Jokes are not real quotations,
+During certification, characters acknowledge saved answers and submitted calls
+with neutral encouragement, without hints or verdicts. The welcome tour never
+opens automatically during an assessment. Live continuous matches also receive
+only neutral acknowledgements; saved match reviews do not trigger reactions.
+Neither comments nor character selection reveal hidden incidents or correct
+answers. Reactions and motion remain optional. Jokes are not real quotations,
 official rulings, investment advice, or endorsements; existing sourced
 feedback and grading remain authoritative.
 

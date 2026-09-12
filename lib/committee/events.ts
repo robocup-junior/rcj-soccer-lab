@@ -135,8 +135,11 @@ const specialists: Partial<Record<CommitteeTopic, CommitteeCharacterId>> = {
 export function selectCommitteeDialogue(
   event: CommitteeEvent,
   history: CommitteeHistory,
+  assessmentActive = false,
 ) {
   if (!isCommitteeEvent(event) || event.context === 'review') return null;
+  // A delayed practice notification must never enter an active assessment.
+  if (assessmentActive && event.context !== 'certification') return null;
   // No answer-derived lines in exams or during live continuous observation.
   if (event.context === 'certification' && event.outcome !== 'recorded')
     return null;
@@ -161,9 +164,9 @@ export function selectCommitteeDialogue(
   );
   if (!available.length) return null;
   const count = (id: CommitteeCharacterId) => history.turns[id] ?? 0;
-  const preferred = specialists[event.topic];
+  const preferred = specialists[topic];
   const ranked = [...available].sort((a, b) => {
-    if (event.topic === 'damaged') {
+    if (topic === 'damaged') {
       if (a.id === 'isa') return -1;
       if (b.id === 'isa') return 1;
     }
@@ -193,6 +196,7 @@ export function selectCommitteeDialogue(
   for (const person of characters)
     appearances[person.id] = (appearances[person.id] ?? 0) + 1;
   return {
+    context: event.context,
     dialogue,
     characters,
     history: {

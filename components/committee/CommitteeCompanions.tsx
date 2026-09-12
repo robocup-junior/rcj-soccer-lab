@@ -66,7 +66,7 @@ export const COMMITTEE_TOUR = [
     characters: ['isa'],
     title: 'Practice at your own pace',
     text: 'Step mode pauses for decisions. Continuous mode keeps the match moving and accepts your calls, including mistakes. Review the timeline afterwards to see what happened and what you could improve.',
-    hint: 'During certification, we stay quiet. Your decisions are yours.',
+    hint: 'During certification, we cheer you on without hints or verdicts. Your decisions are yours.',
   },
   {
     characters: ['finance'],
@@ -254,7 +254,7 @@ export function CommitteeCompanions({
   const active = useRef<Reaction | null>(null);
   const remaining = useRef(REACTION_DURATION);
   const autoTourConsidered = useRef(false);
-  const blocked = embedded || assessmentActive;
+  const blocked = embedded;
 
   const clearReactions = useCallback(() => {
     pending.current = [];
@@ -293,7 +293,7 @@ export function CommitteeCompanions({
       setTourOpen(false);
     });
     return () => cancelAnimationFrame(frame);
-  }, [mode, blocked, clearReactions]);
+  }, [mode, blocked, assessmentActive, clearReactions]);
 
   useEffect(() => {
     if (!ready || autoTourConsidered.current) return;
@@ -301,7 +301,7 @@ export function CommitteeCompanions({
     // pop up a welcome dialog in the middle of a user's existing activity.
     const timer = window.setTimeout(() => {
       autoTourConsidered.current = true;
-      if (!blocked && mode === 'rules' && !tourSeen()) {
+      if (!blocked && !assessmentActive && mode === 'rules' && !tourSeen()) {
         previousFocus.current =
           document.activeElement instanceof HTMLElement
             ? document.activeElement
@@ -320,7 +320,7 @@ export function CommitteeCompanions({
       window.removeEventListener('pointerdown', keepLearning);
       window.removeEventListener('keydown', keepLearning);
     };
-  }, [ready, mode, blocked]);
+  }, [ready, mode, blocked, assessmentActive]);
 
   const closeTour = useCallback(() => {
     persist(TOUR_KEY, 'seen');
@@ -363,7 +363,11 @@ export function CommitteeCompanions({
       seenIds.current.add(event.id);
       if (seenIds.current.size > 256)
         seenIds.current.delete(seenIds.current.values().next().value!);
-      const selected = selectCommitteeDialogue(event, history.current);
+      const selected = selectCommitteeDialogue(
+        event,
+        history.current,
+        assessmentActive,
+      );
       if (!selected) return;
       history.current = selected.history;
       if (!active.current) present(selected);
@@ -378,6 +382,7 @@ export function CommitteeCompanions({
   }, [
     ready,
     blocked,
+    assessmentActive,
     tourOpen,
     preferences.reactions,
     mode,
@@ -431,56 +436,61 @@ export function CommitteeCompanions({
         aria-haspopup="dialog"
       >
         <Users aria-hidden="true" />
-        <span>Meet the committee</span>
+        <span>Meet the Characters</span>
       </button>
 
-      {reaction && !tourOpen && preferences.reactions && (
-        <div
-          className="committee-reaction"
-          aria-label="Committee companion"
-          onPointerEnter={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
-          onFocusCapture={() => setFocused(true)}
-          onBlurCapture={(event) => {
-            if (
-              !event.currentTarget.contains(event.relatedTarget as Node | null)
-            )
-              setFocused(false);
-          }}
-        >
-          <div className="committee-reaction-figures">
-            {reaction.characters.map((character) => (
-              <CommitteeFigure
-                key={character.id}
-                character={character}
-                pose={reaction.dialogue.pose}
-              />
-            ))}
+      {reaction &&
+        (!assessmentActive || reaction.context === 'certification') &&
+        !tourOpen &&
+        preferences.reactions && (
+          <div
+            className="committee-reaction"
+            aria-label="Character companion"
+            onPointerEnter={() => setHovered(true)}
+            onPointerLeave={() => setHovered(false)}
+            onFocusCapture={() => setFocused(true)}
+            onBlurCapture={(event) => {
+              if (
+                !event.currentTarget.contains(
+                  event.relatedTarget as Node | null,
+                )
+              )
+                setFocused(false);
+            }}
+          >
+            <div className="committee-reaction-figures">
+              {reaction.characters.map((character) => (
+                <CommitteeFigure
+                  key={character.id}
+                  character={character}
+                  pose={reaction.dialogue.pose}
+                />
+              ))}
+            </div>
+            <output
+              className="committee-reaction-copy"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <strong data-i18n-skip>
+                {reaction.characters
+                  .map((character) => character.name)
+                  .join(' & ')}
+              </strong>
+              <span className="committee-reaction-text">
+                {reaction.dialogue.text}
+              </span>
+            </output>
+            <button
+              className="committee-icon-button committee-dismiss"
+              type="button"
+              onClick={clearReactions}
+              aria-label="Dismiss character reaction"
+            >
+              <X aria-hidden="true" />
+            </button>
           </div>
-          <output
-            className="committee-reaction-copy"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <strong data-i18n-skip>
-              {reaction.characters
-                .map((character) => character.name)
-                .join(' & ')}
-            </strong>
-            <span className="committee-reaction-text">
-              {reaction.dialogue.text}
-            </span>
-          </output>
-          <button
-            className="committee-icon-button committee-dismiss"
-            type="button"
-            onClick={clearReactions}
-            aria-label="Dismiss committee reaction"
-          >
-            <X aria-hidden="true" />
-          </button>
-        </div>
-      )}
+        )}
 
       <dialog
         ref={dialogRef}
@@ -495,13 +505,13 @@ export function CommitteeCompanions({
         <header className="committee-dialog-header">
           <div>
             <span className="committee-eyebrow">RCJ Soccer Lab</span>
-            <h2 id="committee-tour-title">Meet the committee</h2>
+            <h2 id="committee-tour-title">Meet the Characters</h2>
           </div>
           <button
             className="committee-icon-button"
             type="button"
             onClick={closeTour}
-            aria-label="Close committee tour"
+            aria-label="Close character tour"
           >
             <X aria-hidden="true" />
           </button>
@@ -512,7 +522,7 @@ export function CommitteeCompanions({
         >
           A quick introduction to learning, playing, and refereeing.
         </p>
-        <nav className="committee-cast" aria-label="Committee tour guides">
+        <nav className="committee-cast" aria-label="Character tour guides">
           {COMMITTEE_TOUR.map((item, index) => (
             <button
               key={item.characters[0]}
@@ -555,7 +565,7 @@ export function CommitteeCompanions({
             onClick={() => updatePreference('reactions')}
           >
             <span className="committee-toggle" aria-hidden="true" />
-            Committee reactions
+            Character reactions
           </button>
           <button
             type="button"
