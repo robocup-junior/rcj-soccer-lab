@@ -13,9 +13,14 @@ This is an experimental **mock/training certification workflow** for a shared le
 
 ## One-time setup
 
+The canonical issuer is `robocup-junior/rcj-soccer-lab`. See the
+[organization migration guide](organization-deployment.md) before moving
+existing progress or keys. Operator scripts require this repository explicitly;
+they must not accidentally reconfigure the personal deployment.
+
 1. Use a public repository with Pages configured for GitHub Actions, Issues enabled, and workflows permitted.
-2. Owner runs `node scripts/provision-academy.mjs --provision`. It generates an ECDSA P-256 key in memory and sends the private JWK to `gh secret set ACADEMY_SIGNING_KEY` through stdin. It prints only the public JWK. Save that public JWK in `lib/github/public-key.json`. The script refuses to replace an existing secret.
-3. Owner runs `node scripts/bootstrap-academy-branch.mjs --bootstrap` to create the independent `academy-data` branch without changing `main`.
+2. Owner runs `node scripts/provision-academy.mjs --provision --repo robocup-junior/rcj-soccer-lab`. It generates an ECDSA P-256 key in memory and sends the private JWK to `gh secret set ACADEMY_SIGNING_KEY` through stdin. It prints only the public JWK. Save that public JWK in `lib/github/public-key.json`. The script refuses to replace an existing secret.
+3. Owner runs `node scripts/bootstrap-academy-branch.mjs --bootstrap --repo robocup-junior/rcj-soccer-lab` to create the independent `academy-data` branch without changing `main`.
 4. Push reviewed source/public key to `main`. Run **Publish mock academy requests** once to create the empty signed directory. No dummy certificates are needed.
 5. Open the Pages academy, create a local profile, and connect via a real GitHub issue. Check the signed receipt. The referee number is `RCJ-GH-<immutable numeric GitHub account ID>`.
 

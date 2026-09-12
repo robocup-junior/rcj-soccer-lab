@@ -120,7 +120,7 @@ export function ProfilePanel({
   const [saved, setSaved] = useState(false);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
-  const [imported, setImported] = useState(false);
+  const [imported, setImported] = useState<'current' | 'legacy' | null>(null);
   const reviewGame = async (id: string) => {
     try {
       onReviewGame?.(id, await getGameReplay(id));
@@ -135,11 +135,11 @@ export function ProfilePanel({
 
   const restoreBackup = async (file: File) => {
     setImporting(true);
-    setImported(false);
+    setImported(null);
     setBackupError(null);
     try {
-      await importProgress(file);
-      setImported(true);
+      const result = await importProgress(file);
+      setImported(result.requiresGitHubReconnect ? 'legacy' : 'current');
     } catch (caught) {
       setBackupError(
         caught instanceof Error
@@ -384,7 +384,11 @@ export function ProfilePanel({
           </p>
           {imported && (
             <output className="text-sm text-emerald-300">
-              {t('Progress backup imported')}
+              {t(
+                imported === 'legacy'
+                  ? 'Progress imported from the personal site. Your training history is preserved; reconnect GitHub to the organization repository before submitting certification.'
+                  : 'Progress backup imported',
+              )}
             </output>
           )}
           {backupError && (

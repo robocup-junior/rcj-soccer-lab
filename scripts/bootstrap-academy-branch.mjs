@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-const repository = 'JakubGal/rcj-soccer-lab';
+import { requireOrganizationRepository } from './academy-repository.mjs';
+const repository = requireOrganizationRepository(process.argv.slice(2));
 function api(path, body) {
   return JSON.parse(
     execFileSync(

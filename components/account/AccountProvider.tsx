@@ -92,7 +92,7 @@ export type AccountContextValue = {
   prepareGitHubSubmission: (kind: 'connect' | 'certify') => Promise<void>;
   checkGitHubSubmission: () => Promise<void>;
   exportProgress: () => void;
-  importProgress: (file: File) => Promise<void>;
+  importProgress: (file: File) => Promise<{ requiresGitHubReconnect: boolean }>;
 };
 const AccountContext = createContext<AccountContextValue | null>(null);
 
@@ -368,10 +368,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     async (file: File) => {
       if (file.size > 16 * 1024 * 1024)
         throw new Error('Progress backups must be smaller than 16 MB.');
-      const incoming = await validateBackup(JSON.parse(await file.text()));
+      let requiresGitHubReconnect = false;
+      const incoming = await validateBackup(JSON.parse(await file.text()), {
+        onLegacyImport: () => {
+          requiresGitHubReconnect = true;
+        },
+      });
       await mutate('import-progress', (data) => {
         Object.assign(data, incoming);
       });
+      return { requiresGitHubReconnect };
     },
     [mutate],
   );

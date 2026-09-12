@@ -1,12 +1,16 @@
 import { execFileSync } from 'node:child_process';
 import { registerTrustedTypes } from './github-academy.mjs';
+import { requireOrganizationRepository } from './academy-repository.mjs';
+const repository = requireOrganizationRepository(process.argv.slice(2));
 registerTrustedTypes();
-const { prepareSubmission } = await import('../lib/github/protocol.ts');
+const { prepareSubmission, GITHUB_REPOSITORY } =
+  await import('../lib/github/protocol.ts');
 const { readReceipt } = await import('../lib/github/registry.ts');
-const repository = 'JakubGal/rcj-soccer-lab';
+if (GITHUB_REPOSITORY !== repository)
+  throw new Error('The frontend and operator script repository must match.');
 
 if (process.argv.includes('--submit-connect-test')) {
-  // Real repository-owner identity only. This does NOT submit a passing exam,
+  // Real repository-administrator identity only. This does NOT submit a passing exam,
   // issue any certificate, or opt the owner into the public directory.
   const user = JSON.parse(
     execFileSync('gh', ['api', 'user'], {
@@ -14,8 +18,16 @@ if (process.argv.includes('--submit-connect-test')) {
       stdio: ['ignore', 'pipe', 'pipe'],
     }),
   );
-  if (user.login.toLowerCase() !== 'jakubgal')
-    throw new Error('Run this integration test as the repository owner.');
+  const access = JSON.parse(
+    execFileSync('gh', ['api', `repos/${repository}`], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }),
+  );
+  if (!access.permissions?.admin)
+    throw new Error(
+      'Run this integration test as an organization repository administrator.',
+    );
   const requestId = crypto.randomUUID().replaceAll('-', '');
   const request = await prepareSubmission({
     schema: 1,
@@ -66,6 +78,6 @@ if (process.argv.includes('--submit-connect-test')) {
   );
 } else {
   process.stdout.write(
-    'Use --submit-connect-test once, then --check <requestId>. Never submit synthetic passing exams to the live registry.\n',
+    `Use --repo ${repository} --submit-connect-test once, then --repo ${repository} --check <requestId>. Never submit synthetic passing exams to the live registry.\n`,
   );
 }

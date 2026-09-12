@@ -120,6 +120,12 @@ const PRESERVED_SENTENCES = new Set([
 
 const MANUAL = {
   sk: {
+    'Progress imported from the personal site. Your training history is preserved; reconnect GitHub to the organization repository before submitting certification.':
+      'Pokrok bol importovaný z osobnej stránky. História tréningu zostala zachovaná; pred odoslaním certifikácie znova prepojte GitHub s repozitárom organizácie.',
+    'Certificates from the personal repository cannot be imported as organization certificates. Keep the original backup and contact a maintainer.':
+      'Certifikáty z osobného repozitára nemožno importovať ako certifikáty organizácie. Ponechajte si pôvodnú zálohu a kontaktujte správcu.',
+    'This backup contains an unsupported legacy verification record.':
+      'Táto záloha obsahuje nepodporovaný starší overovací záznam.',
     ms: 'ms',
     'ms ·': 'ms ·',
     'Tracking interval': 'Interval sledovania',
@@ -390,6 +396,12 @@ const MANUAL = {
       'Úplný vstup robota znamená out of bounds. Odstráňte robota na jednu minútu alebo do skoršieho kick-off.',
   },
   de: {
+    'Progress imported from the personal site. Your training history is preserved; reconnect GitHub to the organization repository before submitting certification.':
+      'Fortschritt von der persönlichen Website importiert. Dein Trainingsverlauf bleibt erhalten; verbinde GitHub vor dem Einreichen der Zertifizierung erneut mit dem Repository der Organisation.',
+    'Certificates from the personal repository cannot be imported as organization certificates. Keep the original backup and contact a maintainer.':
+      'Zertifikate aus dem persönlichen Repository können nicht als Zertifikate der Organisation importiert werden. Bewahre die ursprüngliche Sicherung auf und kontaktiere die Projektbetreuung.',
+    'This backup contains an unsupported legacy verification record.':
+      'Diese Sicherung enthält einen nicht unterstützten älteren Verifizierungsdatensatz.',
     ms: 'ms',
     'ms ·': 'ms ·',
     'Tracking interval': 'Tracking-Intervall',
@@ -656,6 +668,12 @@ const MANUAL = {
       'Das vollständige Einfahren gilt als out of bounds. Entfernen Sie den Roboter für eine Minute oder bis zu einem früheren kick-off.',
   },
   ja: {
+    'Progress imported from the personal site. Your training history is preserved; reconnect GitHub to the organization repository before submitting certification.':
+      '個人サイトから進捗を読み込みました。トレーニング履歴は保持されています。認定を申請する前に、GitHubを組織のリポジトリに再接続してください。',
+    'Certificates from the personal repository cannot be imported as organization certificates. Keep the original backup and contact a maintainer.':
+      '個人リポジトリの認定証を組織の認定証として読み込むことはできません。元のバックアップを保管し、管理者に連絡してください。',
+    'This backup contains an unsupported legacy verification record.':
+      'このバックアップには、対応していない旧形式の検証記録が含まれています。',
     ms: 'ms',
     'ms ·': 'ms ·',
     'Tracking interval': '追跡間隔',

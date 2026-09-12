@@ -30,6 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useLocalization } from '@/components/i18n/LocalizationProvider';
+import { GITHUB_REPOSITORY } from '@/lib/github/protocol';
 import {
   getCertifiedReferees,
   type CertifiedRefereeDirectory,
@@ -197,7 +198,7 @@ export function CertifiedRefereesPanel() {
                       <TableCell className="font-mono" data-i18n-skip>
                         <a
                           className="text-sky-300 underline underline-offset-4"
-                          href={`https://github.com/JakubGal/rcj-soccer-lab/issues?q=${encodeURIComponent(referee.verificationCode)}`}
+                          href={`https://github.com/${GITHUB_REPOSITORY}/issues?q=${encodeURIComponent(referee.verificationCode)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={t('View verification issue on GitHub')}
@@ -239,7 +240,7 @@ export function CertifiedRefereesPanel() {
                       </strong>
                       <a
                         className="font-mono text-xs text-sky-300"
-                        href={`https://github.com/JakubGal/rcj-soccer-lab/issues?q=${encodeURIComponent(referee.verificationCode)}`}
+                        href={`https://github.com/${GITHUB_REPOSITORY}/issues?q=${encodeURIComponent(referee.verificationCode)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={t('View verification issue on GitHub')}

@@ -84,7 +84,7 @@ const request = {
   kind: 'certify',
   requestId: 'a'.repeat(32),
   body: 'RCJ-ACADEMY-V1:public-evidence',
-  issueUrl: 'https://github.com/JakubGal/rcj-soccer-lab/issues/new',
+  issueUrl: 'https://github.com/robocup-junior/rcj-soccer-lab/issues/new',
 };
 const receipt = {
   ...request,
@@ -352,7 +352,10 @@ test('verified result identifies it as training rather than an official appointm
   );
   assert.match(html, /Training certification verified/);
   assert.match(html, /not an official competition appointment/);
-  assert.match(html, /issues\/17/);
+  assert.match(
+    html,
+    /https:\/\/github.com\/robocup-junior\/rcj-soccer-lab\/issues\/17/,
+  );
   assert.doesNotMatch(html, /Prepare certification submission/);
 });
 

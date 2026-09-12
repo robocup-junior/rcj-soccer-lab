@@ -21,6 +21,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/components/i18n/LocalizationProvider';
+import { GITHUB_REPOSITORY } from '@/lib/github/protocol';
 import { useAccount } from './AccountProvider';
 
 export function GitHubSubmissionPanel({
@@ -303,7 +304,7 @@ export function GitHubSubmissionPanel({
           Number.isSafeInteger(receipt.issueNumber) &&
           receipt.issueNumber > 0 && (
             <a
-              href={`https://github.com/JakubGal/rcj-soccer-lab/issues/${receipt.issueNumber}`}
+              href={`https://github.com/${GITHUB_REPOSITORY}/issues/${receipt.issueNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-fit items-center gap-1.5 text-sm text-sky-300 underline underline-offset-4"

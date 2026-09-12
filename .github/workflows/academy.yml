@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   publish:
-    if: github.repository == 'JakubGal/rcj-soccer-lab'
+    if: github.repository == 'robocup-junior/rcj-soccer-lab'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     permissions:

@@ -3,10 +3,10 @@ import type { RuleLearningEvent } from '@/lib/certification/client-types';
 import type { MatchReplay } from '@/lib/certification/replay';
 import { packReplay } from './transport';
 
-export const GITHUB_REPOSITORY = 'JakubGal/rcj-soccer-lab';
+export const GITHUB_REPOSITORY = 'robocup-junior/rcj-soccer-lab';
 export const ACADEMY_DATA_URL = `https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/academy-data/`;
 export const SUBMISSION_MARKER = 'RCJ-ACADEMY-V1:';
-export const SIGNING_KEY_ID = 'academy-2026-v1';
+export const SIGNING_KEY_ID = 'academy-robocup-junior-2026-v1';
 
 export type GitHubGameEvidence = {
   id: string;

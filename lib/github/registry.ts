@@ -1,4 +1,5 @@
 import publicKey from './public-key.json';
+import legacyPersonalPublicKey from './legacy-personal-public-key.json';
 import {
   ACADEMY_DATA_URL,
   SIGNING_KEY_ID,
@@ -9,13 +10,16 @@ import {
 } from './protocol';
 import type { CertifiedRefereeDirectory } from '@/lib/account/types';
 
-/** Only envelopes signed by the configured issuer are trusted, even after import. */
-export async function verifyEnvelope<T>(value: unknown): Promise<T> {
+async function verifyWithKey<T>(
+  value: unknown,
+  keyId: string,
+  publicJwk: JsonWebKey,
+): Promise<T> {
   if (!value || typeof value !== 'object')
     throw new Error('Invalid signed record.');
   const envelope = value as SignedEnvelope;
   if (
-    envelope.keyId !== SIGNING_KEY_ID ||
+    envelope.keyId !== keyId ||
     typeof envelope.payload !== 'string' ||
     typeof envelope.signature !== 'string' ||
     envelope.payload.length > 8 * 1024 * 1024
@@ -23,7 +27,7 @@ export async function verifyEnvelope<T>(value: unknown): Promise<T> {
     throw new Error('Invalid signed record.');
   const key = await crypto.subtle.importKey(
     'jwk',
-    publicKey,
+    publicJwk,
     { name: 'ECDSA', namedCurve: 'P-256' },
     false,
     ['verify'],
@@ -38,6 +42,60 @@ export async function verifyEnvelope<T>(value: unknown): Promise<T> {
   if (!valid)
     throw new Error('This record does not have a valid academy signature.');
   return JSON.parse(new TextDecoder().decode(bytes)) as T;
+}
+
+/** Live records and certificates trust only the organization issuer. */
+export async function verifyEnvelope<T>(value: unknown): Promise<T> {
+  return verifyWithKey<T>(value, SIGNING_KEY_ID, publicKey);
+}
+
+/**
+ * Import-only bridge for the personal site's connection-only backups. A valid
+ * old connection permits preserving local progress, never organization trust.
+ * Callers must discard this receipt and request a new organization connection.
+ */
+export async function verifyLegacyConnectionForImport(
+  value: unknown,
+): Promise<GitHubReceipt | null> {
+  const legacyKeyId = 'academy-2026-v1';
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    (value as SignedEnvelope).keyId !== legacyKeyId
+  )
+    return null;
+  const receipt = await verifyWithKey<GitHubReceipt>(
+    value,
+    legacyKeyId,
+    legacyPersonalPublicKey,
+  );
+  if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt))
+    throw new Error(
+      'This backup contains an unsupported legacy verification record.',
+    );
+  if ('certificate' in receipt || receipt.kind === 'certify')
+    throw new Error(
+      'Certificates from the personal repository cannot be imported as organization certificates. Keep the original backup and contact a maintainer.',
+    );
+  if (
+    receipt.kind !== 'connect' ||
+    receipt.status !== 'accepted' ||
+    typeof receipt.requestId !== 'string' ||
+    !/^[a-f0-9]{32}$/.test(receipt.requestId) ||
+    !Number.isSafeInteger(receipt.githubId) ||
+    receipt.githubId < 1 ||
+    typeof receipt.githubLogin !== 'string' ||
+    !/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(receipt.githubLogin) ||
+    receipt.refereeNumber !== `RCJ-GH-${receipt.githubId}` ||
+    !Number.isSafeInteger(receipt.issueNumber) ||
+    receipt.issueNumber < 1 ||
+    typeof receipt.message !== 'string' ||
+    receipt.message.length > 4096
+  )
+    throw new Error(
+      'This backup contains an unsupported legacy verification record.',
+    );
+  return receipt;
 }
 
 async function readSigned<T>(
