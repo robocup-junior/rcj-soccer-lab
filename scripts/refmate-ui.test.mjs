@@ -55,6 +55,10 @@ registerHooks({
 const { RefMateConsole } =
   await import('../components/simulator/RefMateConsole.tsx');
 const { RefereeMatch } = await import('../lib/simulator/referee-match.ts');
+const { PreMatchToss } =
+  await import('../components/simulator/PreMatchToss.tsx');
+const { sampleSituation } =
+  await import('../lib/simulator/situation-replay.ts');
 
 const noop = () => {};
 const makeFrame = () =>
@@ -90,6 +94,93 @@ const robotButtons = (html) =>
     /class="refmate-robot /.test(attributes),
   );
 const disabled = (button) => /\sdisabled(?:=|\s|$)/.test(button.attributes);
+
+test('goal award controls identify the attacking team and painted end in both directions', () => {
+  for (const direction of [-1, 1])
+    for (const mode of ['step', 'continuous']) {
+      const session = new RefereeMatch(73, { mode, duration: 180 });
+      session.match.blueAttackDirection = direction;
+      const html = render({ frame: session.snapshot() });
+      for (const team of ['blue', 'yellow']) {
+        const name = team === 'blue' ? 'Blue' : 'Yellow';
+        const goal =
+          (team === 'blue' ? direction : -direction) === 1 ? 'yellow' : 'blue';
+        const score = buttons(html).find(({ attributes }) =>
+          attributes.includes(`refmate-score refmate-team-${team}`),
+        );
+        assert.ok(score);
+        assert.match(score.content, new RegExp(`Award goal to ${name}`));
+        assert.match(score.content, new RegExp(`Attacks ${goal}-painted goal`));
+        assert.match(
+          score.attributes,
+          new RegExp(`Award goal · Team [AB] / ${name}`),
+        );
+        assert.equal(disabled(score), false);
+      }
+      assert.match(html, /Goal colors mark field ends, not team ownership\./);
+    }
+});
+
+test('pre-match and controller labels show assignments only after ends are chosen', () => {
+  for (const end of ['blue', 'yellow']) {
+    const session = new RefereeMatch(73, {
+      preMatch: true,
+      mode: 'continuous',
+    });
+    assert.doesNotMatch(
+      render({ frame: session.snapshot() }),
+      /Attacks .*?-painted goal/,
+    );
+    assert.ok(session.tossCoin());
+    const toss = (meeting) =>
+      renderToStaticMarkup(
+        createElement(PreMatchToss, {
+          meeting,
+          ready: true,
+          onToss: noop,
+          onKickoff: noop,
+          onEnd: noop,
+          onStart: noop,
+        }),
+      );
+    const choices = toss(session.snapshot().opening);
+    assert.match(choices, /Attack blue-painted goal/);
+    assert.match(choices, /Attack yellow-painted goal/);
+    assert.ok(session.chooseOpeningEnd(end));
+    const frame = session.snapshot();
+    const ready = toss(frame.opening);
+    assert.match(ready, /Goal colors mark field ends, not team ownership\./);
+    assert.match(ready, /Attacks blue-painted goal/);
+    assert.match(ready, /Attacks yellow-painted goal/);
+    assert.match(render({ frame }), /Attacks blue-painted goal/);
+    assert.match(render({ frame }), /Attacks yellow-painted goal/);
+  }
+});
+
+test('match replays preserve unassigned and chosen ends without affecting their session', () => {
+  for (const end of ['blue', 'yellow']) {
+    const session = new RefereeMatch(73, {
+      preMatch: true,
+      mode: 'continuous',
+    });
+    session.tossCoin();
+    session.chooseOpeningEnd(end);
+    const direction = session.snapshot().blueAttackDirection;
+    assert.ok(session.submit(session.decisionKey, { action: 'start' }));
+    for (let tick = 0; tick < 120; tick++) session.step();
+    const replay = session.getMatchReplay();
+    assert.ok(replay);
+    assert.equal(sampleSituation(replay, 0).blueAttackDirection, null);
+    assert.equal(
+      sampleSituation(replay, replay.duration).blueAttackDirection,
+      direction,
+    );
+    const snapshot = session.snapshot();
+    const view = sampleSituation(replay, replay.duration);
+    view.blueAttackDirection *= -1;
+    assert.deepEqual(session.snapshot(), snapshot);
+  }
+});
 
 test('the real controller renders A1/B1/A2/B2 order with the selected robot label', () => {
   const html = render({ target: 'yellow-2' });

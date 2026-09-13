@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Coins, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GoalTarget } from './GoalTarget';
 import type { KickoffMeeting, GoalEnd } from '@/lib/simulator/kickoff';
 
 const name = (team: string | null) => (team === 'blue' ? 'Blue' : 'Yellow');
@@ -55,7 +56,7 @@ export function PreMatchToss({
           {spinning
             ? 'Blue and Yellow each have an equal chance.'
             : meeting.stage === 'ready'
-              ? `Blue attacks the ${meeting.blueAttackDirection === 1 ? 'yellow' : 'blue'} goal. Yellow attacks the other end.`
+              ? 'Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.'
               : meeting.stage === 'toss'
                 ? 'The winner chooses first kickoff or an attacking end. The other team gets the remaining choice.'
                 : meeting.stage === 'end-choice'
@@ -77,6 +78,23 @@ export function PreMatchToss({
             </Button>
           ) : meeting.stage === 'ready' ? (
             <>
+              <div className="referee-chosen-ends">
+                {(['blue', 'yellow'] as const).map((team) => (
+                  <div key={team}>
+                    <strong
+                      className={
+                        team === 'blue' ? 'text-sky-300' : 'text-amber-300'
+                      }
+                    >
+                      {name(team)}
+                    </strong>
+                    <GoalTarget
+                      team={team}
+                      blueAttackDirection={meeting.blueAttackDirection}
+                    />
+                  </div>
+                ))}
+              </div>
               <small>
                 Random legal positions · own halves · ball centered · opponents
                 clear of the center circle. Everyone waits for your signal.
@@ -94,10 +112,10 @@ export function PreMatchToss({
               )}
               <div className="referee-end-options">
                 <Button variant="outline" onClick={() => onEnd('blue')}>
-                  Attack blue goal
+                  Attack blue-painted goal
                 </Button>
                 <Button variant="outline" onClick={() => onEnd('yellow')}>
-                  Attack yellow goal
+                  Attack yellow-painted goal
                 </Button>
               </div>
             </>

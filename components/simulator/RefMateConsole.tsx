@@ -3,6 +3,7 @@
 import { useId, useRef, useState, type ButtonHTMLAttributes } from 'react';
 import { Radio, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GoalTarget } from './GoalTarget';
 import {
   NativeSelect,
   NativeSelectOption,
@@ -154,7 +155,17 @@ export function RefMateConsole({
                 {team === 'blue' ? 'Team A · Blue' : 'Team B · Yellow'}
               </span>
               <strong>{frame.score[team]}</strong>
-              <small>Goal +1</small>
+              <small>
+                {team === 'blue'
+                  ? 'Award goal to Blue'
+                  : 'Award goal to Yellow'}
+              </small>
+              {(!frame.opening || frame.opening.stage === 'ready') && (
+                <GoalTarget
+                  team={team}
+                  blueAttackDirection={frame.blueAttackDirection}
+                />
+              )}
             </CriticalButton>
           ))}
           <div className="refmate-timer">
@@ -184,6 +195,10 @@ export function RefMateConsole({
           </div>
         </div>
 
+        <p className="refmate-gesture-hint">
+          Goal colors mark field ends, not team ownership. Follow the ends
+          chosen at the coin toss.
+        </p>
         <div className="refmate-options">
           <label htmlFor={`${controlsId}-activation`}>
             Activation

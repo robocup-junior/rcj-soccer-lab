@@ -4,6 +4,7 @@ import { registerHooks } from 'node:module';
 import { test } from 'node:test';
 import ts from 'typescript';
 import reconstructionTranslations from './reconstruction-translations.mjs';
+import goalAssignmentTranslations from './goal-assignment-translations.mjs';
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -78,6 +79,42 @@ test('reconstruction controls use reviewed frame terminology and retain live cou
         );
     }
   }
+});
+
+test('goal-assignment reviewed translations cover exactly the seven disambiguated controls', () => {
+  const sources = [
+    'Attacks blue-painted goal',
+    'Attacks yellow-painted goal',
+    'Attack blue-painted goal',
+    'Attack yellow-painted goal',
+    'Award goal to Blue',
+    'Award goal to Yellow',
+    'Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.',
+  ];
+  assert.deepEqual(Object.keys(goalAssignmentTranslations), ['sk', 'de', 'ja']);
+  for (const locale of ['sk', 'de', 'ja']) {
+    assert.deepEqual(Object.keys(goalAssignmentTranslations[locale]), sources);
+    for (const [source, translation] of Object.entries(
+      goalAssignmentTranslations[locale],
+    )) {
+      assert.equal(typeof translation, 'string');
+      assert.ok(translation.trim().length > 0, `${locale}: ${source}`);
+      assert.notEqual(translation, source);
+      assert.doesNotMatch(translation, /\uFFFD/);
+    }
+  }
+});
+
+test('goal-assignment controls use every reviewed translation, distinguishing painted ends from teams', () => {
+  for (const locale of ['sk', 'de', 'ja'])
+    for (const [source, translation] of Object.entries(
+      goalAssignmentTranslations[locale],
+    ))
+      assert.equal(
+        translateText(source, locale),
+        translation,
+        `${locale}: ${source}`,
+      );
 });
 
 test('supports English, Slovak, German and Japanese in stable order', () => {

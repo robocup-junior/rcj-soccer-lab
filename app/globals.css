@@ -1626,6 +1626,35 @@ a {
   color: #c5d0de;
   font-size: 10px;
 }
+.goal-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #c7d5e5;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.3;
+  white-space: normal;
+  text-align: center;
+}
+.goal-target > i {
+  flex: 0 0 10px;
+  height: 10px;
+  border: 1px solid #ffffff70;
+  border-radius: 2px;
+  background: #2774d8;
+}
+.goal-target-yellow > i {
+  background: #f0cc26;
+}
+.refmate-score .goal-target {
+  margin-top: 6px;
+  font-size: 0.75rem;
+}
+.refmate-score .goal-target > span {
+  font-size: inherit;
+}
 .refmate-timer {
   grid-column: 2;
   grid-row: 1;
@@ -1876,6 +1905,12 @@ a {
   gap: 9px;
   margin: 12px 0 16px;
 }
+.referee-goals > button {
+  height: auto;
+  flex-direction: column;
+  padding: 10px 8px;
+  white-space: normal;
+}
 .referee-target {
   margin-bottom: 17px;
 }
@@ -1929,8 +1964,7 @@ a {
   margin-bottom: 18px;
 }
 
-.referee-assistance-note,
-.referee-end-note {
+.referee-assistance-note {
   color: #aec3d2;
   font-size: 0.875rem;
   margin: 8px 0 12px;
@@ -2020,6 +2054,15 @@ a {
   display: grid;
   gap: 12px;
   margin-top: 18px;
+}
+.referee-chosen-ends {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.referee-chosen-ends > div {
+  display: grid;
+  gap: 5px;
 }
 .referee-meeting-actions small {
   color: #adcfbe;
@@ -2749,6 +2792,42 @@ a {
   text-align: center;
   font-size: 0.75rem;
   color: #9cabbf;
+}
+.referee-field-header {
+  position: absolute;
+  top: 18px;
+  left: 12px;
+  right: 12px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.referee-field-header > .referee-scoreboard {
+  position: static;
+  transform: none;
+  max-width: 100%;
+  gap: 12px;
+  padding: 10px 14px;
+  pointer-events: auto;
+}
+.match-scoreboard > .referee-score-team {
+  flex-direction: column;
+  gap: 5px;
+  width: 130px;
+  min-width: 0;
+}
+.referee-team-total {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.referee-field-header > .match-camera {
+  position: static;
+  align-self: flex-end;
+  pointer-events: auto;
 }
 .match-camera {
   position: absolute;

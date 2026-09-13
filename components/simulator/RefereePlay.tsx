@@ -39,6 +39,7 @@ import { MATCH_ACTORS, MATCH_ROBOTS, MATCH_STEP } from '@/lib/simulator/match';
 import { RefereeMatch } from '@/lib/simulator/referee-match';
 import { PreMatchToss } from './PreMatchToss';
 import { RefMateConsole } from './RefMateConsole';
+import { GoalTarget } from './GoalTarget';
 import { REFMATE_MAIN_ACTIONS } from '@/lib/simulator/refmate-controls';
 import {
   sampleSituation,
@@ -962,6 +963,15 @@ export function RefereePlay({
   const moving = replay ? replayPlaying : running && !frame.motionHeld;
   const replayView = replay ? sampleSituation(replay, replayTime) : null;
   const view = replayView ?? { ...frame, ballTrail: session.match.ballTrail() };
+  // Use the recorded end assignment while reviewing, including an unassigned
+  // pre-match frame. Old render-only recordings inherit their session's ends.
+  const goalDirection = replayView
+    ? replayView.blueAttackDirection === undefined
+      ? frame.blueAttackDirection
+      : replayView.blueAttackDirection
+    : frame.opening && frame.opening.stage !== 'ready'
+      ? null
+      : frame.blueAttackDirection;
   const selectedReview = frame.review.find(
     (event) => event.id === reviewEventId,
   );
@@ -1146,53 +1156,65 @@ export function RefereePlay({
             onStart={() => submit({ action: 'start' })}
           />
         )}
-        <div
-          className="match-scoreboard"
-          aria-label={`Blue ${view.score.blue}, Yellow ${view.score.yellow}`}
-        >
-          <span className="text-sky-300">
-            BLUE <strong>{view.score.blue}</strong>
-          </span>
-          <div>
-            <Timer className="size-3.5" />
-            {clock(view.elapsed)}
-            <small>
-              {frame.sessionFinished && !replay
-                ? 'FULL TIME'
-                : replay
-                  ? 'REPLAY'
-                  : moving && frame.phase !== 'evidence'
-                    ? 'AI vs AI'
-                    : frame.phase === 'decision'
-                      ? 'YOUR CALL'
-                      : frame.phase === 'feedback'
-                        ? 'REVIEW'
-                        : !moving
-                          ? 'STOPPED'
-                          : 'PRACTICE'}
-            </small>
-          </div>
-          <span className="text-amber-300">
-            <strong>{view.score.yellow}</strong> YELLOW
-          </span>
-        </div>
-        <div className="match-camera">
-          <NativeSelect
-            size="sm"
-            aria-label="Referee camera"
-            value={camera}
-            onChange={(e) => setCamera(e.target.value as CameraPreset)}
+        <div className="referee-field-header">
+          <div
+            className="match-scoreboard referee-scoreboard"
+            aria-label={`Blue ${view.score.blue}, Yellow ${view.score.yellow}`}
           >
-            <NativeSelectOption value="overhead">
-              Overhead evidence
-            </NativeSelectOption>
-            <NativeSelectOption value="broadcast">3D view</NativeSelectOption>
-            <NativeSelectOption value="referee">
-              Referee sideline
-            </NativeSelectOption>
-            <NativeSelectOption value="ball">Follow ball</NativeSelectOption>
-            <NativeSelectOption value="free">Free orbit</NativeSelectOption>
-          </NativeSelect>
+            <span className="text-sky-300 referee-score-team">
+              <span className="referee-team-total">
+                BLUE <strong>{view.score.blue}</strong>
+              </span>
+              {goalDirection !== null && (
+                <GoalTarget team="blue" blueAttackDirection={goalDirection} />
+              )}
+            </span>
+            <div>
+              <Timer className="size-3.5" />
+              {clock(view.elapsed)}
+              <small>
+                {frame.sessionFinished && !replay
+                  ? 'FULL TIME'
+                  : replay
+                    ? 'REPLAY'
+                    : moving && frame.phase !== 'evidence'
+                      ? 'AI vs AI'
+                      : frame.phase === 'decision'
+                        ? 'YOUR CALL'
+                        : frame.phase === 'feedback'
+                          ? 'REVIEW'
+                          : !moving
+                            ? 'STOPPED'
+                            : 'PRACTICE'}
+              </small>
+            </div>
+            <span className="text-amber-300 referee-score-team">
+              <span className="referee-team-total">
+                <strong>{view.score.yellow}</strong> YELLOW
+              </span>
+              {goalDirection !== null && (
+                <GoalTarget team="yellow" blueAttackDirection={goalDirection} />
+              )}
+            </span>
+          </div>
+          <div className="match-camera">
+            <NativeSelect
+              size="sm"
+              aria-label="Referee camera"
+              value={camera}
+              onChange={(e) => setCamera(e.target.value as CameraPreset)}
+            >
+              <NativeSelectOption value="overhead">
+                Overhead evidence
+              </NativeSelectOption>
+              <NativeSelectOption value="broadcast">3D view</NativeSelectOption>
+              <NativeSelectOption value="referee">
+                Referee sideline
+              </NativeSelectOption>
+              <NativeSelectOption value="ball">Follow ball</NativeSelectOption>
+              <NativeSelectOption value="free">Free orbit</NativeSelectOption>
+            </NativeSelect>
+          </div>
         </div>
         {!replay && frame.count !== null && (
           <output className="referee-count" aria-live="polite">
@@ -1965,13 +1987,6 @@ export function RefereePlay({
                 is marked right or wrong until the post-match review.
               </p>
             )}
-          {!frame.opening && (
-            <p className="referee-end-note">
-              Blue → {frame.blueAttackDirection === 1 ? 'yellow' : 'blue'} goal
-              · Yellow → {frame.blueAttackDirection === 1 ? 'blue' : 'yellow'}{' '}
-              goal
-            </p>
-          )}
 
           {!certification && (
             <Button
@@ -2291,7 +2306,13 @@ export function RefereePlay({
                   className="text-sky-300"
                   onClick={() => submit({ action: 'goal', target: 'blue' })}
                 >
-                  Blue goal +1
+                  <span>Award goal to Blue</span>
+                  {(!frame.opening || frame.opening.stage === 'ready') && (
+                    <GoalTarget
+                      team="blue"
+                      blueAttackDirection={frame.blueAttackDirection}
+                    />
+                  )}
                 </Button>
                 <Button
                   disabled={blocked}
@@ -2299,7 +2320,13 @@ export function RefereePlay({
                   className="text-amber-300"
                   onClick={() => submit({ action: 'goal', target: 'yellow' })}
                 >
-                  Yellow goal +1
+                  <span>Award goal to Yellow</span>
+                  {(!frame.opening || frame.opening.stage === 'ready') && (
+                    <GoalTarget
+                      team="yellow"
+                      blueAttackDirection={frame.blueAttackDirection}
+                    />
+                  )}
                 </Button>
               </div>
               <div className="referee-target">

@@ -3,6 +3,7 @@ import path from 'node:path';
 import ts from 'typescript';
 import committeeTranslations from './committee-translations.mjs';
 import reconstructionTranslations from './reconstruction-translations.mjs';
+import goalAssignmentTranslations from './goal-assignment-translations.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUTPUT = path.join(ROOT, 'lib', 'i18n', 'catalog.generated.json');
@@ -942,6 +943,8 @@ for (const locale of TARGETS)
   Object.assign(MANUAL[locale], committeeTranslations[locale]);
 for (const locale of TARGETS)
   Object.assign(MANUAL[locale], reconstructionTranslations[locale]);
+for (const locale of TARGETS)
+  Object.assign(MANUAL[locale], goalAssignmentTranslations[locale]);
 const hasLetters = (value) => /\p{L}/u.test(value);
 
 function looksHuman(value) {

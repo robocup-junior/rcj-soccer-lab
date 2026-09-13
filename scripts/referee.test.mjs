@@ -1422,6 +1422,51 @@ test('out-goal movement does not leak into the shared ordinary-goal scene', () =
   }
 });
 
+test('authored goals and own goals preserve attribution through team swaps, reflections and reversed ends', () => {
+  for (const direction of [-1, 1])
+    for (const swap of [false, true])
+      for (const reflect of [false, true])
+        for (const id of ['goal', 'own-goal']) {
+          const label = `${id}, direction ${direction}, swap ${swap}, reflect ${reflect}`;
+          const session = new RefereeMatch(2026);
+          session.match.blueAttackDirection = direction;
+          assert.equal(
+            session.beginCase(definition(id), { swap, reflect }),
+            true,
+          );
+          for (
+            let tick = 0;
+            tick < 1200 && session.phase === 'evidence';
+            tick++
+          )
+            session.step();
+          assert.equal(session.phase, 'decision', label);
+          const ball = session.snapshot().actors.ball;
+          assert.ok(
+            Math.abs(ball.z) >= FIELD.goalBackContactBallCenterZ,
+            label,
+          );
+          // Derive the scorer from the displayed scene, independently of the
+          // authored expected call and its team-variant transformation.
+          const scoringTeam = ball.z * direction > 0 ? 'blue' : 'yellow';
+          const concedingTeam = scoringTeam === 'blue' ? 'yellow' : 'blue';
+          assert.deepEqual(
+            session
+              .expected()
+              .map(({ action, target }) => ({ action, target })),
+            [{ action: 'goal', target: scoringTeam }],
+            label,
+          );
+          correct(session, 'goal', scoringTeam);
+          assert.deepEqual(
+            session.snapshot().score,
+            { [scoringTeam]: 1, [concedingTeam]: 0 },
+            label,
+          );
+          assert.equal(session.snapshot().kickoffTeam, concedingTeam, label);
+        }
+});
+
 test('wrong team is explained and a corrected retry does not earn first-try credit', () => {
   const session = prepare('own-goal');
   assert.equal(submit(session, 'goal', 'blue').verdict, 'wrong-target');

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T12:40:47.946Z",
+  "generatedAt": "2026-09-13T16:14:49.225Z",
   "locales": {
     "sk": {
       "exact": {
@@ -358,9 +358,11 @@
         "At the referee signal": "Na signál rozhodcu",
         "At the unoccupied neutral spot furthest from the ball, facing its own goal": "Na neobsadenom neutrálnom mieste najďalej od lopty, čelom k vlastnej bráne",
         "At the world championship, which statement about the provided referee communication module is correct?": "Ktoré tvrdenie o poskytnutom komunikačnom module rozhodcu je na svetovom šampionáte správne?",
-        "Attack blue goal": "Útok na modrú bránku",
-        "Attack yellow goal": "Útok na žltú bránu",
+        "Attack blue-painted goal": "Útočiť na modro natretú bránku",
+        "Attack yellow-painted goal": "Útočiť na žlto natretú bránku",
         "Attacker approaches defender": "Útočník sa blíži k obrancovi",
+        "Attacks blue-painted goal": "Útočí na modro natretú bránku",
+        "Attacks yellow-painted goal": "Útočí na žlto natretú bránku",
         "Attempt": "Pokus",
         "Attempts exhausted": "Pokusy vyčerpané",
         "authenticated": "overené",
@@ -388,6 +390,8 @@
         "Award goal · Team A / Yellow": "Udelený gól · Tím A / Žltý",
         "Award goal · Team B / Blue": "Udelený gól · Tím B / Modrý",
         "Award goal · Team B / Yellow": "Uznať gól · Tím B / Yellow",
+        "Award goal to Blue": "Uznať gól modrému tímu",
+        "Award goal to Yellow": "Uznať gól žltému tímu",
         "Award the goal as soon as the ball crosses the goal line": "Udeľte gól hneď, ako lopta prekročí bránkovú čiaru",
         "Award the goal only when the ball contacts the back wall": "Udeľte gól iba vtedy, keď sa lopta dotkne zadnej steny",
         "Award Types": "Typy ocenení",
@@ -464,7 +468,6 @@
         "blue": "modrá",
         "Blue": "Modrá",
         "BLUE": "MODRÁ",
-        "Blue →": "Modrá →",
         "BLUE +1": "MODRÁ +1",
         "Blue 1": "Blue 1",
         "Blue 1 accidentally pushes Yellow 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Blue 1 omylom zatlačí Yellow 1 do steny. Pre toto cvičenie sa v rámci školiacej politiky komisie v1 vyberá povolené oslobodenie od pushed-out.",
@@ -495,7 +498,6 @@
         "Blue defenders in area": "Modrí obrancovia v oblasti",
         "Blue defends its goal": "Modrá bráni svoj cieľ",
         "Blue goal": "Modrý gól",
-        "Blue goal +1": "Modrý gól +1",
         "Blue is too close": "Modrá je príliš blízko",
         "Blue kickoff": "Modrá kickoff",
         "Blue last touched the ball; it then touches the inside back wall of the goal defended by Blue.": "Modrá sa naposledy dotkla lopty; potom sa dotkne vnútornej zadnej steny brány bránenej Modrou.",
@@ -1158,10 +1160,8 @@
         "Go to second": "Prejdite na druhú",
         "goal": "cieľ",
         "Goal": "Cieľ",
-        "goal · Blue →": "cieľ · Modrá →",
-        "goal · Yellow →": "cieľ · Žltý →",
-        "Goal +1": "Gól +1",
         "Goal after an out-of-bounds event": "Gól po udalosti out-of-bounds",
+        "Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.": "Farby bránok označujú konce ihriska, nie príslušnosť k tímu. Riaďte sa stranami zvolenými pri hode mincou.",
         "Goal decision": "Rozhodnutie o góle",
         "Goal event": "Gólová udalosť",
         "Goal mouth crossed": "Gól prekrížil",
@@ -3135,7 +3135,6 @@
         "yellow": "žltá",
         "Yellow": "Žltá",
         "YELLOW": "ŽLTÝ",
-        "Yellow →": "Žltá →",
         "YELLOW +1": "ŽLTÁ +1",
         "Yellow 1": "Yellow 1",
         "Yellow 1 accidentally pushes Blue 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Yellow 1 omylom zatlačí Blue 1 do steny. Pre toto cvičenie sa v rámci školiacej politiky komisie v1 vyberá povolené oslobodenie od pushed-out.",
@@ -3166,7 +3165,6 @@
         "Yellow defenders in area": "Žltí obrancovia v oblasti",
         "Yellow defends its goal": "Žltá bráni svoj cieľ",
         "Yellow goal": "Žltý gól",
-        "Yellow goal +1": "Žltý gól +1",
         "Yellow is too close": "Žltá je príliš blízko",
         "Yellow kickoff": "Žltá kickoff",
         "Yellow last touched the ball; it then touches the inside back wall of the goal defended by Yellow.": "Žltá sa naposledy dotkla lopty; potom sa dotkne vnútornej zadnej steny brány bránenej žltým.",
@@ -3515,10 +3513,6 @@
           "translation": "Modrá {0}, žltá {1}"
         },
         {
-          "source": "Blue attacks the {0} goal. Yellow attacks the other end.",
-          "translation": "Modrý útočí na bránku {0}. Žltá útočí na druhý koniec."
-        },
-        {
           "source": "Both {0} robots remain unavailable through another complete 30-second kickoff interval.{1}",
           "translation": "Oba roboty {0} zostávajú nedostupné počas ďalšieho úplného 30-sekundového intervalu kickoff.{1}"
         },
@@ -3753,10 +3747,6 @@
         {
           "source": "Yellow {0}, Blue {1}",
           "translation": "Žltá {0}, Modrá {1}"
-        },
-        {
-          "source": "Yellow attacks the {0} goal. Blue attacks the other end.",
-          "translation": "Žltá útočí na bránku {0}. Modrý útočí na druhý koniec."
         }
       ]
     },
@@ -4117,9 +4107,11 @@
         "At the referee signal": "Auf das Signal des Schiedsrichters",
         "At the unoccupied neutral spot furthest from the ball, facing its own goal": "An der unbesetzten neutralen Stelle, die am weitesten vom Ball entfernt ist, mit Blick auf das eigene Tor",
         "At the world championship, which statement about the provided referee communication module is correct?": "Welche Aussage zum bereitgestellten Schiedsrichter-Kommunikationsmodul ist bei der Weltmeisterschaft richtig?",
-        "Attack blue goal": "Greife das blaue Tor an",
-        "Attack yellow goal": "Greife das gelbe Tor an",
+        "Attack blue-painted goal": "Blau gestrichenes Tor angreifen",
+        "Attack yellow-painted goal": "Gelb gestrichenes Tor angreifen",
         "Attacker approaches defender": "Der Angreifer nähert sich dem Verteidiger",
+        "Attacks blue-painted goal": "Greift das blau gestrichene Tor an",
+        "Attacks yellow-painted goal": "Greift das gelb gestrichene Tor an",
         "Attempt": "Versuch",
         "Attempts exhausted": "Versuche erschöpft",
         "authenticated": "authentifiziert",
@@ -4147,6 +4139,8 @@
         "Award goal · Team A / Yellow": "Auszeichnungsziel · Team A / Gelb",
         "Award goal · Team B / Blue": "Auszeichnungsziel · Team B / Blau",
         "Award goal · Team B / Yellow": "Tor geben · Team B / Yellow",
+        "Award goal to Blue": "Tor für Team Blau geben",
+        "Award goal to Yellow": "Tor für Team Gelb geben",
         "Award the goal as soon as the ball crosses the goal line": "Erteilen Sie das Tor, sobald der Ball die Torlinie überquert",
         "Award the goal only when the ball contacts the back wall": "Erteilen Sie das Tor nur, wenn der Ball die Rückwand berührt",
         "Award Types": "Auszeichnungsarten",
@@ -4223,7 +4217,6 @@
         "blue": "blau",
         "Blue": "Blau",
         "BLUE": "BLAU",
-        "Blue →": "Blau →",
         "BLUE +1": "BLAU +1",
         "Blue 1": "Blue 1",
         "Blue 1 accidentally pushes Yellow 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Blue 1 drückt Yellow 1 versehentlich in die Wand. Für diese Übung wählt die Ausschussschulungsrichtlinie v1 den zulässigen pushed-out-Verzicht aus.",
@@ -4254,7 +4247,6 @@
         "Blue defenders in area": "Blaue Verteidiger im Bereich",
         "Blue defends its goal": "Blau verteidigt sein Ziel",
         "Blue goal": "Blaues Ziel",
-        "Blue goal +1": "Blaues Ziel +1",
         "Blue is too close": "Blau ist zu nah",
         "Blue kickoff": "Blau kickoff",
         "Blue last touched the ball; it then touches the inside back wall of the goal defended by Blue.": "Blau berührte den Ball zuletzt; Dann berührt es die innere Rückwand des von Blau verteidigten Tores.",
@@ -4917,10 +4909,8 @@
         "Go to second": "Gehen Sie zum zweiten",
         "goal": "Ziel",
         "Goal": "Ziel",
-        "goal · Blue →": "Ziel · Blau →",
-        "goal · Yellow →": "Tor · Gelb →",
-        "Goal +1": "Tor +1",
         "Goal after an out-of-bounds event": "Ziel nach einem out-of-bounds-Ereignis",
+        "Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.": "Die Torfarben kennzeichnen die Spielfeldenden, nicht die Teamzugehörigkeit. Halte dich an die beim Münzwurf gewählte Seitenverteilung.",
         "Goal decision": "Zielentscheidung",
         "Goal event": "Torereignis",
         "Goal mouth crossed": "Torschuss gekreuzt",
@@ -6894,7 +6884,6 @@
         "yellow": "gelb",
         "Yellow": "Gelb",
         "YELLOW": "GELB",
-        "Yellow →": "Gelb →",
         "YELLOW +1": "GELB +1",
         "Yellow 1": "Yellow 1",
         "Yellow 1 accidentally pushes Blue 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Yellow 1 drückt Blue 1 versehentlich in die Wand. Für diese Übung wählt die Ausschussschulungsrichtlinie v1 den zulässigen pushed-out-Verzicht aus.",
@@ -6925,7 +6914,6 @@
         "Yellow defenders in area": "Gelbe Verteidiger im Strafraum",
         "Yellow defends its goal": "Gelb verteidigt sein Tor",
         "Yellow goal": "Gelbes Tor",
-        "Yellow goal +1": "Gelbes Tor +1",
         "Yellow is too close": "Gelb ist zu nah",
         "Yellow kickoff": "Gelb kickoff",
         "Yellow last touched the ball; it then touches the inside back wall of the goal defended by Yellow.": "Gelb berührte den Ball zuletzt; Dann berührt es die innere Rückwand des von Gelb verteidigten Tores.",
@@ -7274,10 +7262,6 @@
           "translation": "Blau {0}, Gelb {1}"
         },
         {
-          "source": "Blue attacks the {0} goal. Yellow attacks the other end.",
-          "translation": "Blau greift das Tor {0} an. Gelb greift am anderen Ende an."
-        },
-        {
           "source": "Both {0} robots remain unavailable through another complete 30-second kickoff interval.{1}",
           "translation": "Beide {0}-Roboter bleiben für ein weiteres komplettes 30-Sekunden-kickoff-Intervall nicht verfügbar.{1}"
         },
@@ -7512,10 +7496,6 @@
         {
           "source": "Yellow {0}, Blue {1}",
           "translation": "Gelb {0}, Blau {1}"
-        },
-        {
-          "source": "Yellow attacks the {0} goal. Blue attacks the other end.",
-          "translation": "Gelb greift das {0}-Tor an. Blau greift das andere Ende an."
         }
       ]
     },
@@ -7876,9 +7856,11 @@
         "At the referee signal": "主審の合図で",
         "At the unoccupied neutral spot furthest from the ball, facing its own goal": "自陣ゴールに面した、ボールから最も遠い空いているニュートラルスポット",
         "At the world championship, which statement about the provided referee communication module is correct?": "世界選手権において、提供された審判通信モジュールに関する記述はどれが正しいですか?",
-        "Attack blue goal": "青いゴールを攻撃する",
-        "Attack yellow goal": "黄色のゴールを攻撃する",
+        "Attack blue-painted goal": "青く塗られたゴールを攻める",
+        "Attack yellow-painted goal": "黄色く塗られたゴールを攻める",
         "Attacker approaches defender": "攻撃者が防御者に近づく",
+        "Attacks blue-painted goal": "青く塗られたゴールを攻めます",
+        "Attacks yellow-painted goal": "黄色く塗られたゴールを攻めます",
         "Attempt": "試みる",
         "Attempts exhausted": "試みは尽きた",
         "authenticated": "認証された",
@@ -7906,6 +7888,8 @@
         "Award goal · Team A / Yellow": "賞ゴール・チームA/イエロー",
         "Award goal · Team B / Blue": "賞ゴール・チームB/青",
         "Award goal · Team B / Yellow": "ゴールを認定 · チーム B / Yellow",
+        "Award goal to Blue": "青チームの得点を認定",
+        "Award goal to Yellow": "黄チームの得点を認定",
         "Award the goal as soon as the ball crosses the goal line": "ボールがゴールラインを越えたらすぐにゴールを与える",
         "Award the goal only when the ball contacts the back wall": "ボールが後ろの壁に接触した場合にのみゴールが与えられます",
         "Award Types": "賞の種類",
@@ -7982,7 +7966,6 @@
         "blue": "青",
         "Blue": "ブルー",
         "BLUE": "ブルー",
-        "Blue →": "青→",
         "BLUE +1": "ブルー+1",
         "Blue 1": "Blue 1",
         "Blue 1 accidentally pushes Yellow 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Blue 1 が誤って Yellow 1 を壁に押し込んでしまいます。この演習では、委員会トレーニング ポリシー v1 は、許可された pushed-out 免除を選択します。",
@@ -8013,7 +7996,6 @@
         "Blue defenders in area": "エリア内の青いディフェンダー",
         "Blue defends its goal": "ブルーがゴールを守る",
         "Blue goal": "青いゴール",
-        "Blue goal +1": "青のゴール+1",
         "Blue is too close": "青が近すぎる",
         "Blue kickoff": "青 kickoff",
         "Blue last touched the ball; it then touches the inside back wall of the goal defended by Blue.": "ブルーが最後にボールに触れた。そして、ブルーが守るゴールの内側後壁に触れた。",
@@ -8676,10 +8658,8 @@
         "Go to second": "2番目に進む",
         "goal": "目標",
         "Goal": "目標",
-        "goal · Blue →": "ゴール・青→",
-        "goal · Yellow →": "ゴール・イエロー→",
-        "Goal +1": "ゴール +1",
         "Goal after an out-of-bounds event": "out-of-bounds イベント後の目標",
+        "Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.": "ゴールの色はフィールドの両端を区別するためのもので、どちらのチームのゴールかを示すものではありません。コイントスで決めたエンドに従ってください。",
         "Goal decision": "目標の決定",
         "Goal event": "ゴールイベント",
         "Goal mouth crossed": "ゴールマウスクロス",
@@ -10653,7 +10633,6 @@
         "yellow": "黄色",
         "Yellow": "黄色",
         "YELLOW": "黄色",
-        "Yellow →": "黄色→",
         "YELLOW +1": "黄+1",
         "Yellow 1": "Yellow 1",
         "Yellow 1 accidentally pushes Blue 1 into the wall. For this exercise, committee training policy v1 selects the permitted pushed-out waiver.": "Yellow 1 が誤って Blue 1 を壁に押し込んでしまいます。この演習では、委員会トレーニング ポリシー v1 は、許可された pushed-out 免除を選択します。",
@@ -10684,7 +10663,6 @@
         "Yellow defenders in area": "エリア内の黄色のディフェンダー",
         "Yellow defends its goal": "イエローがゴールを守る",
         "Yellow goal": "黄色のゴール",
-        "Yellow goal +1": "イエローゴール+1",
         "Yellow is too close": "黄色が近すぎる",
         "Yellow kickoff": "黄色 kickoff",
         "Yellow last touched the ball; it then touches the inside back wall of the goal defended by Yellow.": "イエローが最後にボールに触れた。そしてイエローが守るゴールの内側後壁に触れた。",
@@ -11033,10 +11011,6 @@
           "translation": "青 {0}、黄 {1}"
         },
         {
-          "source": "Blue attacks the {0} goal. Yellow attacks the other end.",
-          "translation": "ブルーが{0}ゴールにアタック。黄色は反対側を攻撃します。"
-        },
-        {
           "source": "Both {0} robots remain unavailable through another complete 30-second kickoff interval.{1}",
           "translation": "両方の {0} ロボットは、さらに 30 秒間の kickoff 間隔が終了するまで利用できなくなります。{1}"
         },
@@ -11271,10 +11245,6 @@
         {
           "source": "Yellow {0}, Blue {1}",
           "translation": "黄色 {0}、青色 {1}"
-        },
-        {
-          "source": "Yellow attacks the {0} goal. Blue attacks the other end.",
-          "translation": "イエローが {0} ゴールを攻撃します。青は反対側を攻撃します。"
         }
       ]
     }

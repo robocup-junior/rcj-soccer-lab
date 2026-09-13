@@ -535,6 +535,10 @@ export class RefereeMatch {
       actors: state.actors,
       heights: this.heights,
       score: state.score,
+      blueAttackDirection:
+        this.opening && this.meeting.stage !== 'ready'
+          ? null
+          : this.match.blueAttackDirection,
       elapsed: state.elapsed,
       damage: this.damage,
     };

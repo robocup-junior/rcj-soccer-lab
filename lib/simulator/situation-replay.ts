@@ -6,6 +6,8 @@ export type ReplayFrame = {
   actors: Record<string, Pose>;
   heights: Record<string, number>;
   score: { blue: number; yellow: number };
+  /** Null until ends are chosen; optional for older render-only recordings. */
+  blueAttackDirection?: 1 | -1 | null;
   elapsed: number;
   damage: DamageCue | null;
 };

@@ -181,6 +181,65 @@ for (const end of [-1, 1]) {
   });
 }
 
+test('automatic back-wall goals follow the attacking end, not the last-touch team', () => {
+  for (const direction of [-1, 1])
+    for (const end of [-1, 1])
+      for (const lastTouchTeam of ['blue', 'yellow']) {
+        const label = `direction ${direction}, end ${end}, last touch ${lastTouchTeam}`;
+        const match = new SoccerMatch();
+        match.blueAttackDirection = direction;
+        const shooter = `${lastTouchTeam}-1`;
+        const ballZ = end * (FIELD.goalMouthZ - 0.3);
+        // Use a real kick, including shots into the kicker's own defended end.
+        // Do not seed a pending event or assign a synthetic last-touch marker.
+        match.place({
+          [shooter]: {
+            x: 0,
+            z: ballZ - end * 0.125,
+            yaw: end === 1 ? 0 : Math.PI,
+          },
+          ball: { x: 0, z: ballZ, yaw: 0 },
+        });
+        const idle = settings({ blue: 'off', yellow: 'off' });
+        advance(match, 0.36, idle);
+        match.step(
+          {
+            ...idle,
+            selectedRobot: shooter,
+            controls: { ...idle.controls, [lastTouchTeam]: 'manual' },
+          },
+          { ...NO_DRIVE, kick: true, dribble: false },
+        );
+        assert.equal(match.lastBallTouch, shooter, label);
+        assert.ok(match.state.ballVelocity.z * end > 0, label);
+        assert.deepEqual(match.state.score, { blue: 0, yellow: 0 }, label);
+        for (let tick = 0; tick < 90 && match.state.phase === 'playing'; tick++)
+          match.step(idle);
+        const scoringTeam = end === direction ? 'blue' : 'yellow';
+        const concedingTeam = scoringTeam === 'blue' ? 'yellow' : 'blue';
+        assert.equal(match.state.phase, 'goal', label);
+        assert.ok(
+          Math.abs(match.state.actors.ball.z) >=
+            FIELD.goalBackContactBallCenterZ,
+          label,
+        );
+        assert.deepEqual(
+          match.state.score,
+          { [scoringTeam]: 1, [concedingTeam]: 0 },
+          label,
+        );
+        advance(match, 2, idle);
+        assert.equal(match.state.phase, 'playing', label);
+        assert.equal(match.state.score[scoringTeam], 1, label);
+        assert.equal(match.state.score[concedingTeam], 0, label);
+        assert.equal(
+          match.state.message,
+          `${concedingTeam === 'blue' ? 'Blue' : 'Yellow'} kickoff`,
+          label,
+        );
+      }
+});
+
 test('kickoff places the ball at the centre with the non-kickoff team clear of it', () => {
   const assertLegalKickoff = (match, kickoffTeam) => {
     assert.equal(match.state.actors.ball.x, 0);
