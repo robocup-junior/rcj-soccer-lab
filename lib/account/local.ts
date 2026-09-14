@@ -9,7 +9,11 @@ import type {
   FinishGamePayload,
 } from './types';
 import type { RuleLearningEvent } from '@/lib/certification/client-types';
-import { CERTIFICATION_POLICY } from '@/lib/certification/policy';
+import {
+  CERTIFICATION_POLICY,
+  certificationPolicyFor,
+  isSupportedCertificationPolicy,
+} from '@/lib/certification/policy';
 import {
   CERTIFICATION_QUESTION_IDS,
   scoreGame,
@@ -173,8 +177,8 @@ export async function accountSnapshot(
       : null;
   };
   const round = data.round;
-  const currentPolicy =
-    round?.policyVersion === CERTIFICATION_POLICY.policyVersion;
+  const roundPolicy = certificationPolicyFor(round?.policyVersion);
+  const supportedPolicy = roundPolicy !== null;
   const legacyQuestions = [
     ...new Set(
       (round?.ruleEvents ?? [])
@@ -183,8 +187,12 @@ export async function accountSnapshot(
     ),
   ];
   const rules =
-    round && currentPolicy
-      ? summarizeRuleEvidence(round.ruleEvents, round.id)
+    round && roundPolicy
+      ? summarizeRuleEvidence(
+          round.ruleEvents,
+          round.id,
+          roundPolicy.policyVersion,
+        )
       : round
         ? {
             answered: legacyQuestions.length,
@@ -194,6 +202,7 @@ export async function accountSnapshot(
             requiredAccuracy: 95,
             passed: false,
             answeredQuestionIds: legacyQuestions,
+            requiredQuestionIds: [],
           }
         : null;
   const track = (mode: 'step' | 'continuous') => {
@@ -217,7 +226,7 @@ export async function accountSnapshot(
           startedAt: game.startedAt,
           completedAt: null,
         }),
-        inProgress: currentPolicy && !game.endedAt,
+        inProgress: supportedPolicy && !game.endedAt,
         canReview: game.replay?.engineVersion === MATCH_REPLAY_ENGINE_VERSION,
       }));
     const qualifyingGames = attempts.filter(
@@ -241,8 +250,8 @@ export async function accountSnapshot(
   const failed =
     rules &&
     (rules.answered - rules.correctFirstTry >
-      CERTIFICATION_POLICY.ruleQuestionCount -
-        CERTIFICATION_POLICY.ruleFirstTryRequired ||
+      (roundPolicy ?? CERTIFICATION_POLICY).ruleQuestionCount -
+        (roundPolicy ?? CERTIFICATION_POLICY).ruleFirstTryRequired ||
       [step, continuous].some(
         (item) =>
           item.qualifyingGames +
@@ -303,7 +312,7 @@ export async function accountSnapshot(
             season: '2026',
             status: verified
               ? 'qualified'
-              : !currentPolicy
+              : !supportedPolicy
                 ? 'upgrade-required'
                 : passed
                   ? 'ready'
@@ -514,7 +523,7 @@ export function resumeLocalGame(
   if (
     !data.enabled ||
     !round ||
-    round.policyVersion !== CERTIFICATION_POLICY.policyVersion ||
+    !isSupportedCertificationPolicy(round.policyVersion) ||
     !game ||
     game.endedAt
   )
@@ -579,7 +588,7 @@ export function saveLocalCheckpoint(
   value: MatchReplayCheckpoint,
 ) {
   const game = data.round?.games.find((entry) => entry.id === id);
-  if (data.round?.policyVersion !== CERTIFICATION_POLICY.policyVersion || !game)
+  if (!isSupportedCertificationPolicy(data.round?.policyVersion) || !game)
     throw new Error('This game belongs to a different certification round.');
   const checkpoint = validateMatchReplayCheckpoint(value);
   if (checkpoint.mode !== game.mode || checkpoint.seed !== game.seed)
@@ -616,7 +625,7 @@ export function finishLocalGame(
   payload: FinishGamePayload,
 ) {
   const game = data.round?.games.find((entry) => entry.id === id);
-  if (data.round?.policyVersion !== CERTIFICATION_POLICY.policyVersion || !game)
+  if (!isSupportedCertificationPolicy(data.round?.policyVersion) || !game)
     throw new Error('This game belongs to a different certification round.');
   if (!payload.replay)
     throw new Error(
@@ -684,12 +693,12 @@ export function recordLocalRule(data: LocalProgress, event: RuleLearningEvent) {
   }
   if (!data.round || event.certificationRunId !== data.round.id)
     throw new Error('This certification round is no longer active.');
-  if (data.round.policyVersion !== CERTIFICATION_POLICY.policyVersion)
+  if (!isSupportedCertificationPolicy(data.round.policyVersion))
     throw new Error(
       'This round uses an older grading version. Restart certification to use the corrected examination.',
     );
   const events = [...data.round.ruleEvents, event];
-  summarizeRuleEvidence(events, data.round.id);
+  summarizeRuleEvidence(events, data.round.id, data.round.policyVersion);
   data.round.ruleEvents = events;
 }
 
@@ -960,8 +969,8 @@ export async function validateBackup(
       round.ruleEvents,
       12000,
     ) as RuleLearningEvent[];
-    if (policyVersion === CERTIFICATION_POLICY.policyVersion)
-      summarizeRuleEvidence(ruleEvents, id);
+    if (isSupportedCertificationPolicy(policyVersion))
+      summarizeRuleEvidence(ruleEvents, id, policyVersion);
     else
       for (const event of ruleEvents) {
         const item = backupRecord(event);
@@ -986,7 +995,7 @@ export async function validateBackup(
     source.checkpoints === undefined ? {} : backupRecord(source.checkpoints);
   if (Object.keys(checkpoints).length > 13) invalidBackup();
   for (const [id, value] of Object.entries(checkpoints)) {
-    if (data.round?.policyVersion === CERTIFICATION_POLICY.policyVersion)
+    if (isSupportedCertificationPolicy(data.round?.policyVersion))
       saveLocalCheckpoint(data, id, validateMatchReplayCheckpoint(value));
     else {
       const checkpoint = storedCheckpoint(value);

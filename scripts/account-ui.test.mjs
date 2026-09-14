@@ -457,3 +457,17 @@ test('a verified older round retains its certificate notice but cannot submit fo
     /Prepare certification submission|Submit for verification/,
   );
 });
+
+test('a supported v3 round offers continuation rather than requiring a v4 restart', () => {
+  const context = mockContext({ roundStatus: 'in-progress' });
+  context.account.certification.policyVersion = 'rcj-soccer-2026-v3';
+  context.account.certification.rules.total = 105;
+  context.account.certification.rules.answered = 1;
+  context.account.certification.rules.passed = false;
+  const html = render(CertificationPanel, { onOpenRules: noop }, context);
+  assert.match(html, /Continue questions/);
+  assert.doesNotMatch(
+    html,
+    /Updated examination available|older grading version/,
+  );
+});

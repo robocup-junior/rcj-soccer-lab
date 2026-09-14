@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Lightbulb, Pause, Play, RotateCcw } from 'lucide-react';
+import { Lightbulb, Pause, Play, RotateCcw } from 'lucide-react';
+import { AnswerChoice, AnswerFeedback } from './AnswerFeedback';
 import { Button } from '@/components/ui/button';
 import { RefereeMatch } from '@/lib/simulator/referee-match';
 import {
@@ -335,33 +336,32 @@ export function CaseLesson({
           !feedback && (
             <div>
               {choices.map((choice) => (
-                <Button
+                <AnswerChoice
                   key={`${choice.action}:${choice.target}`}
-                  variant="outline"
                   disabled={
                     !ready || learningSavePending || Boolean(learningSaveError)
                   }
                   onClick={() => submit(choice)}
                 >
                   {label(choice)}
-                </Button>
+                </AnswerChoice>
               ))}
             </div>
           )
         )}
         {feedback && (
-          <div
-            className={
-              correct
-                ? 'lesson-feedback lesson-feedback-good'
-                : 'lesson-feedback'
+          <AnswerFeedback
+            result={
+              feedback.verdict === 'supported'
+                ? 'acceptable'
+                : correct
+                  ? 'correct'
+                  : 'incorrect'
             }
-            aria-live="polite"
           >
-            <h4>
-              {correct && <Check className="size-4" />}
-              {feedback.title}
-            </h4>
+            <p>
+              <strong>{feedback.title}</strong>
+            </p>
             <p>{feedback.detail}</p>
             <p>{feedback.effect}</p>
             {correct && (
@@ -395,7 +395,7 @@ export function CaseLesson({
               </Button>
             )}
             {feedback.final && <strong>Situation check complete</strong>}
-          </div>
+          </AnswerFeedback>
         )}
         {!feedback?.final && learningMode !== 'certification' && (
           <Button

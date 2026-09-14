@@ -49,7 +49,7 @@ export function PreMatchToss({
               : meeting.stage === 'ready'
                 ? `${name(meeting.firstKickoff)} kicks off`
                 : meeting.stage === 'end-choice'
-                  ? `${name(meeting.choosingTeam)} chooses an end`
+                  ? `Which goal will ${name(meeting.choosingTeam)} attack?`
                   : `${name(meeting.winner)} wins the toss`}
         </h2>
         <p>
@@ -58,7 +58,7 @@ export function PreMatchToss({
             : meeting.stage === 'ready'
               ? 'Goal colors mark field ends, not team ownership. Follow the ends chosen at the coin toss.'
               : meeting.stage === 'toss'
-                ? 'The winner chooses first kickoff or an attacking end. The other team gets the remaining choice.'
+                ? 'The coin-toss winner chooses either the first kickoff or which goal to attack. The other team makes the remaining choice.'
                 : meeting.stage === 'end-choice'
                   ? `${name(meeting.firstKickoff)} chose first kickoff. Choose the goal ${name(meeting.choosingTeam)} will attack.`
                   : `Make ${name(meeting.winner)}’s choice: take first kickoff, or pick a goal to attack and let the other team kick off.`}

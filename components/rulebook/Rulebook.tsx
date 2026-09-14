@@ -92,20 +92,32 @@ export function Rulebook({
   const { locale } = useLocalization();
   const learningMode = learning?.mode ?? 'practice';
   const certificationRunId = learning?.certificationRunId ?? null;
+  const assignedQuestionIds = learning?.questionIds;
+  const assignedSituations = useMemo(
+    () =>
+      learningMode === 'certification' && assignedQuestionIds
+        ? LEARNING_SITUATIONS.filter((item) =>
+            assignedQuestionIds.includes(item.id),
+          )
+        : LEARNING_SITUATIONS,
+    [learningMode, assignedQuestionIds],
+  );
   const learningContextKey =
     learningMode === 'certification'
       ? `certification:${certificationRunId ?? 'unassigned'}`
       : 'practice';
-  const requestedSituation = LEARNING_SITUATIONS.find(
+  const requestedSituation = assignedSituations.find(
     (item) => item.id === situationId,
   );
   const selectedId =
     requestedSituation && !situationCoversSection(requestedSituation, sectionId)
       ? requestedSituation.sectionId
       : sectionId;
-  const [library, setLibrary] = useState<'situations' | 'sections'>(
+  const [selectedLibrary, setLibrary] = useState<'situations' | 'sections'>(
     'situations',
   );
+  const library =
+    learningMode === 'certification' ? 'situations' : selectedLibrary;
   const [passed, setPassed] = useState<string[]>([]);
   const [contextCompleted, setContextCompleted] = useState<
     Record<string, string[]>
@@ -113,11 +125,17 @@ export function Rulebook({
   const [studyAnswers, setStudyAnswers] = useState<Record<string, string>>({});
   const [query, setQuery] = useState('');
   const [layout, setLayout] = useState<'split' | 'text' | 'visual'>('split');
+  // Certification presents decisions, not the reference paragraph alongside
+  // its answer. The full reading workspace remains available in practice.
+  const readingLayout = learningMode === 'certification' ? 'visual' : layout;
   const [reviewed, setReviewed] = useState<string[]>([]);
   const [restored, setRestored] = useState(false);
   const remoteCompleted = useMemo(
-    () => validLearningProgress(learning?.completedSituationIds),
-    [learning?.completedSituationIds],
+    () =>
+      validLearningProgress(learning?.completedSituationIds).filter((id) =>
+        assignedSituations.some((item) => item.id === id),
+      ),
+    [learning?.completedSituationIds, assignedSituations],
   );
   const completedSituationIds = useMemo(
     () => [
@@ -229,7 +247,7 @@ export function Rulebook({
     },
     [select],
   );
-  const sectionSituations = LEARNING_SITUATIONS.filter((item) =>
+  const sectionSituations = assignedSituations.filter((item) =>
     situationCoversSection(item, selected.id),
   );
   const situation =
@@ -329,7 +347,7 @@ export function Rulebook({
     return saved;
   };
   const chooseSituation = (id: string) => {
-    const item = LEARNING_SITUATIONS.find((item) => item.id === id)!;
+    const item = assignedSituations.find((item) => item.id === id)!;
     onSelect(
       situationCoversSection(item, selected.id) ? selected.id : item.sectionId,
       item.id,
@@ -346,7 +364,7 @@ export function Rulebook({
       }));
     else setPassed((current) => [...new Set([...current, situation.id])]);
   };
-  const filteredSituations = LEARNING_SITUATIONS.filter((item) => {
+  const filteredSituations = assignedSituations.filter((item) => {
     const section = RULE_SECTIONS.find(
       (section) => section.id === item.sectionId,
     )!;
@@ -446,36 +464,40 @@ export function Rulebook({
               ? 'CERTIFICATION RULES / FIRST ANSWER COUNTS'
               : 'RULES & SITUATIONS / 2026'}
           </p>
-          <div className="learning-library-switch">
-            <Button
-              size="sm"
-              variant={library === 'situations' ? 'secondary' : 'ghost'}
-              onClick={() => setLibrary('situations')}
+          {learningMode !== 'certification' && (
+            <div className="learning-library-switch">
+              <Button
+                size="sm"
+                variant={library === 'situations' ? 'secondary' : 'ghost'}
+                onClick={() => setLibrary('situations')}
+              >
+                Situations
+              </Button>
+              <Button
+                size="sm"
+                variant={library === 'sections' ? 'secondary' : 'ghost'}
+                onClick={() => setLibrary('sections')}
+              >
+                All rules
+              </Button>
+            </div>
+          )}
+          {learningMode !== 'certification' && (
+            <NativeSelect
+              aria-label="Official rule document"
+              value={document.id}
+              onChange={(event) => {
+                setLibrary('sections');
+                selectDocument(event.target.value);
+              }}
             >
-              Situations
-            </Button>
-            <Button
-              size="sm"
-              variant={library === 'sections' ? 'secondary' : 'ghost'}
-              onClick={() => setLibrary('sections')}
-            >
-              All rules
-            </Button>
-          </div>
-          <NativeSelect
-            aria-label="Official rule document"
-            value={document.id}
-            onChange={(event) => {
-              setLibrary('sections');
-              selectDocument(event.target.value);
-            }}
-          >
-            {RULE_DOCUMENTS.map((item) => (
-              <NativeSelectOption key={item.id} value={item.id}>
-                {item.title}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
+              {RULE_DOCUMENTS.map((item) => (
+                <NativeSelectOption key={item.id} value={item.id}>
+                  {item.title}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          )}
           <div className="rule-search">
             <Search aria-hidden="true" />
             <Input
@@ -489,21 +511,23 @@ export function Rulebook({
             <span>
               {library === 'situations'
                 ? learningMode === 'certification'
-                  ? `${completedSituationIds.length} / ${LEARNING_SITUATIONS.length} questions completed`
-                  : `${completedSituationIds.length} / ${LEARNING_SITUATIONS.length} checks passed`
+                  ? `${completedSituationIds.length} / ${assignedSituations.length} questions completed`
+                  : `${completedSituationIds.length} / ${assignedSituations.length} checks passed`
                 : `${readCount} / ${documentSections.length} reviewed`}
             </span>
             <Progress
               value={
                 library === 'situations'
                   ? (completedSituationIds.length /
-                      LEARNING_SITUATIONS.length) *
+                      Math.max(1, assignedSituations.length)) *
                     100
                   : (readCount / documentSections.length) * 100
               }
               aria-label={
                 library === 'situations'
-                  ? 'Situation checks passed'
+                  ? learningMode === 'certification'
+                    ? 'Questions answered'
+                    : 'Situation checks passed'
                   : 'Reading progress in this document'
               }
             />
@@ -543,13 +567,21 @@ export function Rulebook({
                   >
                     <span className="rule-toc-number">
                       {completedSituationIds.includes(item.id) ? (
-                        <Check aria-label="Check passed" />
+                        <Check
+                          aria-label={
+                            learningMode === 'certification'
+                              ? 'Answer recorded'
+                              : 'Check passed'
+                          }
+                        />
                       ) : (
                         section.number || 'A'
                       )}
                     </span>
                     <span>
-                      {item.title}
+                      {learningMode === 'certification'
+                        ? `Question ${assignedSituations.indexOf(item) + 1}`
+                        : item.title}
                       <small>
                         {item.kind === 'case'
                           ? 'Referee decisions'
@@ -648,24 +680,36 @@ export function Rulebook({
               {document.title} / Indexed revision {document.revision}
             </p>
             <h1>
-              {selected.number && <span>{selected.number}</span>}
-              {selected.title}
+              {learningMode === 'certification' ? (
+                situation ? (
+                  `Question ${assignedSituations.indexOf(situation) + 1}`
+                ) : (
+                  'Certification'
+                )
+              ) : (
+                <>
+                  {selected.number && <span>{selected.number}</span>}
+                  {selected.title}
+                </>
+              )}
             </h1>
           </div>
-          <label htmlFor="rule-reviewed" className="rule-reviewed">
-            <Checkbox
-              id="rule-reviewed"
-              checked={reviewed.includes(selected.id)}
-              onCheckedChange={(checked) =>
-                setReviewed((current) =>
-                  checked
-                    ? [...new Set([...current, selected.id])]
-                    : current.filter((id) => id !== selected.id),
-                )
-              }
-            />
-            Reviewed
-          </label>
+          {learningMode !== 'certification' && (
+            <label htmlFor="rule-reviewed" className="rule-reviewed">
+              <Checkbox
+                id="rule-reviewed"
+                checked={reviewed.includes(selected.id)}
+                onCheckedChange={(checked) =>
+                  setReviewed((current) =>
+                    checked
+                      ? [...new Set([...current, selected.id])]
+                      : current.filter((id) => id !== selected.id),
+                  )
+                }
+              />
+              Reviewed
+            </label>
+          )}
         </header>
         <div className="rule-section-toolbar">
           <div>
@@ -702,25 +746,31 @@ export function Rulebook({
               <ArrowRight />
             </Button>
           </div>
-          <NativeSelect
-            size="sm"
-            value={layout}
-            onChange={(event) => setLayout(event.target.value as typeof layout)}
-            aria-label="Rulebook reading layout"
-          >
-            <NativeSelectOption value="split">
-              Text + interactive guide
-            </NativeSelectOption>
-            <NativeSelectOption value="text">
-              Full-width official text
-            </NativeSelectOption>
-            <NativeSelectOption value="visual">
-              Interactive guide
-            </NativeSelectOption>
-          </NativeSelect>
+          {learningMode !== 'certification' && (
+            <NativeSelect
+              size="sm"
+              value={layout}
+              onChange={(event) =>
+                setLayout(event.target.value as typeof layout)
+              }
+              aria-label="Rulebook reading layout"
+            >
+              <NativeSelectOption value="split">
+                Text + interactive guide
+              </NativeSelectOption>
+              <NativeSelectOption value="text">
+                Full-width official text
+              </NativeSelectOption>
+              <NativeSelectOption value="visual">
+                Interactive guide
+              </NativeSelectOption>
+            </NativeSelect>
+          )}
         </div>
-        <div className={cn('rule-reading-layout', `rule-layout-${layout}`)}>
-          {layout !== 'visual' && (
+        <div
+          className={cn('rule-reading-layout', `rule-layout-${readingLayout}`)}
+        >
+          {readingLayout !== 'visual' && (
             <section
               className="rule-source-pane"
               aria-label="Complete official rule text"
@@ -750,7 +800,7 @@ export function Rulebook({
               </p>
             </section>
           )}
-          {layout !== 'text' && (
+          {readingLayout !== 'text' && (
             <section
               className="rule-guide-pane"
               aria-label="Interactive companion guide"
@@ -782,7 +832,10 @@ export function Rulebook({
                       {sectionSituations.map((item) => (
                         <NativeSelectOption key={item.id} value={item.id}>
                           {completedSituationIds.includes(item.id) ? '✓ ' : ''}
-                          {item.title} ·{' '}
+                          {learningMode === 'certification'
+                            ? `Question ${assignedSituations.indexOf(item) + 1}`
+                            : item.title}{' '}
+                          ·{' '}
                           {item.kind === 'case'
                             ? 'decision practice'
                             : item.kind === 'scenario'
@@ -799,11 +852,17 @@ export function Rulebook({
                           completedSituationIds.includes(item.id),
                         ).length
                       }{' '}
-                      / {sectionSituations.length} situation checks passed ·{' '}
+                      / {sectionSituations.length}{' '}
+                      {learningMode === 'certification'
+                        ? 'questions answered'
+                        : 'situation checks passed'}{' '}
+                      ·{' '}
                       {sectionSituations.every((item) =>
                         completedSituationIds.includes(item.id),
                       )
-                        ? 'All checks complete'
+                        ? learningMode === 'certification'
+                          ? 'All questions answered'
+                          : 'All checks complete'
                         : 'Answer each situation to check your understanding'}
                     </p>
                   </section>
@@ -844,6 +903,10 @@ export function Rulebook({
                     learningMode={learningMode}
                     certificationRunId={certificationRunId}
                     onLearningEvent={onLearningEvent}
+                    alreadyAnswered={
+                      learningMode === 'certification' &&
+                      completedSituationIds.includes(situation.id)
+                    }
                   />
                 )}
                 {situation?.kind === 'clip' && (
@@ -859,6 +922,10 @@ export function Rulebook({
                     learningMode={learningMode}
                     certificationRunId={certificationRunId}
                     onLearningEvent={onLearningEvent}
+                    alreadyAnswered={
+                      learningMode === 'certification' &&
+                      completedSituationIds.includes(situation.id)
+                    }
                   />
                 )}
                 {situation?.kind === 'question' && (
@@ -871,63 +938,76 @@ export function Rulebook({
                     learningMode={learningMode}
                     certificationRunId={certificationRunId}
                     onLearningEvent={onLearningEvent}
-                  />
-                )}
-                {guide === 'animation' && !situation && clips.length > 0 && (
-                  <div className="rule-example-list">
-                    {clips.map((clip) => (
-                      <Button
-                        key={clip.id}
-                        variant="outline"
-                        onClick={() => chooseSituation(`clip:${clip.id}`)}
-                      >
-                        {clip.title}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-                {guide === 'inspection' && (
-                  <InspectionWorkbench onRule={onSoccerRule} />
-                )}
-                {guide === 'kicker' && (
-                  <KickerWorkbench robotVisual={robotVisual} />
-                )}
-                {guide === 'field' && <FieldWorkbench onRule={onRule} />}
-                {guide === 'ball' && <BallWorkbench />}
-                {guide === 'scoring' && <ScoringWorkbench />}
-                {(
-                  [
-                    'team',
-                    'documentation',
-                    'competition',
-                    'conduct',
-                  ] as string[]
-                ).includes(guide) && (
-                  <ReadinessWorkbench
-                    key={guide}
-                    category={
-                      guide as
-                        | 'team'
-                        | 'documentation'
-                        | 'competition'
-                        | 'conduct'
+                    alreadyAnswered={
+                      learningMode === 'certification' &&
+                      completedSituationIds.includes(situation.id)
                     }
                   />
                 )}
-                {guide === 'decision' && <DecisionWorkbench />}
-                {guide === 'companion' && (
-                  <CompanionWorkbench
-                    key={document.id}
-                    document={document.id as 'entry' | 'superteam'}
-                    onDocument={selectDocument}
-                  />
+                {learningMode !== 'certification' && (
+                  <>
+                    {guide === 'animation' &&
+                      !situation &&
+                      clips.length > 0 && (
+                        <div className="rule-example-list">
+                          {clips.map((clip) => (
+                            <Button
+                              key={clip.id}
+                              variant="outline"
+                              onClick={() => chooseSituation(`clip:${clip.id}`)}
+                            >
+                              {clip.title}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    {guide === 'inspection' && (
+                      <InspectionWorkbench onRule={onSoccerRule} />
+                    )}
+                    {guide === 'kicker' && (
+                      <KickerWorkbench robotVisual={robotVisual} />
+                    )}
+                    {guide === 'field' && <FieldWorkbench onRule={onRule} />}
+                    {guide === 'ball' && <BallWorkbench />}
+                    {guide === 'scoring' && <ScoringWorkbench />}
+                    {(
+                      [
+                        'team',
+                        'documentation',
+                        'competition',
+                        'conduct',
+                      ] as string[]
+                    ).includes(guide) && (
+                      <ReadinessWorkbench
+                        key={guide}
+                        category={
+                          guide as
+                            | 'team'
+                            | 'documentation'
+                            | 'competition'
+                            | 'conduct'
+                        }
+                      />
+                    )}
+                    {guide === 'decision' && <DecisionWorkbench />}
+                    {guide === 'companion' && (
+                      <CompanionWorkbench
+                        key={document.id}
+                        document={document.id as 'entry' | 'superteam'}
+                        onDocument={selectDocument}
+                      />
+                    )}
+                    {guide === 'overview' && overview}
+                    {selected.anchor === 'robots-control' && (
+                      <p className="rule-source-note">
+                        Manual Play mode is a practice tool. Competition robots
+                        operate autonomously.
+                      </p>
+                    )}
+                  </>
                 )}
-                {guide === 'overview' && overview}
-                {selected.anchor === 'robots-control' && (
-                  <p className="rule-source-note">
-                    Manual Play mode is a practice tool. Competition robots
-                    operate autonomously.
-                  </p>
+                {learningMode === 'certification' && !situation && (
+                  <p>Select a certification question from the list.</p>
                 )}
                 <div className="rule-guide-footnote">
                   <BookOpen />

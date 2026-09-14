@@ -260,6 +260,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
           : null,
       completedSituationIds:
         account?.certification?.rules.answeredQuestionIds ?? [],
+      questionIds: account?.certification?.rules.requiredQuestionIds ?? [],
       onEvent: async (event) => {
         await recordRuleLearning(event);
       },

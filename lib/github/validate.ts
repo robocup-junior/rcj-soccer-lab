@@ -1,6 +1,8 @@
-import { CERTIFICATION_POLICY } from '@/lib/certification/policy';
 import {
-  CERTIFICATION_QUESTION_IDS,
+  CERTIFICATION_POLICY,
+  certificationPolicyFor,
+} from '@/lib/certification/policy';
+import {
   gradeCaseAnswerPrefix,
   gradeRuleAnswer,
   scoreGame,
@@ -45,7 +47,11 @@ function canonical(
 export function summarizeRuleEvidence(
   events: RuleLearningEvent[],
   roundId: string,
+  policyVersion: string = CERTIFICATION_POLICY.policyVersion,
 ) {
+  const policy = certificationPolicyFor(policyVersion);
+  if (!policy) return fail('Unsupported certification policy.');
+  const questionIds = new Set(policy.questionIds);
   if (!Array.isArray(events) || events.length > 12000)
     return fail('Invalid rules evidence.');
   const answers = new Map<
@@ -60,7 +66,7 @@ export function summarizeRuleEvidence(
   for (const event of events) {
     if (
       !event ||
-      !CERTIFICATION_QUESTION_IDS.has(event.questionId) ||
+      !questionIds.has(event.questionId) ||
       event.mode !== 'certification' ||
       event.certificationRunId !== roundId
     )
@@ -108,16 +114,17 @@ export function summarizeRuleEvidence(
   ).length;
   return {
     answered: completed.length,
-    total: CERTIFICATION_POLICY.ruleQuestionCount,
+    total: policy.ruleQuestionCount,
     correctFirstTry,
     accuracy: completed.length
       ? Math.round((10000 * correctFirstTry) / completed.length) / 100
       : null,
-    requiredAccuracy: CERTIFICATION_POLICY.ruleFirstTryPercent,
+    requiredAccuracy: policy.ruleFirstTryPercent,
     passed:
-      completed.length === CERTIFICATION_POLICY.ruleQuestionCount &&
-      correctFirstTry >= CERTIFICATION_POLICY.ruleFirstTryRequired,
+      completed.length === policy.ruleQuestionCount &&
+      correctFirstTry >= policy.ruleFirstTryRequired,
     answeredQuestionIds: completed.map(([id]) => id),
+    requiredQuestionIds: [...policy.questionIds],
   };
 }
 
@@ -144,7 +151,8 @@ export async function validateSubmission(input: unknown) {
   };
   if (submission.kind === 'connect') return { profile };
   const round = submission.round;
-  if (round?.policyVersion !== CERTIFICATION_POLICY.policyVersion)
+  const policy = certificationPolicyFor(round?.policyVersion);
+  if (!policy)
     return fail(
       'This round uses an older certification policy. Keep its saved history and start a new current-version round.',
     );
@@ -156,10 +164,14 @@ export async function validateSubmission(input: unknown) {
     !Number.isFinite(Date.parse(round.startedAt))
   )
     return fail('Invalid certification round.');
-  const rules = summarizeRuleEvidence(round.ruleEvents, round.id);
+  const rules = summarizeRuleEvidence(
+    round.ruleEvents,
+    round.id,
+    policy.policyVersion,
+  );
   if (!rules.passed)
     return fail(
-      `The rules examination did not meet ${CERTIFICATION_POLICY.ruleFirstTryRequired} of ${CERTIFICATION_POLICY.ruleQuestionCount} correct first answers.`,
+      `The rules examination did not meet ${policy.ruleFirstTryRequired} of ${policy.ruleQuestionCount} correct first answers.`,
     );
   if (!Array.isArray(round.games) || round.games.length > 13)
     return fail('Too many game attempts.');
@@ -185,7 +197,7 @@ export async function validateSubmission(input: unknown) {
       return fail('Invalid or duplicated game attempt.');
     uniqueIds.add(game.id);
     used[game.mode]++;
-    if (used[game.mode] > CERTIFICATION_POLICY.games[game.mode].maxAttempts)
+    if (used[game.mode] > policy.games[game.mode].maxAttempts)
       return fail('The attempt limit was exceeded.');
     if (
       game.seed !==
@@ -215,9 +227,8 @@ export async function validateSubmission(input: unknown) {
     });
   }
   if (
-    qualifying.step < CERTIFICATION_POLICY.games.step.requiredQualifying ||
-    qualifying.continuous <
-      CERTIFICATION_POLICY.games.continuous.requiredQualifying
+    qualifying.step < policy.games.step.requiredQualifying ||
+    qualifying.continuous < policy.games.continuous.requiredQualifying
   )
     return fail(
       'The replayed games did not meet the certification requirements.',
@@ -232,7 +243,7 @@ export async function validateSubmission(input: unknown) {
       stepAttempts: used.step,
       continuousAttempts: used.continuous,
       games: results,
-      policyVersion: CERTIFICATION_POLICY.policyVersion,
+      policyVersion: policy.policyVersion,
     },
   };
 }

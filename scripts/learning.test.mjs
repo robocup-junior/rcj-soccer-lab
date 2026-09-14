@@ -84,7 +84,7 @@ test('secondary rule sources appear in the real lesson selector without duplicat
       1,
     );
   assert.equal(situationCoversSection(item, 'soccer:scoring'), false);
-  assert.equal(LEARNING_SITUATIONS.length, 105);
+  assert.equal(LEARNING_SITUATIONS.length, 111);
 });
 const accepted = (feedback) =>
   feedback && ['correct', 'supported'].includes(feedback.verdict);
@@ -94,11 +94,11 @@ const settings = (duration = 120) => ({
   duration,
 });
 
-test('all 105 situations retain their source and correct official section', () => {
+test('all 111 situations retain their source and correct official section', () => {
   assert.equal(RULE_DOCUMENTS.length, 6);
   assert.equal(RULE_SECTIONS.length, 259);
-  assert.equal(LEARNING_SITUATIONS.length, 105);
-  assert.equal(new Set(LEARNING_SITUATIONS.map((item) => item.id)).size, 105);
+  assert.equal(LEARNING_SITUATIONS.length, 111);
+  assert.equal(new Set(LEARNING_SITUATIONS.map((item) => item.id)).size, 111);
   const groups = [
     { kind: 'case', sources: REFEREE_CASES, sourceUrl: ruleUrl, count: 35 },
     {
@@ -119,7 +119,7 @@ test('all 105 situations retain their source and correct official section', () =
       sources: RULE_QUESTIONS,
       sourceUrl: (question) =>
         ruleUrl(REFEREE_CASES[0]).split('#')[0] + '#' + question.anchor,
-      count: 32,
+      count: 38,
     },
   ];
   for (const { kind, sources, sourceUrl, count } of groups) {
@@ -188,7 +188,14 @@ test('knowledge-check section labels include an actual appendix reference, never
 
 test('published pushing criteria and selected committee policy are distinguished', () => {
   const pushing = SCENARIOS.find((item) => item.id === 'pushing-discretion');
-  assert.match(pushing.refereeCue, /not additional rule conditions/);
+  assert.match(
+    pushing.refereeCue,
+    /Which decision is allowed under the pushing rule/,
+  );
+  assert.match(
+    pushing.choices.map((choice) => choice.feedback).join(' '),
+    /does not require proving blame or a material disadvantage/,
+  );
   const combined = SCENARIOS.find(
     (item) => item.id === 'pushing-and-multiple-defense',
   );

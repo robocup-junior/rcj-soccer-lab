@@ -23,11 +23,14 @@ const {
   validateBackup,
   acceptGitHubReceipt,
   assertCanPrepareGitHubRequest,
+  recordLocalRule,
 } = await import('../lib/account/local.ts');
 const { RULE_CLIPS } = await import('../lib/rulebook/animations.ts');
 const { SCENARIOS } = await import('../lib/simulator/scenarios.ts');
 const { RULE_QUESTIONS } = await import('../lib/rulebook/questions.ts');
 const { CERTIFICATION_POLICY } = await import('../lib/certification/policy.ts');
+const { CERTIFICATION_V3_QUESTION_IDS } =
+  await import('../lib/certification/question-manifest.ts');
 const { makeCaseAnswer } = await import('./replay-fixtures.mjs');
 const { LEARNING_SITUATIONS } = await import('../lib/rulebook/learning.ts');
 
@@ -152,6 +155,94 @@ test('first case steps remain immutable when later complete prefixes replace the
   const result = summarizeRuleEvidence([wrong, correct], data.round.id);
   assert.equal(result.correctFirstTry, 0);
   assert.equal(result.answered, 1);
+});
+
+test('v3 questions retain their first answers and original denominator through local save and issuer validation', async () => {
+  const data = await newData();
+  data.round.policyVersion = 'rcj-soccer-2026-v3';
+  const first = eventFor('clip:match-halves', data.round.id, {
+    type: 'answer',
+    answer: { kind: 'clip', selectedIndex: 1 },
+    firstAnswer: true,
+    attemptNumber: 1,
+    accepted: false,
+    completed: false,
+  });
+  recordLocalRule(data, first);
+  recordLocalRule(data, eventFor('clip:match-halves', data.round.id));
+  const before = structuredClone(data.round.ruleEvents);
+  const snapshot = await accountSnapshot(data);
+  assert.equal(snapshot.certification.status, 'in-progress');
+  assert.equal(snapshot.certification.rules.total, 105);
+  assert.equal(snapshot.certification.rules.correctFirstTry, 0);
+  assert.deepEqual(
+    snapshot.certification.rules.requiredQuestionIds,
+    CERTIFICATION_V3_QUESTION_IDS,
+  );
+  const restored = await validateBackup(structuredClone(data));
+  assert.deepEqual(restored.round.ruleEvents, before);
+  assert.equal(
+    (await accountSnapshot(restored)).certification.rules.total,
+    105,
+  );
+  const newQuestion = eventFor(
+    'question:lack-progress-nearest-free',
+    data.round.id,
+  );
+  assert.throws(
+    () => recordLocalRule(data, newQuestion),
+    /different round or question/,
+  );
+  assert.deepEqual(data.round.ruleEvents, before);
+
+  data.round.ruleEvents = CERTIFICATION_V3_QUESTION_IDS.map((id) =>
+    eventFor(id, data.round.id),
+  );
+  const rules = summarizeRuleEvidence(
+    data.round.ruleEvents,
+    data.round.id,
+    data.round.policyVersion,
+  );
+  assert.equal(rules.passed, true);
+  assert.equal(rules.correctFirstTry, 105);
+  const clipEvents = data.round.ruleEvents.filter(
+    (event) => event.kind === 'clip',
+  );
+  for (const misses of [5, 6]) {
+    const wrongPrefix = clipEvents
+      .slice(0, misses)
+      .map((event) => ({
+        ...event,
+        answer: {
+          kind: 'clip',
+          selectedIndex: event.answer.selectedIndex === 0 ? 1 : 0,
+        },
+      }));
+    const boundary = summarizeRuleEvidence(
+      [...wrongPrefix, ...data.round.ruleEvents],
+      data.round.id,
+      data.round.policyVersion,
+    );
+    assert.equal(boundary.correctFirstTry, 105 - misses);
+    assert.equal(boundary.passed, misses === 5);
+  }
+  assert.equal(
+    summarizeRuleEvidence(data.round.ruleEvents, data.round.id).passed,
+    false,
+    'v4 requires its six additional questions',
+  );
+  const request = await prepareSubmission({
+    schema: 1,
+    kind: 'certify',
+    requestId: 'd'.repeat(32),
+    profile,
+    round: data.round,
+  });
+  await assert.rejects(
+    () => validateSubmission(decodeSubmission(request.body)),
+    /replayed games/,
+    'v3 completed rules must pass the issuer rules gate',
+  );
 });
 
 test('actual lesson answer prefixes survive browser transport and pass the issuer rules gate', async () => {
@@ -490,6 +581,38 @@ test('new profile connection can recover a certificate issued for the current ro
   });
 });
 
+test('a signed v3 certificate remains unchanged, verified and exportable under the v4 app', async () => {
+  await withTestIssuer(async (signer) => {
+    const data = await newData();
+    data.round.policyVersion = 'rcj-soccer-2026-v3';
+    data.request = {
+      kind: 'certify',
+      requestId: 'b'.repeat(32),
+      issueUrl: 'https://github.com/',
+      body: 'certify',
+    };
+    const receipt = certifiedReceipt(data);
+    receipt.certificate.summary = {
+      policyVersion: 'rcj-soccer-2026-v3',
+      rulesTotal: 105,
+      rulesCorrect: 105,
+    };
+    const envelope = signer.envelope(receipt);
+    await acceptGitHubReceipt(data, envelope);
+    const restored = await validateBackup(structuredClone(data));
+    assert.deepEqual(restored.certificationReceipt, envelope);
+    const snapshot = await accountSnapshot(restored);
+    assert.equal(snapshot.certification.status, 'qualified');
+    assert.equal(snapshot.certification.policyVersion, 'rcj-soccer-2026-v3');
+    assert.equal(snapshot.certification.rules.total, 105);
+    assert.deepEqual(
+      restored.certificationReceipt,
+      envelope,
+      'viewing updated content cannot rewrite a signed receipt',
+    );
+  });
+});
+
 test('changing request kind cannot discard unresolved certification correlation', async () => {
   await withTestIssuer(async (signer) => {
     const data = await newData();
@@ -578,6 +701,23 @@ test('complete seven-game round survives browser compression, issue decoding and
   );
   assert.equal(validated.summary.stepQualifying, 5);
   assert.equal(validated.summary.continuousQualifying, 2);
+  assert.equal(validated.summary.policyVersion, 'rcj-soccer-2026-v4');
+  const originalBankPayload = structuredClone(payload);
+  originalBankPayload.round.policyVersion = 'rcj-soccer-2026-v3';
+  originalBankPayload.round.ruleEvents =
+    originalBankPayload.round.ruleEvents.filter((event) =>
+      CERTIFICATION_V3_QUESTION_IDS.includes(event.questionId),
+    );
+  const originalBankResult = await validateSubmission(originalBankPayload);
+  assert.equal(originalBankResult.summary.rulesTotal, 105);
+  assert.equal(originalBankResult.summary.rulesCorrect, 105);
+  assert.equal(
+    originalBankResult.summary.policyVersion,
+    'rcj-soccer-2026-v3',
+    'issuer signs the actual assigned bank, never the latest label',
+  );
+  assert.equal(originalBankResult.summary.stepQualifying, 5);
+  assert.equal(originalBankResult.summary.continuousQualifying, 2);
   const fake = structuredClone(payload);
   fake.round.games[1].replay = fake.round.games[0].replay;
   await assert.rejects(() => validateSubmission(fake), /replay does not match/);

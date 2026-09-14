@@ -4,6 +4,9 @@ import ts from 'typescript';
 import committeeTranslations from './committee-translations.mjs';
 import reconstructionTranslations from './reconstruction-translations.mjs';
 import goalAssignmentTranslations from './goal-assignment-translations.mjs';
+import clipQuestionTranslations from './clip-question-translations.mjs';
+import placementQuestionTranslations from './placement-question-translations.mjs';
+import lessonUiTranslations from './lesson-ui-translations.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUTPUT = path.join(ROOT, 'lib', 'i18n', 'catalog.generated.json');
@@ -945,6 +948,13 @@ for (const locale of TARGETS)
   Object.assign(MANUAL[locale], reconstructionTranslations[locale]);
 for (const locale of TARGETS)
   Object.assign(MANUAL[locale], goalAssignmentTranslations[locale]);
+for (const locale of TARGETS)
+  Object.assign(
+    MANUAL[locale],
+    clipQuestionTranslations[locale],
+    placementQuestionTranslations[locale],
+    lessonUiTranslations[locale],
+  );
 const hasLetters = (value) => /\p{L}/u.test(value);
 
 function looksHuman(value) {
@@ -991,6 +1001,7 @@ const TRANSLATABLE_ATTRIBUTES = new Set([
   'label',
   'message',
   'placeholder',
+  'phaseLabel',
   'title',
 ]);
 

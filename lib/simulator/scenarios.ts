@@ -332,19 +332,19 @@ const holdingChoices: RefereeChoice[] = [
 const multipleDefenseChoices: RefereeChoice[] = [
   {
     id: 'move-farther',
-    label: 'Move Blue 2, the robot farther from the ball',
+    label: 'Move Blue 2 to the furthest unoccupied neutral spot',
     grade: 'correct',
     score: 1,
     feedback:
-      'Correct. Blue 1 is closer to the ball, so Blue 2 is moved to the furthest unoccupied neutral spot.',
+      'Blue 2 is farther from the ball, so move that robot to the furthest unoccupied neutral spot. Leave the ball and Blue 1 in place.',
   },
   {
     id: 'move-nearer',
-    label: 'Move Blue 1, the robot nearer to the ball',
+    label: 'Move Blue 1 to the furthest unoccupied neutral spot',
     grade: 'incorrect',
     score: 0,
     feedback:
-      'That moves the wrong defender. Rule 2.6 selects the robot farther from the ball.',
+      'Blue 1 is nearer to the ball. Move Blue 2, the farther robot, to the furthest unoccupied neutral spot instead.',
   },
   {
     id: 'wait-for-ball',
@@ -352,7 +352,7 @@ const multipleDefenseChoices: RefereeChoice[] = [
     grade: 'incorrect',
     score: 0.1,
     feedback:
-      'The shown multiple-defense fact already exists; ball position does not erase the two-defender condition.',
+      'Both Blue robots already overlap the same penalty area. Move the farther robot now; do not wait for the ball to leave.',
   },
   {
     id: 'move-both',
@@ -360,7 +360,7 @@ const multipleDefenseChoices: RefereeChoice[] = [
     grade: 'incorrect',
     score: 0,
     feedback:
-      'This is disproportionate and does not follow the depicted multiple-defense remedy.',
+      'This first multiple-defense incident calls for relocating only the farther robot, Blue 2, not removing both robots from play.',
   },
 ];
 
@@ -410,11 +410,11 @@ const combinedChoices: RefereeChoice[] = [
   },
   {
     id: 'defense-first',
-    label: 'Immediately remove the farther Blue defender',
+    label: 'Relocate the farther Blue defender before resolving pushing',
     grade: 'partial',
     score: 0.45,
     feedback:
-      'You noticed the two defenders, but the rule resolves simultaneous pushing first. Moving the ball can change which defender is farther away.',
+      'You identified multiple defense, but resolve pushing and move the ball first. Then compare each Blue robot’s distance to the ball again.',
   },
   {
     id: 'call-both',
@@ -483,7 +483,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'The blue robot uses a powered front roller to give the ball backspin while driving. The ball stays visibly mobile and the yellow robot can knock it free.',
     refereeCue:
-      'Look for independent ball movement and whether a genuine opponent challenge can dislodge it. Backspin alone is not the decision.',
+      'The opponent dislodges the rolling ball from the dribbler. Which referee decision is justified?',
     duration: 10,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.2, -0.64, 0), 1, true),
@@ -591,7 +591,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'A front cavity traps the ball even though the roller is switched off. The opponent makes a real challenge, but the ball remains locked to the blue robot.',
     refereeCue:
-      'Mechanism labels are not enough. Watch relative ball motion, access by the opponent, and how long the trapped state persists.',
+      'The ball stays trapped during the opponent’s challenge. Which referee decision should you make?',
     duration: 10,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.12, -0.26, 0.05), 1),
@@ -684,7 +684,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'Two blue robots occupy their own penalty area. Blue 1 is closer to the ball, so Blue 2 is moved to the furthest unoccupied neutral spot.',
     refereeCue:
-      "Count defenders using position, then compare each robot's distance from the ball before selecting the robot to move.",
+      'Both Blue robots partly overlap the same penalty area. Blue 1 is nearer to the ball. Which robot should you move, and where?',
     duration: 12,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.18, -0.89, 0), 1),
@@ -780,7 +780,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'Blue and yellow meet while both can play the ball. Their contact becomes sustained, but both keep driving. Camera angle and effect on play matter.',
     refereeCue:
-      'Check opponent contact, at least one robot overlapping the penalty area, and at least one robot touching the ball. Then exercise referee discretion; blame and material disadvantage are not additional rule conditions.',
+      'The opponents touch near the penalty area while contesting the ball. Which decision is allowed under the pushing rule?',
     duration: 10,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.12, -0.9, 0), 1),
@@ -882,7 +882,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'Penalty-area contact and a two-defender arrangement occur together. If the contact is judged pushing, resolve it before multiple defense; the order does not depend on which event caused the other.',
     refereeCue:
-      'Read the timeline, not one frozen frame. Decide the pushing question first, then reassess which objective conditions remain.',
+      'Pushing and multiple defense occur together. Which situation should you resolve first, and what should you check next?',
     duration: 12,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.26, -0.87, 0), 1),
@@ -1001,7 +1001,7 @@ export const SCENARIOS: ScenarioDefinition[] = [
     publicSummary:
       'The ball crosses the yellow goal opening, continues through the goal, and only then touches the back wall. A small rebound follows.',
     refereeCue:
-      'Do not react to the plane overlay alone. Keep sight of the ball and confirm the distinct back-wall contact before signalling.',
+      'The ball crosses the goal opening and then rebounds from the back wall. At what moment should you award the goal?',
     duration: 10,
     actors: [
       robot('blue-1', 'Blue 1', 'blue', pose(-0.08, 0.38, 0), 1),

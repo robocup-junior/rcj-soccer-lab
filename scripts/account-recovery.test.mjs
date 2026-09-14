@@ -229,6 +229,42 @@ test('legacy rounds remain readable, require explicit restart, and retain old ev
   assert.equal(restored.archivedReplays[launch.attemptId].engineVersion, 'referee-match-2026-v1');
 });
 
+test('v3 active games and completed replays remain usable after the v4 question-bank update', async () => {
+  const data = await dataForTest();
+  data.round.policyVersion = 'rcj-soccer-2026-v3';
+  const launch = await start(data);
+  const checkpoint = openingCheckpoint(
+    resumeLocalGame(data, launch.attemptId).checkpoint,
+  );
+  saveLocalCheckpoint(data, launch.attemptId, checkpoint);
+  const restored = await validateBackup(JSON.parse(JSON.stringify(data)));
+  assert.equal(restored.round.policyVersion, 'rcj-soccer-2026-v3');
+  assert.equal(
+    (await accountSnapshot(restored)).certification.status,
+    'in-progress',
+  );
+  assert.equal(
+    (await accountSnapshot(restored)).certification.rules.total,
+    105,
+  );
+  assert.deepEqual(
+    resumeLocalGame(restored, launch.attemptId).checkpoint,
+    checkpoint,
+  );
+  const replay = finish(restored, launch.attemptId);
+  assert.deepEqual(savedLocalReplay(restored, launch.attemptId), replay);
+  assert.equal(
+    (await accountSnapshot(restored)).recentGames[0].canReview,
+    true,
+  );
+  await start(restored);
+  assert.equal(
+    restored.round.games.length,
+    2,
+    'continuing v3 does not reset attempts',
+  );
+});
+
 test('failed final saves can retry; concurrent and completed saves are deduplicated', async () => {
   const tracker = createResultSaveTracker();
   let calls = 0;

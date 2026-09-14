@@ -486,4 +486,94 @@ export const RULE_QUESTIONS: RuleQuestion[] = [
     feedback:
       'The credential records completion of this main-league training assessment, not an official appointment or separate-format qualification. Local organizers can have adaptations and additional procedures.',
   },
+  {
+    id: 'lack-progress-nearest-free',
+    title: 'Ball placement: nearest available spot',
+    anchor: 'lack-of-progress',
+    question:
+      'Lack of progress has been called after the count. Neutral spot A is 20 cm from the ball but occupied; B is free at 45 cm; C is free at 90 cm. Where do you move the ball?',
+    options: [
+      'To C, the furthest free spot',
+      'To A, after moving the robot occupying it',
+      'To B, the nearest unoccupied spot',
+    ],
+    answer: 2,
+    feedback:
+      'Move the ball to B. Compare distances only among unoccupied neutral spots; do not clear an occupied spot or choose the furthest one for lack of progress.',
+  },
+  {
+    id: 'pushing-ball-furthest-free',
+    title: 'Pushing: move the ball, not a robot',
+    anchor: 'inside-penalty-area',
+    question:
+      'The referee calls pushing under Rule 2.6. The furthest neutral spot is occupied, but other spots are free. What should be relocated, and where?',
+    options: [
+      'The ball, to the furthest unoccupied neutral spot',
+      'The ball, to the nearest unoccupied neutral spot',
+      'The nearer robot, to the nearest unoccupied neutral spot',
+    ],
+    answer: 0,
+    feedback:
+      'A pushing call relocates the ball to the furthest available neutral spot. Skip occupied spots. This is not the nearest-spot procedure used for lack of progress, nor the robot relocation used for multiple defense.',
+  },
+  {
+    id: 'multiple-defense-robot-spot',
+    title: 'Multiple defense: choose the robot and spot',
+    anchor: 'inside-penalty-area',
+    question:
+      'Both Blue robots partly overlap the same penalty area; neither is fully inside and no pushing occurs. Blue 1 is 20 cm from the ball and Blue 2 is 45 cm away. Which relocation is correct?',
+    options: [
+      'Move Blue 1 to the furthest unoccupied neutral spot',
+      'Move Blue 2 to the nearest unoccupied neutral spot',
+      'Move Blue 2 to the furthest unoccupied neutral spot',
+    ],
+    answer: 2,
+    feedback:
+      'First choose Blue 2 because it is farther from the ball. Then choose the furthest unoccupied neutral spot for that robot. The ball is not relocated for this multiple-defense incident.',
+  },
+  {
+    id: 'damaged-return-occupied-spot',
+    title: 'Returning robot: skip occupied spots',
+    anchor: 'damaged-robots',
+    question:
+      'During play, a repaired robot is eligible and has permission to return. The spot furthest from the ball is occupied; two free spots are 30 cm and 100 cm from the ball. How should the robot return?',
+    options: [
+      'At the free spot 30 cm from the ball, facing its own goal',
+      'At the free spot 100 cm from the ball, facing its own goal',
+      'At the free spot 100 cm from the ball, facing the ball',
+    ],
+    answer: 1,
+    feedback:
+      'Place the returning robot at the furthest unoccupied spot, here 100 cm from the ball, facing its own goal. Do not move the ball or another robot to make room.',
+  },
+  {
+    id: 'lack-progress-repeat-spot',
+    title: 'Lack of progress after a first placement',
+    anchor: 'lack-of-progress',
+    question:
+      'The ball was moved after a lack-of-progress call, but the new placement does not resolve the stalemate. What may the referee do?',
+    options: [
+      'Keep returning the ball to that same spot without another count',
+      'Count and call lack of progress again, then move the ball to a different unoccupied neutral spot',
+      'Automatically remove both teams’ robots as damaged',
+    ],
+    answer: 1,
+    feedback:
+      'The referee may repeat the lack-of-progress procedure and use a different neutral spot. An unsuccessful first placement does not create an automatic damaged-robot penalty or a rule to choose the furthest spot.',
+  },
+  {
+    id: 'ball-out-followup-placement',
+    title: 'Ball out: distinguish the ball from the robot',
+    anchor: 'ball-movement',
+    question:
+      'A robot sends the ball over the wall and is removed as damaged. The ball remains beyond every robot’s reach; after a completed count, the referee calls lack of progress. What goes to the nearest unoccupied neutral spot?',
+    options: [
+      'The removed robot, facing the opponent’s goal',
+      'The ball; the robot stays off until it may return with permission',
+      'Both the ball and the removed robot',
+    ],
+    answer: 1,
+    feedback:
+      'Rule 2.5 penalizes the robot that sends the ball out; it does not itself specify a replacement spot. The stated lack-of-progress call selects the nearest free spot for the ball under Rule 2.7. A later robot return uses the furthest free spot under Rule 2.9.',
+  },
 ];

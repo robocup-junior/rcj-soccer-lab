@@ -1,4 +1,3 @@
-import { LEARNING_SITUATIONS } from '@/lib/rulebook/learning';
 import { RULE_CLIPS } from '@/lib/rulebook/animations';
 import { RULE_QUESTIONS } from '@/lib/rulebook/questions';
 import { SCENARIOS } from '@/lib/simulator/scenarios';
@@ -6,7 +5,7 @@ import { CERTIFICATION_POLICY, type CertificationMode } from './policy';
 import { gradeCaseEvidence } from './case-evidence';
 
 export const CERTIFICATION_QUESTION_IDS = new Set(
-  LEARNING_SITUATIONS.map((item) => item.id),
+  CERTIFICATION_POLICY.questionIds,
 );
 
 export type RuleAnswerGrade = {

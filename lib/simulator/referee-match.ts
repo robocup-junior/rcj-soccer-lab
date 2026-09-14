@@ -2069,7 +2069,7 @@ export class RefereeMatch {
     if (this.returnRequest(item))
       return 'Check the selected robot’s repair status, remaining waiting time, kickoff eligibility and a clear neutral spot.';
     if (['goal', 'own-goal', 'post'].includes(id))
-      return 'Watch for contact with the INSIDE back wall, not just the post or goal line. The team attacking that end receives the goal, regardless of the last touch.';
+      return 'Watch for contact with the INSIDE back wall, not just the post or goal line. The team attacking that end is awarded one point, regardless of the last touch.';
     if (id === 'out-goal')
       return 'Check whether a scoring-team robot was already out on the field, or whether the same ball passage continued from an out-of-bounds carrier after removal.';
     if (id === 'pushing-goal')

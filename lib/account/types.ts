@@ -50,6 +50,8 @@ export type RulesCertificationProgress = {
   requiredAccuracy: number;
   passed: boolean;
   answeredQuestionIds: string[];
+  /** Immutable assignments for this round's supported examination version. */
+  requiredQuestionIds: string[];
 };
 
 export type CertificationGameAttempt = {

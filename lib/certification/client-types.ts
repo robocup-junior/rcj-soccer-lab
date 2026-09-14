@@ -65,6 +65,8 @@ export type RuleLearningEvent =
 export type RuleLearningBridge = {
   mode?: RuleLearningMode;
   certificationRunId?: string | null;
+  /** Pinned question set assigned to this certification round. */
+  questionIds?: readonly string[];
   /** Eventual completions restored from the account or active certification. */
   completedSituationIds?: readonly string[];
   onEvent?: (event: RuleLearningEvent) => MaybePromise<void>;

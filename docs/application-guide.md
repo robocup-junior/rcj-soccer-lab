@@ -22,7 +22,7 @@ Application: <https://robocup-junior.github.io/rcj-soccer-lab/>
   numbers, game history/averages, and an opt-in signed training-referee directory.
 - Complete English, Slovak, German, and Japanese interface/catalogue support,
   including generated match feedback, referee reviews, quizzes, and embeds.
-- A situation library combining 105 decision exercises, guided replays,
+- A situation library combining 111 decision exercises, guided replays,
   technical/safety/administration questions and
   detailed studies with their matching official sections, questions and saved
   completion checks.
@@ -44,6 +44,17 @@ Ball attachment is a visual teaching aid, not a certificate that a physical
 robot complies with the rules. The legal example releases the ball during a
 challenge; the illegal-holding example deliberately does not. Observable facts
 and referee judgments intentionally remain separate.
+
+Animated questions and detailed studies first show the observable situation and
+stop at the decision point, before the referee's correction. Choose an answer to
+see the explanation. In practice, **Watch explained replay** opens the guided
+walkthrough first and records the answer as assisted. Question choices are
+shuffled without changing their grading. Text checks, animated questions, detailed
+studies and referee cases share the same result banner and answer icons.
+
+The placement checks explicitly distinguish moving the ball from moving a robot,
+nearest from furthest unoccupied neutral spots, and the procedure when a repeated
+**lack of progress** call is needed.
 
 ## Run on localhost
 
@@ -164,11 +175,19 @@ or the original public issues. Do not put children's private information here.
 
 A 2026 round requires:
 
-- All 105 rule questions, with at least 100 correct on the first recorded answer.
+- All 111 rule questions, with at least 106 correct on the first recorded answer.
 - Five complete 10-minute Step games at 90% or better, from at most eight starts.
 - Two complete 10-minute Continuous games at 80% or better, from at most five starts.
 
-Hints/reveals are disabled during certification. Every game start consumes a
+New rounds use assessment policy v4. Existing v3 rounds retain their original
+105 assigned questions and require at least 100 correct first answers; updates
+do not reset that progress or add six questions halfway through a round.
+
+Hints, reference panes and explained replays are hidden until an answer is
+recorded during certification. Text and animated questions and detailed studies
+lock after the first answer; their explanations can still be reviewed afterward.
+Case exercises may need several decisions to finish a procedure, but retries do
+not replace an earlier wrong answer. Every game start consumes a
 local attempt. Full restarts are unlimited and reset all round evidence together,
 while keeping practice history and previous round summaries. Seeds are assigned
 deterministically from round ID, mode and attempt number to prevent reusing the
@@ -186,13 +205,14 @@ summary. Saves can be retried after a storage error. Export
 a backup before clearing site data or changing browsers. Checkpoints are not cloud
 sync, and abrupt browser/device shutdown can lose the most recent unsaved seconds.
 
-The corrected examination is `rcj-soccer-2026-v3` (replay engine
-`referee-match-2026-v3`). Unfinished older rounds are read-only and require an
-explicit fresh-round restart. Existing practice history, older evidence in backups,
+New examinations use `rcj-soccer-2026-v4`; v3 rounds remain supported with their
+original question set. Both use replay engine `referee-match-2026-v3`. Unfinished
+v1/v2 rounds are read-only and require an explicit fresh-round restart.
+Existing practice history, older evidence in backups,
 and previously signed certificates are preserved; older recordings are not
 silently regraded using the new engine.
 
-The assessment covers main 2v2 Soccer, including 32 source-linked knowledge
+The assessment covers main 2v2 Soccer, including 38 source-linked knowledge
 questions. It is not comprehensive Entry/SuperTeam or tournament-organizer
 qualification. The opponent-pushed robot return and out-carrier subsequent-goal
 decisions retain the committee training policy requested for this app and are

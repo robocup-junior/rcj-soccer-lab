@@ -46,7 +46,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useLocalization } from '@/components/i18n/LocalizationProvider';
-import { CERTIFICATION_POLICY } from '@/lib/certification/policy';
+import { isSupportedCertificationPolicy } from '@/lib/certification/policy';
 import type {
   CertificationGameLaunch,
   CertificationMode,
@@ -337,8 +337,7 @@ export function CertificationPanel({
     : 0;
   const allPassed =
     rules.passed && round.step.passed && round.continuous.passed;
-  const upgradeRequired =
-    round.policyVersion !== CERTIFICATION_POLICY.policyVersion;
+  const upgradeRequired = !isSupportedCertificationPolicy(round.policyVersion);
   const roundFailed = round.status === 'failed' || upgradeRequired;
   const unfinished = attempts.some((attempt) => attempt.inProgress);
   const verified = round.status === 'qualified';

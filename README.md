@@ -15,7 +15,7 @@ Designed for teams, volunteers and referees learning the 2026 rules together.
 
 | Mode             | What you can do                                                                                                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Rules**        | Read official source documents alongside 105 decision exercises, animated situations and technical workbenches. Orbit and replay situations from different angles. |
+| **Rules**        | Read official source documents alongside 111 decision exercises, animated situations and technical workbenches. Orbit and replay situations from different angles. |
 | **Play**         | Arrange robots and the ball, drive manually, play against AI, or play local two-player matches using WASD and arrow keys.                                          |
 | **Referee**      | Practise Step or Continuous matches using classic or RefMate-style controls. Review decisions, missed incidents and the match timeline afterward.                  |
 | **Video replay** | Open a local recording, calibrate the field, track robots and the ball, review uncertain positions, save an editable replay or export a 3D video.                  |
