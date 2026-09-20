@@ -457,3 +457,80 @@ export function penaltyEvidenceSegments(pose: Pose, visual: RobotVisualId) {
   }
   return segments;
 }
+
+/**
+ * Z coordinate (positive towards `end`) of a pushing line drawn `depth` metres
+ * behind the outer front edge of the penalty area. The line spans the inside
+ * of the area between its two side stripes.
+ */
+export function pushingLineZ(depth: number) {
+  return front + depth;
+}
+export function pushingLineSegment(
+  end: number,
+  depth: number,
+): [PointXZ, PointXZ] {
+  const inner = halfWidth - SPEC.markings.whiteLineWidth;
+  return [
+    [-inner, end * pushingLineZ(depth)],
+    [inner, end * pushingLineZ(depth)],
+  ];
+}
+
+/**
+ * True when any part of the actual robot body touches or has crossed the
+ * pushing line of the penalty area at `end`. A robot beside the area, outside
+ * its width, has not reached a line that is only drawn inside the area.
+ */
+export function robotReachesPushingLine(
+  pose: Pose,
+  end: number,
+  depth: number,
+  visual: RobotVisualId = DEFAULT_ROBOT_VISUAL_ID,
+) {
+  const line = pushingLineZ(depth);
+  const bound = footprintRadius(visual);
+  if (
+    pose.z * end < line - bound - EPS ||
+    Math.abs(pose.x) > halfWidth + bound + EPS
+  )
+    return false;
+  const [a, b] = pushingLineSegment(end, depth);
+  for (const polygon of projectRobotFootprint(pose, visual)) {
+    const ring = polygon.outer;
+    for (let i = 0; i < ring.length; i++) {
+      const p = ring[i],
+        q = ring[(i + 1) % ring.length];
+      if (Math.abs(p[0]) <= halfWidth + EPS && p[1] * end >= line - EPS)
+        return true;
+      if (segmentsIntersect(p, q, a, b)) return true;
+    }
+  }
+  return false;
+}
+
+/** The wedge ("ramp") rises along the walls; a body within its run is on it. */
+export function robotOnRamp(
+  pose: Pose,
+  visual: RobotVisualId = DEFAULT_ROBOT_VISUAL_ID,
+  run: number = SPEC.wedge.run,
+) {
+  return robotWallClearance(pose, visual).gap < run - EPS;
+}
+
+/**
+ * Candidate centres for "the general area of its own corner": well inside both
+ * boundary lines, clear of the penalty area and of the neighbouring neutral
+ * spot. `ownEnd` is the sign of z at the goal the robot's team defends.
+ */
+export function ownCornerSpots(ownEnd: number): Pose[] {
+  const inset = 0.2;
+  const x = FIELD.playingHalfWidth - inset;
+  const z = ownEnd * (FIELD.playingHalfLength - inset);
+  return [-1, 1].map((side) => ({
+    x: side * x,
+    z,
+    // Turned towards the centre of the field; the rules name no orientation.
+    yaw: Math.atan2(-side * x, -z),
+  }));
+}

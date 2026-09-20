@@ -1,9 +1,12 @@
-import index from './official-index.json';
+import { CERTIFICATION_RULESET_ID, getRuleset } from '../rulesets/registry';
+import type {
+  OfficialDocument,
+  OfficialSection,
+  SourceNotice,
+} from '../rulesets/types';
 
-export const RULE_DOCUMENTS = index.documents;
-export const RULE_SECTIONS = index.sections;
-export const RULEBOOK_CHECKED_ON = index.checkedOn;
-export type RuleSection = (typeof RULE_SECTIONS)[number];
+export type RuleSection = OfficialSection;
+export type RuleDocument = OfficialDocument;
 export type GuideKind =
   | 'animation'
   | 'inspection'
@@ -50,11 +53,6 @@ export function guideFor(section: RuleSection): GuideKind {
   return 'overview';
 }
 
-export function sectionUrl(section: RuleSection) {
-  const document = RULE_DOCUMENTS.find((item) => item.id === section.document)!;
-  return `${document.url}#${section.anchor}`;
-}
-
 /** Appendices have titles but no numeric section number in the official index. */
 export function sectionReference(section: RuleSection) {
   if (section.number)
@@ -64,23 +62,85 @@ export function sectionReference(section: RuleSection) {
   return section.title;
 }
 
-export function findSections(
-  query: string,
-  document: string,
-  localize: (value: string) => string = (value) => value,
-) {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  return RULE_SECTIONS.filter((section) => {
-    if (!terms.length) return section.document === document;
-    const aliases =
-      guideFor(section) === 'inspection'
-        ? 'technical inspection robot size weight measurements'
-        : guideFor(section) === 'kicker'
-          ? 'kicking power test rebound'
-          : '';
-    const source = `${section.number} ${section.title} ${section.chapter} ${section.document} ${aliases}`;
-    const searchable =
-      `${source} ${localize(section.title)} ${localize(section.chapter)} ${localize(aliases)}`.toLowerCase();
-    return terms.every((term) => searchable.includes(term));
-  });
+/** The official documents and their headings, as one rule set publishes them. */
+export type RulebookCatalog = {
+  rulesetId: string;
+  documents: readonly RuleDocument[];
+  sections: readonly RuleSection[];
+  checkedOn: string;
+  sectionUrl: (section: RuleSection) => string;
+  section: (id: string) => RuleSection | undefined;
+  sectionByAnchor: (
+    document: string,
+    anchor: string,
+  ) => RuleSection | undefined;
+  /** Base URL of a document, for references that only know an anchor. */
+  documentUrl: (document: string) => string;
+  findSections: (
+    query: string,
+    document: string,
+    localize?: (value: string) => string,
+  ) => RuleSection[];
+  noticesFor: (section: RuleSection) => SourceNotice[];
+};
+
+const catalogs = new Map<string, RulebookCatalog>();
+
+export function rulebookCatalog(rulesetId?: string | null): RulebookCatalog {
+  const ruleset = getRuleset(rulesetId);
+  const cached = catalogs.get(ruleset.id);
+  if (cached) return cached;
+  const { documents, sections, checkedOn } = ruleset.index;
+  const documentUrl = (id: string) =>
+    documents.find((item) => item.id === id)!.url;
+  const catalog: RulebookCatalog = {
+    rulesetId: ruleset.id,
+    documents,
+    sections,
+    checkedOn,
+    documentUrl,
+    sectionUrl: (section) =>
+      `${documentUrl(section.document)}#${section.anchor}`,
+    section: (id) => sections.find((item) => item.id === id),
+    sectionByAnchor: (document, anchor) =>
+      sections.find(
+        (item) => item.document === document && item.anchor === anchor,
+      ),
+    findSections: (query, document, localize = (value) => value) => {
+      const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      return sections.filter((section) => {
+        if (!terms.length) return section.document === document;
+        const aliases =
+          guideFor(section) === 'inspection'
+            ? 'technical inspection robot size weight measurements'
+            : guideFor(section) === 'kicker'
+              ? 'kicking power test rebound'
+              : '';
+        const source = `${section.number} ${section.title} ${section.chapter} ${section.document} ${aliases}`;
+        const searchable =
+          `${source} ${localize(section.title)} ${localize(section.chapter)} ${localize(aliases)}`.toLowerCase();
+        return terms.every((term) => searchable.includes(term));
+      });
+    },
+    noticesFor: (section) =>
+      ruleset.sourceNotices.filter(
+        (notice) =>
+          notice.document === section.document &&
+          notice.anchors.includes(section.anchor),
+      ),
+  };
+  catalogs.set(ruleset.id, catalog);
+  return catalog;
 }
+
+/**
+ * The rule set that certification rounds are assigned and graded against.
+ * These constants predate rule-set selection; use rulebookCatalog(id) wherever
+ * the reader's selected rule set matters.
+ */
+const certificationCatalog = rulebookCatalog(CERTIFICATION_RULESET_ID);
+export const RULE_DOCUMENTS = certificationCatalog.documents;
+export const RULE_SECTIONS = certificationCatalog.sections;
+export const RULEBOOK_CHECKED_ON = certificationCatalog.checkedOn;
+export const sectionUrl = certificationCatalog.sectionUrl;
+export const findSections = certificationCatalog.findSections;

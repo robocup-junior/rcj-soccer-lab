@@ -13,7 +13,8 @@ export type TrainingTopic = (typeof TRAINING_TOPICS)[number]['id'];
 export type TrainingMode = 'step' | 'continuous';
 export type Assessment = 'correct' | 'wrong' | 'missed' | 'assisted';
 export function trainingTopic(definition: RefereeCase): TrainingTopic {
-  const id = definition.id.replace(/^live-/, '');
+  if (definition.topic) return definition.topic;
+  const id = (definition.like ?? definition.id).replace(/^live-/, '');
   if (['wall', 'full-area', 'pushed-out'].includes(id)) return 'out';
   if (['damaged', 'both-damaged', 'damage-exception'].includes(id))
     return 'damage';

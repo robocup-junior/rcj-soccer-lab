@@ -1,8 +1,9 @@
 # RCJ Soccer Lab — application guide
 
 Interactive 3D rule explanations, referee practice, and optional referee
-certification for RoboCupJunior Soccer 2026. The application works as a full
-training tool and as a small iframe embedded directly beside a rule.
+certification for RoboCupJunior Soccer. It works with the 2026 rules and with
+the 2027 draft, and compares them. The application works as a full training
+tool and as a small iframe embedded directly beside a rule.
 
 Application: <https://robocup-junior.github.io/rcj-soccer-lab/>
 
@@ -17,12 +18,17 @@ Application: <https://robocup-junior.github.io/rcj-soccer-lab/>
   entries, including appendices and footnotes.
 - 32 additional gameplay animations with timelines, camera choices and questions,
   plus interactive inspection, kicker, field, ball and scoring workbenches.
-- Five main tabs: **Rules**, **Play**, **Referee**, **Video replay**, and **Academy**.
+- Six main tabs: **Rules**, **Play**, **Referee**, **Version comparison**,
+  **Video replay**, and **Academy**.
+- A **Rules version** selector for the 2026 rules and the 2027 draft. It
+  switches the official text, the situation library, the field markings and the
+  referee engine together; see [Rules versions](#rules-versions).
 - Optional device-local profiles, portable progress backups, GitHub-confirmed referee
   numbers, game history/averages, and an opt-in signed training-referee directory.
 - Complete English, Slovak, German, and Japanese interface/catalogue support,
   including generated match feedback, referee reviews, quizzes, and embeds.
-- A situation library combining 111 decision exercises, guided replays,
+- A situation library combining 111 decision exercises (133 under the 2027
+  draft), guided replays,
   technical/safety/administration questions and
   detailed studies with their matching official sections, questions and saved
   completion checks.
@@ -407,6 +413,47 @@ symmetry, shuffle coverage and completion of every case in all four variants.
 The normal Play engine keeps automatic goal/stall behavior unless referee mode
 is explicitly enabled.
 
+## Rules versions
+
+The **Rules version** selector in the header chooses which version of the
+rules the whole application works with. The choice is remembered on the device
+and is part of every shared link as `ruleset=2026` or `ruleset=2027`. First-time
+visitors start with the newest final rules.
+
+| Where                  | What follows the selected version                                                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Rules**              | The official documents of that version, its section numbers, and its situation library. Sections that changed are marked, with a summary above the learning aid.        |
+| **Play**               | Field markings of that version, such as the pushing line of the 2027 draft.                                                                                             |
+| **Referee**            | The expected calls, robot returns, live incidents, hints, explanations and the cited sections, in Step and in Continuous mode. Changing the version starts a new match. |
+| **Version comparison** | Two versions side by side: every change with its old and new wording, what to do differently, how the Lab models it, and situations to practise it.                     |
+
+Under the **2027 draft** the referee engine applies: multiple defense only in a
+team's own penalty area; pushing decided by the pushing line; removal as damaged
+for ball holding; an out-of-bounds penalty of at least one minute, with the
+return at the next game interruption and in the robot's own corner; void goals
+only for the penalized robot itself; pushed out for a robot pushed onto the
+ramp; waiting robots returned before a lack-of-progress placement; and a
+neutral kickoff when no robot is left on the field.
+
+A draft can leave points open. The Lab then needs a working answer, states it
+as a **training assumption** in the comparison tab, and keeps it behind a single
+setting in `lib/rulesets/2027/gameplay.ts`. For the draft of 2026-09-18 these
+are: the position of the pushing line (provisionally at mid-depth of the
+penalty area, and labelled as provisional on the field), the conflict between
+sections 2.3 and 2.8 on returning at a kick-off (the changed section 2.8 is
+followed), what counts as a game interruption, which own corner a robot returns
+to and how it faces, and whether to count again after waiting robots return.
+Training assumptions are not rules; the final text and the event organizers
+decide.
+
+Training certification always uses the 2026 rules. While a certification
+round, one of its games or a saved review is open, the selector is locked and
+shows that version. Learning progress is shared between versions: situations
+keep their id when only their wording changes, and new situations have ids of
+their own.
+
+To add a version, follow [adding a rules version](adding-a-rules-version.md).
+
 ## Read and explore every rule
 
 Open **Rules** in the top bar, or visit `/?mode=rules`. The contents cover the
@@ -426,9 +473,11 @@ scenario links and embeds remain supported.
 
 The official-text pane loads the original document, including every paragraph,
 table, note and appendix. It requires internet access and has an **Open original**
-link. The local index records the revision and source hash checked on
-2026-09-05; the reader loads the live official pages, which may subsequently
-change. Official paragraphs are not mirrored into the repository.
+link. Each rules version has its own local index with the revision, a content
+hash per document and the date it was checked; the reader loads the live
+official pages, which may subsequently change. Official paragraphs are not
+mirrored into the repository. A notice above the text says when a version is a
+draft, or when a published page has a known defect.
 
 - Search section titles and numbers across all six documents. Select a section
   to jump to its official text and corresponding learning tool.
@@ -442,7 +491,8 @@ change. Official paragraphs are not mirrored into the repository.
   capture depth, handle clearance, marker diameter, voltage and radio power.
   Diagrams and limit checks update as measurements change. Its checklist links
   directly to relevant inspection paragraphs.
-- The kicker bench compares rebound paths. The field and ball explorers show
+- The kicker bench compares rebound paths; under the 2027 draft it shows the
+  piloted vertical test instead. The field and ball explorers show
   dimensions; the scoring explorer combines tournament placement, actual rubric
   grade choices, TDP bonuses and the Community Award point. Preparation guides
   cover team requirements, documentation, interviews and referee decisions.
@@ -458,13 +508,15 @@ main-league animations and measurement limits are not applied to those formats.
 The reader calls out source differences, including legacy large-ball details
 and conflicting poster dimensions. Check event amendments with the organizers.
 
-Rulebook data and learning logic live in `lib/rulebook`, and the reader and
-workbenches in `components/rulebook`. After an official source update, refresh
-the heading index and review the learning aids against the revised text:
+Learning logic lives in `lib/rulebook`, one folder per rules version in
+`lib/rulesets`, and the reader and workbenches in `components/rulebook`. After
+an official source update, refresh the heading index of that version and review
+the learning aids against the revised text:
 
 ```bash
-python scripts/sync-rulebook.py
+python scripts/sync-rulebook.py 2026
 pnpm test:rules
+pnpm test:rulesets
 ```
 
 The sync script indexes headings and counts paragraph/footnote blocks, records

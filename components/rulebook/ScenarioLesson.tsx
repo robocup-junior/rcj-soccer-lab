@@ -11,7 +11,7 @@ import type { RobotVisualId } from '@/lib/simulator/robot-models';
 import type { ScenarioDefinition } from '@/lib/simulator/types';
 import { AnswerChoice, AnswerFeedback } from './AnswerFeedback';
 import { LearningSaveStatus, useLearningSave } from './useLearningSave';
-import { SCENARIO_DECISION_TIMES } from '@/lib/rulebook/scenario-assessments';
+import { scenarioDecisionTime } from '@/lib/rulebook/learning-bank';
 import { orderedAnswers } from '@/lib/rulebook/answer-order';
 import { useLocalization } from '@/components/i18n/LocalizationProvider';
 import type {
@@ -61,7 +61,7 @@ export function ScenarioLesson({
     alreadyAnswered;
   const duration = explained
     ? scenario.duration
-    : SCENARIO_DECISION_TIMES[scenario.id];
+    : (scenarioDecisionTime(scenario) ?? scenario.duration);
   const locked =
     learningMode === 'certification' && (alreadyAnswered || answer !== null);
   const cursor = useRef(0);

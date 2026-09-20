@@ -15,7 +15,9 @@ import {
   Check,
   ExternalLink,
   Film,
+  GitCompareArrows,
   Search,
+  TriangleAlert,
   Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,17 +29,18 @@ import {
 } from '@/components/ui/native-select';
 import { Progress } from '@/components/ui/progress';
 import {
-  RULE_DOCUMENTS,
-  RULE_SECTIONS,
-  RULEBOOK_CHECKED_ON,
-  findSections,
   guideFor,
-  sectionUrl,
+  rulebookCatalog,
   sectionReference,
   type RuleSection,
 } from '@/lib/rulebook/catalog';
-import { clipsFor, RULE_CLIPS } from '@/lib/rulebook/animations';
-import { RULE_QUESTIONS } from '@/lib/rulebook/questions';
+import {
+  allLearningSituationIds,
+  bankClipsFor,
+  learningBank,
+} from '@/lib/rulebook/learning-bank';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
+import { rulesetOptionLabel } from '@/lib/rulesets/registry';
 import type { RobotVisualId } from '@/lib/simulator/robot-models';
 import { InspectionWorkbench } from './InspectionWorkbench';
 import { RuleAnimationPlayer } from './RuleAnimationPlayer';
@@ -52,13 +55,9 @@ import {
 } from './RuleLabs';
 import { cn } from '@/lib/utils';
 import {
-  LEARNING_SITUATIONS,
   LEARNING_PROGRESS_KEY,
-  validLearningProgress,
   situationCoversSection,
 } from '@/lib/rulebook/learning';
-import { REFEREE_CASES } from '@/lib/simulator/referee-cases';
-import { SCENARIOS } from '@/lib/simulator/scenarios';
 import { CaseLesson } from './CaseLesson';
 import { ScenarioLesson } from './ScenarioLesson';
 import { QuestionLesson } from './QuestionLesson';
@@ -72,7 +71,20 @@ import type {
 import { committeeTopic, emitCommitteeEvent } from '@/lib/committee/events';
 
 const DEFAULT_SECTION = 'soccer:inside-penalty-area';
-const PROGRESS_KEY = 'rcj-rulebook-read-2026-06-03-v1';
+const KNOWN_SITUATION_IDS = allLearningSituationIds();
+/** Checks passed under any rule set stay recorded; ids never mean two answers. */
+function storedLearningProgress(value: unknown): string[] {
+  return Array.isArray(value)
+    ? [
+        ...new Set(
+          value.filter(
+            (id): id is string =>
+              typeof id === 'string' && KNOWN_SITUATION_IDS.has(id),
+          ),
+        ),
+      ]
+    : [];
+}
 
 export function Rulebook({
   robotVisual,
@@ -80,6 +92,7 @@ export function Rulebook({
   sectionId = DEFAULT_SECTION,
   situationId = null,
   onSelect,
+  onCompare,
   learning,
 }: {
   robotVisual: RobotVisualId;
@@ -87,20 +100,28 @@ export function Rulebook({
   sectionId?: string;
   situationId?: string | null;
   onSelect: (sectionId: string, situationId: string | null) => void;
+  /** Opens the Version comparison tab. */
+  onCompare?: () => void;
   learning?: RuleLearningBridge;
 }) {
   const { locale } = useLocalization();
+  const { ruleset } = useRuleset();
+  const catalog = useMemo(() => rulebookCatalog(ruleset.id), [ruleset.id]);
+  const bank = useMemo(() => learningBank(ruleset.id), [ruleset.id]);
+  const RULE_SECTIONS = catalog.sections;
+  const RULE_DOCUMENTS = catalog.documents;
+  const PROGRESS_KEY = ruleset.readingProgressKey;
   const learningMode = learning?.mode ?? 'practice';
   const certificationRunId = learning?.certificationRunId ?? null;
   const assignedQuestionIds = learning?.questionIds;
   const assignedSituations = useMemo(
     () =>
       learningMode === 'certification' && assignedQuestionIds
-        ? LEARNING_SITUATIONS.filter((item) =>
+        ? bank.situations.filter((item) =>
             assignedQuestionIds.includes(item.id),
           )
-        : LEARNING_SITUATIONS,
-    [learningMode, assignedQuestionIds],
+        : bank.situations,
+    [bank, learningMode, assignedQuestionIds],
   );
   const learningContextKey =
     learningMode === 'certification'
@@ -132,21 +153,24 @@ export function Rulebook({
   const [restored, setRestored] = useState(false);
   const remoteCompleted = useMemo(
     () =>
-      validLearningProgress(learning?.completedSituationIds).filter((id) =>
+      storedLearningProgress(learning?.completedSituationIds).filter((id) =>
         assignedSituations.some((item) => item.id === id),
       ),
     [learning?.completedSituationIds, assignedSituations],
   );
   const completedSituationIds = useMemo(
-    () => [
-      ...new Set([
-        ...(learningMode === 'certification'
-          ? (contextCompleted[learningContextKey] ?? [])
-          : passed),
-        ...remoteCompleted,
-      ]),
-    ],
+    () =>
+      [
+        ...new Set([
+          ...(learningMode === 'certification'
+            ? (contextCompleted[learningContextKey] ?? [])
+            : passed),
+          ...remoteCompleted,
+        ]),
+        // Progress is stored across rule sets; count what this one offers.
+      ].filter((id) => assignedSituations.some((item) => item.id === id)),
     [
+      assignedSituations,
       contextCompleted,
       learningContextKey,
       learningMode,
@@ -163,8 +187,10 @@ export function Rulebook({
   const guide = guideFor(selected);
   const matches = useMemo(
     () =>
-      findSections(query, document.id, (value) => translateText(value, locale)),
-    [document.id, locale, query],
+      catalog.findSections(query, document.id, (value) =>
+        translateText(value, locale),
+      ),
+    [catalog, document.id, locale, query],
   );
   const documentSections = RULE_SECTIONS.filter(
     (section) => section.document === document.id,
@@ -175,49 +201,83 @@ export function Rulebook({
   const readCount = documentSections.filter((section) =>
     reviewed.includes(section.id),
   ).length;
-  const clips = useMemo(() => clipsFor(selected.anchor), [selected.anchor]);
-  const sourceUrl = sectionUrl(selected);
+  const clips = useMemo(
+    () => bankClipsFor(bank, selected.anchor),
+    [bank, selected.anchor],
+  );
+  const sourceUrl = catalog.sectionUrl(selected);
+  const sourceNotices = catalog.noticesFor(selected);
+  // What this rule set changed, relative to the one it is based on.
+  const changedAnchors = useMemo(
+    () =>
+      new Set(
+        ruleset.changes.map((change) => `${change.document}:${change.anchor}`),
+      ),
+    [ruleset],
+  );
+  const sectionChanges = ruleset.changes.filter(
+    (change) =>
+      change.document === selected.document &&
+      change.anchor === selected.anchor,
+  );
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       try {
         setPassed(
-          validLearningProgress(
+          storedLearningProgress(
             JSON.parse(localStorage.getItem(LEARNING_PROGRESS_KEY) ?? '[]'),
           ),
         );
       } catch {
         /* Invalid quiz progress must not prevent restoring reading progress. */
       }
+      setRestored(true);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  // "Reviewed" marks belong to one rule set: reading section 2.8 of 2026 says
+  // nothing about the rewritten section 2.8 of a later year.
+  const [reviewedKey, setReviewedKey] = useState<string | null>(null);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      let next: string[] = [];
       try {
         const saved: unknown = JSON.parse(
           localStorage.getItem(PROGRESS_KEY) ?? '[]',
         );
         if (Array.isArray(saved))
-          setReviewed(
-            saved.filter(
-              (id): id is string =>
-                typeof id === 'string' &&
-                RULE_SECTIONS.some((section) => section.id === id),
-            ),
+          next = saved.filter(
+            (id): id is string =>
+              typeof id === 'string' &&
+              RULE_SECTIONS.some((section) => section.id === id),
           );
       } catch {
         /* Reading remains available when local storage is disabled. */
       }
-      setRestored(true);
+      setReviewed(next);
+      setReviewedKey(PROGRESS_KEY);
     });
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [PROGRESS_KEY, RULE_SECTIONS]);
 
   useEffect(() => {
     if (!restored) return;
     try {
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(reviewed));
       localStorage.setItem(LEARNING_PROGRESS_KEY, JSON.stringify(passed));
     } catch {
       /* Session-only progress is still usable. */
     }
-  }, [restored, reviewed, passed]);
+  }, [restored, passed]);
+  useEffect(() => {
+    // Never write one rule set's marks under another rule set's key.
+    if (reviewedKey !== PROGRESS_KEY) return;
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(reviewed));
+    } catch {
+      /* Session-only progress is still usable. */
+    }
+  }, [PROGRESS_KEY, reviewed, reviewedKey]);
 
   const select = useCallback(
     (section: RuleSection) => {
@@ -233,7 +293,7 @@ export function Rulebook({
         setQuery('');
       }
     },
-    [select],
+    [RULE_SECTIONS, select],
   );
   const onRule = useCallback(
     (documentId: string, anchor: string) => {
@@ -245,7 +305,7 @@ export function Rulebook({
         setQuery('');
       }
     },
-    [select],
+    [RULE_SECTIONS, select],
   );
   const sectionSituations = assignedSituations.filter((item) =>
     situationCoversSection(item, selected.id),
@@ -389,6 +449,7 @@ export function Rulebook({
     (item) => item.id === situation?.id,
   );
   const navigatingSituations = library === 'situations' && situationIndex >= 0;
+  const SCENARIOS = bank.scenarios;
   const studyResults = SCENARIOS.flatMap((item) => {
     const answer = item.choices.find(
       (choice) =>
@@ -462,7 +523,10 @@ export function Rulebook({
           <p className="rule-kicker">
             {learningMode === 'certification'
               ? 'CERTIFICATION RULES / FIRST ANSWER COUNTS'
-              : 'RULES & SITUATIONS / 2026'}
+              : `RULES & SITUATIONS / ${ruleset.shortLabel}`}
+            {ruleset.status === 'draft' && (
+              <span className="ruleset-draft-badge">Draft</span>
+            )}
           </p>
           {learningMode !== 'certification' && (
             <div className="learning-library-switch">
@@ -634,6 +698,13 @@ export function Rulebook({
                   </span>
                   <span>
                     {section.title}
+                    {changedAnchors.has(
+                      `${section.document}:${section.anchor}`,
+                    ) && (
+                      <em className="rule-toc-changed">
+                        {`Changed from ${ruleset.basedOn}`}
+                      </em>
+                    )}
                     {query && (
                       <small>
                         {
@@ -659,7 +730,17 @@ export function Rulebook({
         </nav>
         <div className="rulebook-nav-footer">
           <span>{RULE_DOCUMENTS.length} full official documents</span>
-          <small>Index checked {RULEBOOK_CHECKED_ON}</small>
+          <small>
+            <span>{rulesetOptionLabel(ruleset)}</span>
+            {' · '}
+            <span>Index checked {catalog.checkedOn}</span>
+          </small>
+          {learningMode !== 'certification' && onCompare && (
+            <Button size="sm" variant="ghost" onClick={onCompare}>
+              <GitCompareArrows />
+              Compare rule versions
+            </Button>
+          )}
           <a
             href="https://robocup.org/conduct"
             target="_blank"
@@ -785,6 +866,22 @@ export function Rulebook({
                   Open original <ExternalLink />
                 </a>
               </div>
+              {(ruleset.status === 'draft' || sourceNotices.length > 0) && (
+                <div className="rule-source-notice" role="note">
+                  <TriangleAlert aria-hidden="true" />
+                  <div>
+                    {ruleset.status === 'draft' && (
+                      <p>
+                        This is a draft published for comment. It can still
+                        change before the season.
+                      </p>
+                    )}
+                    {sourceNotices.map((notice) => (
+                      <p key={notice.id}>{notice.text}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
               <iframe
                 key={document.id}
                 src={sourceUrl}
@@ -819,6 +916,29 @@ export function Rulebook({
                 )}
               </div>
               <div className="rule-guide-scroll">
+                {learningMode !== 'certification' &&
+                  sectionChanges.length > 0 && (
+                    <section className="rule-section-changes">
+                      <h2>
+                        <GitCompareArrows aria-hidden="true" />
+                        {`Changed from the ${ruleset.basedOn} rules`}
+                      </h2>
+                      <ul>
+                        {sectionChanges.map((change) => (
+                          <li key={change.id}>
+                            <strong>{change.title}</strong>
+                            <span>{change.after}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {onCompare && (
+                        <Button size="sm" variant="outline" onClick={onCompare}>
+                          Open the version comparison
+                          <ArrowRight />
+                        </Button>
+                      )}
+                    </section>
+                  )}
                 {sectionSituations.length > 0 && (
                   <section className="learning-situation-picker">
                     <label htmlFor="learning-situation">
@@ -870,7 +990,7 @@ export function Rulebook({
                 {situation?.kind === 'case' && (
                   <CaseLesson
                     key={`${learningContextKey}:${situation.id}`}
-                    item={REFEREE_CASES.find(
+                    item={bank.cases.find(
                       (item) => item.id === situation.sourceId,
                     )!}
                     robotVisual={robotVisual}
@@ -883,7 +1003,7 @@ export function Rulebook({
                 {situation?.kind === 'scenario' && (
                   <ScenarioLesson
                     key={`${learningContextKey}:${situation.id}`}
-                    scenario={SCENARIOS.find(
+                    scenario={bank.scenarios.find(
                       (item) => item.id === situation.sourceId,
                     )!}
                     initialAnswer={
@@ -913,7 +1033,7 @@ export function Rulebook({
                   <RuleAnimationPlayer
                     key={`${learningContextKey}:${situation.id}`}
                     clips={[
-                      RULE_CLIPS.find(
+                      bank.clips.find(
                         (item) => item.id === situation.sourceId,
                       )!,
                     ]}
@@ -931,7 +1051,7 @@ export function Rulebook({
                 {situation?.kind === 'question' && (
                   <QuestionLesson
                     key={`${learningContextKey}:${situation.id}`}
-                    item={RULE_QUESTIONS.find(
+                    item={bank.questions.find(
                       (item) => item.id === situation.sourceId,
                     )!}
                     onPassed={passSituation}
@@ -1012,8 +1132,8 @@ export function Rulebook({
                 <div className="rule-guide-footnote">
                   <BookOpen />
                   <span>
-                    {COMMITTEE_TRAINING_POLICY.scope} {RULE_CLIPS.length}{' '}
-                    authored gameplay examples · {RULE_QUESTIONS.length}{' '}
+                    {COMMITTEE_TRAINING_POLICY.scope} {bank.clips.length}{' '}
+                    authored gameplay examples · {bank.questions.length}{' '}
                     technical, safety and administration checks.
                   </span>
                 </div>

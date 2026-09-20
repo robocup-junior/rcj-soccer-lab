@@ -49,6 +49,7 @@ jobs:
           pnpm test:match
           pnpm test:referee
           pnpm test:rules
+          pnpm test:rulesets
           pnpm test:learning
           pnpm test:certification
           pnpm test:i18n

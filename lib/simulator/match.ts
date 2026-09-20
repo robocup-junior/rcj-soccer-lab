@@ -202,6 +202,15 @@ export class SoccerMatch {
   }
 
   /**
+   * Last robot to touch the ball in the current passage of play; null after a
+   * referee placement. Unlike lastBallTouch it persists between physics steps,
+   * so it identifies the scorer when the ball reaches a back wall.
+   */
+  get lastBallToucher() {
+    return this.lastBallTouchActor;
+  }
+
+  /**
    * Changes on referee placement or when possession/touch passes to a different
    * robot. It lets adjudication link a later goal to the same passage of play.
    */

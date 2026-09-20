@@ -44,6 +44,8 @@ import { cn } from '@/lib/utils';
 import { moveManualActor, clonePoses } from '@/lib/simulator/manual-layout';
 import type { Pose } from '@/lib/simulator/types';
 import { SCENARIOS } from '@/lib/simulator/scenarios';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
+import { rulesetOptionLabel } from '@/lib/rulesets/registry';
 import {
   practiceLayout,
   preparePracticeMatch,
@@ -76,6 +78,7 @@ export function MatchPlay({
   onArrangeChange,
   onReferee,
 }: Props) {
+  const { ruleset } = useRuleset();
   const [engine, setEngine] = useState(() => {
     const match = new SoccerMatch();
     match.robotVisual = robotVisual;
@@ -1097,6 +1100,20 @@ export function MatchPlay({
             the back wall; kickoffs restart automatically. Stalled AI play
             resets after 8 seconds. Use Referee AI match to judge randomized
             incidents and control penalties, goals and restarts.
+          </p>
+          <p className="match-hint match-ruleset-note">
+            <strong>{rulesetOptionLabel(ruleset)}</strong>
+            {ruleset.gameplay.pushing.lineDepth !== null && (
+              <span>
+                {ruleset.gameplay.pushing.lineProvisional
+                  ? 'The field shows the pushing line at a provisional position.'
+                  : 'The field shows the pushing line.'}
+              </span>
+            )}
+            <span>
+              Penalties such as out of bounds, pushing and multiple defense are
+              judged in Referee mode under the same rules version.
+            </span>
           </p>
         </div>
       </aside>

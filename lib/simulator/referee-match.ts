@@ -17,10 +17,20 @@ import { KickoffMeeting, randomKickoff, type GoalEnd } from './kickoff';
 import {
   clampRobotToField,
   insidePenalty,
+  ownCornerSpots,
+  robotOnRamp,
   robotPenaltyOverlap,
+  robotReachesPushingLine,
   robotTouchesFieldWall,
   robotTouchesGoal,
 } from './referee-geometry';
+import {
+  CERTIFICATION_RULESET_ID,
+  gameplayRulesFor,
+  hasGameplayRules,
+} from '../rulesets/gameplay';
+import type { GameplayRules } from '../rulesets/types';
+import { learningBank, type LearningBank } from '../rulebook/learning-bank';
 import { rulesForDecision, type AppliedRule } from './referee-rules';
 import { DEFAULT_ROBOT_VISUAL_ID, type RobotVisualId } from './robot-models';
 import { ContinuousDirector } from './continuous-director';
@@ -35,11 +45,12 @@ import {
 } from './referee-training';
 export { insidePenalty } from './referee-geometry';
 import {
-  REFEREE_CASES,
-  REFEREE_ACTIONS,
   IncidentBag,
+  refereeActionLabel,
+  caseKind,
   caseScene,
   evidenceDuration,
+  findRefereeCase,
   requiresStoppage,
   ruleUrl,
   transformId,
@@ -61,6 +72,8 @@ export type BenchEntry = {
   repairReportedAt?: number;
   kickoff: number;
 };
+/** Bench reason of a robot that was called out of bounds. */
+const OUT_OF_BOUNDS = 'Out of bounds';
 export type CallFeedback = {
   verdict: 'correct' | 'supported' | 'wrong-target' | 'incorrect' | 'premature';
   title: string;
@@ -166,6 +179,17 @@ export function penaltyOverlap(point: Pose, end: number, full = false) {
 export class RefereeMatch {
   readonly match = new SoccerMatch();
   readonly bag: IncidentBag;
+  /** Rule set this session adjudicates; certification always uses 2026. */
+  readonly rulesetId: string;
+  private readonly rules: GameplayRules;
+  private readonly lessons: LearningBank;
+  /** Simulation time of the latest game interruption (see noteInterruption). */
+  private lastInterruptionAt = Number.NEGATIVE_INFINITY;
+  /**
+   * Line-based pushing can persist as robot-to-robot contact after the ball
+   * has been moved. One call settles a contact; a new call needs a new one.
+   */
+  private pushingSettled = false;
   private currentPhase: TrainingPhase = 'live';
   get phase() {
     return this.currentPhase;
@@ -303,7 +327,7 @@ export class RefereeMatch {
           detail: scored
             ? 'No matching call was made within the available decision window.'
             : 'This situation was recorded for review but was outside the selected scoring topics.',
-          rule: ruleUrl(item.definition),
+          rule: ruleUrl(item.definition, this.rulesetId),
           scored,
         });
     }
@@ -370,7 +394,7 @@ export class RefereeMatch {
             effect: 'No referee action changed the match.',
             detail:
               'Not scored: the incident appeared too late to reach its defined reaction deadline before full time.',
-            rule: ruleUrl(item.definition),
+            rule: ruleUrl(item.definition, this.rulesetId),
             scored: false,
           });
       }
@@ -408,9 +432,11 @@ export class RefereeMatch {
   private armReaction(item: ActiveIncident) {
     if (this.mode !== 'continuous') return;
     const calls = this.expectedFor(item).map((call) => ({ ...call }));
-    const persistent = calls.some((call) =>
-      ['out', 'damaged', 'goal', 'no-goal', 'return'].includes(call.action),
-    );
+    const persistent =
+      caseKind(item.definition) === 'all-out' ||
+      calls.some((call) =>
+        ['out', 'damaged', 'goal', 'no-goal', 'return'].includes(call.action),
+      );
     item.reactionExpected = calls;
     item.reactionStartedAt = this.clock;
     item.reactionReplayAt = this.currentMatchReplayTime;
@@ -593,11 +619,7 @@ export class RefereeMatch {
     };
   }
   private noteOut(item: ActiveIncident) {
-    if (
-      !['wall', 'full-area', 'out-goal'].includes(
-        item.definition.id.replace(/^live-/, ''),
-      )
-    )
+    if (!['wall', 'full-area', 'out-goal'].includes(caseKind(item.definition)))
       return;
     for (const call of item.definition.steps.flat()) {
       if (call.action !== 'out' || !call.target) continue;
@@ -666,7 +688,7 @@ export class RefereeMatch {
     }
   }
   private incidentKey(definition: RefereeCase, variant: Variant) {
-    const id = definition.id.replace(/^live-/, '');
+    const id = caseKind(definition);
     const target =
       definition.steps.flat().find((call) => call.target)?.target ?? '';
     const robot = target.startsWith('farther')
@@ -717,7 +739,7 @@ export class RefereeMatch {
       'interference',
     ]);
     this.pending = this.pending.filter((item) => {
-      if (positional.has(item.definition.id.replace(/^live-/, ''))) {
+      if (positional.has(caseKind(item.definition))) {
         if (this.mode === 'continuous') {
           if (
             item.reactionDeadline !== undefined &&
@@ -730,11 +752,7 @@ export class RefereeMatch {
         return false;
       }
       this.skipResolvedSteps(item);
-      if (
-        ['interruption', 'spectator'].includes(
-          item.definition.id.replace(/^live-/, ''),
-        )
-      )
+      if (['interruption', 'spectator'].includes(caseKind(item.definition)))
         return item.step < item.definition.steps.length;
       return item.definition.steps
         .slice(item.step)
@@ -754,9 +772,7 @@ export class RefereeMatch {
         !item ||
         item.finished ||
         item.progressResumed ||
-        !['deadlock', 'repeat-progress'].includes(
-          item.definition.id.replace(/^live-/, ''),
-        ) ||
+        !['deadlock', 'repeat-progress'].includes(caseKind(item.definition)) ||
         (!item.natural && item.time < evidenceDuration(item.definition))
       )
         continue;
@@ -840,8 +856,15 @@ export class RefereeMatch {
       lockRobotVisual?: boolean;
       /** Disable the heavyweight visual timeline for headless verification. */
       recordMatchReplay?: boolean;
+      /** Registered rule set id; unknown or absent means the certification rules. */
+      rulesetId?: string;
     } = {},
   ) {
+    this.rulesetId = hasGameplayRules(options.rulesetId)
+      ? options.rulesetId
+      : CERTIFICATION_RULESET_ID;
+    this.rules = gameplayRulesFor(this.rulesetId);
+    this.lessons = learningBank(this.rulesetId);
     this.mode = options.mode ?? 'step';
     this.duration = options.duration ?? Number.MAX_SAFE_INTEGER;
     this.topics = options.topics?.length
@@ -851,8 +874,8 @@ export class RefereeMatch {
     this.robotVisualLocked = Boolean(options.lockRobotVisual);
     this.match.setRobotVisual(this.robotVisual);
     this.recordMatchReplay = options.recordMatchReplay ?? true;
-    this.bag = new IncidentBag(seed);
-    this.director = new ContinuousDirector(this.bag, this.topics);
+    this.bag = new IncidentBag(seed, this.lessons.cases);
+    this.director = new ContinuousDirector(this.bag, this.topics, this.rules);
     this.meeting = new KickoffMeeting(seed);
     this.opening = Boolean(options.preMatch);
     this.match.restart('neutral');
@@ -976,11 +999,19 @@ export class RefereeMatch {
       const returnCall = this.returnRequest(item);
       if (returnCall) {
         const entry = this.bench[returnCall];
+        const newOutRules =
+          this.servingOutOfBounds(returnCall) &&
+          (this.rules.outOfBounds.returnNeedsInterruption ||
+            !this.rules.outOfBounds.kickoffEndsPenaltyEarly);
         facts = !entry
           ? `${robotName(returnCall)} is already back on the field.`
           : this.canReturn(returnCall)
-            ? `${robotName(returnCall)} is repaired, eligible and has a clear return spot. You may permit its return now.`
-            : `${robotName(returnCall)} requests return. ${!entry.ready ? 'Repair is still in progress.' : this.clock < entry.eligibleAt && !this.kickoffDue ? `${Math.ceil(entry.eligibleAt - this.clock)} seconds of its waiting period remain.` : 'Wait until a legal neutral return spot is clear.'}`;
+            ? newOutRules
+              ? `${robotName(returnCall)} has served its minute, a game interruption allows its return, and its corner area is clear. You may permit its return now.`
+              : `${robotName(returnCall)} is repaired, eligible and has a clear return spot. You may permit its return now.`
+            : newOutRules
+              ? `${robotName(returnCall)} requests return. ${!this.penaltyServed(returnCall) ? `Its minimum penalty runs for another ${Math.ceil(entry.eligibleAt - this.clock)} seconds${this.kickoffDue ? '; the pending kickoff does not shorten it' : ''}.` : this.awaitingInterruption(returnCall) ? 'Its minute has passed; it returns at the next game interruption.' : 'Wait until its own corner area is clear.'}`
+              : `${robotName(returnCall)} requests return. ${!entry.ready ? 'Repair is still in progress.' : this.clock < entry.eligibleAt && !this.kickoffDue ? `${Math.ceil(entry.eligibleAt - this.clock)} seconds of its waiting period remain.` : 'Wait until a legal neutral return spot is clear.'}`;
       }
       if (item.finished && this.feedback) facts = this.feedback.effect;
     }
@@ -1024,7 +1055,7 @@ export class RefereeMatch {
           'pushing',
           'full-area',
           'partial-area',
-        ].includes(item.definition.id.replace(/^live-/, '')),
+        ].includes(caseKind(item.definition)),
       ),
       decisionKey: this.decisionKey,
       feedback: this.feedback
@@ -1039,7 +1070,11 @@ export class RefereeMatch {
         ...entry,
         remaining: Math.max(0, entry.eligibleAt - this.clock),
         eligible: this.canReturn(entry.robot),
+        ...(this.rules.outOfBounds.returnNeedsInterruption
+          ? { awaitingInterruption: this.awaitingInterruption(entry.robot) }
+          : {}),
       })),
+      rulesetId: this.rulesetId,
       completed: this.completed.map((entry) => ({ ...entry })),
       coverage: unique,
       assessed: this.completedCount,
@@ -1129,7 +1164,7 @@ export class RefereeMatch {
     this.kickoffDue = Boolean(definition.kickoff);
     this.kickoffTeam = transformId(
       definition.kickoffTeam ??
-        (['early', 'return-kickoff'].includes(definition.id)
+        (['early', 'return-kickoff'].includes(caseKind(definition))
           ? 'blue'
           : 'neutral'),
       variant,
@@ -1141,7 +1176,7 @@ export class RefereeMatch {
       const robot = transformId(entry.robot, variant);
       this.bench[robot] = {
         robot,
-        reason: 'Repair exercise',
+        reason: entry.reason ?? 'Repair exercise',
         removedAt: this.clock - entry.waited,
         eligibleAt: this.clock + 60 - entry.waited,
         ready: entry.ready,
@@ -1171,7 +1206,10 @@ export class RefereeMatch {
     this.feedback = null;
     this.countCompleted = false;
     this.phase = evidenceDuration(definition) > 0 ? 'evidence' : 'decision';
-    if (definition.id === 'damaged') {
+    if (
+      caseKind(definition) === 'damaged' &&
+      !definition.id.startsWith('live-')
+    ) {
       const robot = transformId('blue-1', variant);
       this.damage = {
         id: `${this.seed}:${++this.damageSerial}`,
@@ -1189,7 +1227,7 @@ export class RefereeMatch {
     if (this.mode === 'continuous' || this.sessionFinished) return false;
     if (this.active || Object.keys(this.bench).length || this.kickoffDue)
       return false;
-    for (let i = 0; i < REFEREE_CASES.length * 2; i++) {
+    for (let i = 0; i < this.lessons.cases.length * 2; i++) {
       const next = this.bag.next();
       if (this.topics.includes(trainingTopic(next)))
         return this.beginCase(next);
@@ -1285,10 +1323,8 @@ export class RefereeMatch {
           item &&
           !item.finished &&
           (item.key === key ||
-            (item.definition.id.replace(/^live-/, '') === 'combined' &&
-              ['pushing', 'multiple'].includes(
-                definition.id.replace(/^live-/, ''),
-              ))),
+            (caseKind(item.definition) === 'combined' &&
+              ['pushing', 'multiple'].includes(caseKind(definition)))),
       )
     )
       return;
@@ -1319,7 +1355,7 @@ export class RefereeMatch {
         ? this.match.ballPassageRevision
         : undefined,
     };
-    const incidentId = definition.id.replace(/^live-/, '');
+    const incidentId = caseKind(definition);
     if (['multiple', 'repeat-defense', 'combined'].includes(incidentId)) {
       const defenseTeam = this.multipleDefenseTeam(definition, unchanged);
       if (defenseTeam) this.multipleDefenseOffenses[defenseTeam]++;
@@ -1369,7 +1405,9 @@ export class RefereeMatch {
     facts: string,
     steps?: RequiredCall[][],
   ): RefereeCase {
-    const source = REFEREE_CASES.find((item) => item.id === id)!;
+    const source = findRefereeCase(id)!;
+    // A later rule set may word the same live incident differently.
+    const text = this.lessons.liveText[id];
     const explanations: Record<string, string> = {
       goal: 'Back-wall contact awards one goal to the team attacking that end. The conceding team takes the kickoff.',
       wall: 'Remove the identified out-of-bounds robot. Its one-minute waiting period starts at removal and advances when you resume the training match.',
@@ -1382,9 +1420,10 @@ export class RefereeMatch {
     };
     return {
       ...source,
+      ...(text?.title ? { title: text.title } : {}),
       id: `live-${id}`,
       facts,
-      explanation: explanations[id] ?? source.explanation,
+      explanation: text?.explanation ?? explanations[id] ?? source.explanation,
       steps: steps ?? source.steps,
       bench: undefined,
     };
@@ -1443,13 +1482,39 @@ export class RefereeMatch {
       );
       if (this.motionHeld) return;
     }
+    if (
+      this.rules.kickoff.neutralWhenAllRobotsOut &&
+      !this.kickoffDue &&
+      !MATCH_ROBOTS.some((robot) => this.match.state.actors[robot.id]) &&
+      ![this.active, ...this.pending].some(
+        (item) =>
+          item && !item.finished && caseKind(item.definition) === 'all-out',
+      )
+    ) {
+      // The last robot has left the field: a neutral kick-off takes place.
+      this.beginLive(
+        this.liveDefinition(
+          'all-out-2027',
+          'No robot is left on the field. Every robot of both teams has been removed.',
+          [[{ action: 'neutral' }]],
+        ),
+      );
+      this.syncMotion();
+      if (this.motionHeld) return;
+    }
     if (this.kickoffDue) {
-      const unavailable = (['blue', 'yellow'] as const).find(
+      const absent = (['blue', 'yellow'] as const).filter(
         (team) =>
           !MATCH_ROBOTS.some(
             (robot) => robot.team === team && this.match.state.actors[robot.id],
           ),
       );
+      // The 30-second award goes to "the remaining team". With an empty
+      // field (neutral kick-off for all robots out) no team remains.
+      const unavailable =
+        this.rules.kickoff.neutralWhenAllRobotsOut && absent.length === 2
+          ? undefined
+          : absent[0];
       if (unavailable) {
         this.waitingFor += MATCH_STEP;
         if (this.waitingFor >= 30) {
@@ -1486,7 +1551,8 @@ export class RefereeMatch {
       disabledRobots.push(this.damage.robot);
     if (
       this.active &&
-      ['deadlock', 'repeat-progress'].includes(this.active.definition.id)
+      !this.active.definition.id.startsWith('live-') &&
+      ['deadlock', 'repeat-progress'].includes(caseKind(this.active.definition))
     )
       disabledRobots.push(
         ...['blue-1', 'yellow-1'].map((id) =>
@@ -1546,6 +1612,10 @@ export class RefereeMatch {
         this.countCompleted = true;
         this.feedback = null;
         this.phase = 'decision';
+        // The lack-of-progress call interrupts play: robots whose minute has
+        // passed come back before the ball is touched.
+        if (this.rules.lackOfProgress.returnServedRobotsFirst)
+          this.noteInterruption();
       }
     }
     if (this.detectLiveIncident()) return;
@@ -1629,12 +1699,16 @@ export class RefereeMatch {
       ]),
     );
     if (pending) {
+      // Where only the penalized robot's own goals are void, the scorer is
+      // the last robot that touched the ball in this passage of play.
+      const scorerOnly = this.rules.outOfBounds.voidGoals === 'penalized-robot';
       const liveScoringOffender =
         pending.kind === 'goal'
           ? MATCH_ROBOTS.find(
               (r) =>
                 r.team === pending.team &&
                 this.match.state.actors[r.id] &&
+                (!scorerOnly || this.match.lastBallToucher === r.id) &&
                 (this.outRobots.has(r.id) ||
                   (boundaries.includes(r) && !boundaryPushers.get(r.id))),
             )
@@ -1654,9 +1728,7 @@ export class RefereeMatch {
                 Boolean(
                   item &&
                   !item.finished &&
-                  ['pushing', 'combined'].includes(
-                    item.definition.id.replace(/^live-/, ''),
-                  ) &&
+                  ['pushing', 'combined'].includes(caseKind(item.definition)) &&
                   item.definition.steps[item.step]?.some(
                     (call) => call.action === 'pushing',
                   ) &&
@@ -1692,7 +1764,9 @@ export class RefereeMatch {
             'out-goal',
             !liveScoringOffender && passageOffender
               ? `${scoringOffender.label} was out of bounds while controlling the ball. The robot was removed, but that same released ball continued to the back wall. ${COMMITTEE_TRAINING_POLICY.outCarrierPassage}`
-              : `${scoringOffender.label} is out of bounds and still on the field when its team scores.`,
+              : scorerOnly
+                ? `${scoringOffender.label} is out of bounds, still on the field, and scored this goal itself.`
+                : `${scoringOffender.label} is out of bounds and still on the field when its team scores.`,
             steps,
           ),
         );
@@ -1711,7 +1785,7 @@ export class RefereeMatch {
           ],
           [{ action: 'pushing' }],
         ];
-        if (pushing.definition.id.replace(/^live-/, '') === 'combined') {
+        if (caseKind(pushing.definition) === 'combined') {
           const team =
             pushing.definition.steps
               .flat()
@@ -1795,6 +1869,32 @@ export class RefereeMatch {
       this.syncMotion();
       if (this.motionHeld) return true;
     }
+    if (this.rules.outOfBounds.pushedOntoRampWaivable)
+      for (const robot of MATCH_ROBOTS) {
+        const pose = this.match.state.actors[robot.id];
+        const pushedBy = pose && this.match.opponentPusher(robot.id);
+        if (
+          !pose ||
+          !pushedBy ||
+          boundaries.includes(robot) ||
+          !robotOnRamp(pose, this.robotVisual, SPEC.wedge.run)
+        )
+          continue;
+        this.beginLive(
+          this.liveDefinition(
+            'pushed-ramp-2027',
+            `${robotName(pushedBy)} drove ${robot.label} onto the ramp along the wall. ${robot.label} has not touched the wall.`,
+            [
+              [
+                { action: 'waive-out', target: robot.id, discretionary: true },
+                { action: 'play-on', discretionary: true },
+              ],
+            ],
+          ),
+        );
+        this.syncMotion();
+        if (this.motionHeld) return true;
+      }
     const contact = this.contactDefinition();
     const contactKey = contact
       ? JSON.stringify([contact.id, contact.steps])
@@ -1833,11 +1933,55 @@ export class RefereeMatch {
     this.syncMotion();
   }
 
+  /** Field end (sign of z) of the goal that `team` defends. */
+  private ownEnd(team: MatchTeam) {
+    return -this.match.attackDirection(team);
+  }
+  /** Penalty areas in which two partly overlapping teammates infringe. */
+  private multipleDefenseEnds(team: MatchTeam) {
+    return this.rules.multipleDefense.areas === 'own'
+      ? [this.ownEnd(team)]
+      : [-1, 1];
+  }
+  /**
+   * Rule sets with a pushing line: opponents in contact, directly or through
+   * the ball, while the DEFENDER's body has reached the line in its own area.
+   */
+  private pushingAtLine() {
+    const depth = this.rules.pushing.lineDepth;
+    if (depth === null) return false;
+    const poses = this.match.state.actors;
+    return MATCH_ROBOTS.some((defender) => {
+      const pose = poses[defender.id];
+      if (
+        !pose ||
+        !robotReachesPushingLine(
+          pose,
+          this.ownEnd(defender.team as MatchTeam),
+          depth,
+          this.robotVisual,
+        )
+      )
+        return false;
+      return MATCH_ROBOTS.some((attacker) => {
+        const other = poses[attacker.id];
+        if (!other || attacker.team === defender.team) return false;
+        return (
+          distance(pose, other) <= 0.205 ||
+          (distance(pose, poses.ball) <= 0.126 &&
+            distance(other, poses.ball) <= 0.126)
+        );
+      });
+    });
+  }
+
   private contactDefinition(): RefereeCase | null {
     const poses = this.match.state.actors;
+    const byLine = this.rules.pushing.basis === 'line';
     let defenders: { team: MatchTeam; end: number } | null = null;
     for (const end of [-1, 1])
       for (const team of ['blue', 'yellow'] as const) {
+        if (!this.multipleDefenseEnds(team).includes(end)) continue;
         if (
           MATCH_ROBOTS.filter(
             (r) =>
@@ -1848,23 +1992,27 @@ export class RefereeMatch {
         )
           defenders = { team, end };
       }
-    const pushing = MATCH_ROBOTS.some(
-      (a) =>
-        poses[a.id] &&
-        MATCH_ROBOTS.some(
-          (b) =>
-            poses[b.id] &&
-            a.team !== b.team &&
-            distance(poses[a.id], poses[b.id]) <= 0.205 &&
-            (distance(poses[a.id], poses.ball) <= 0.126 ||
-              distance(poses[b.id], poses.ball) <= 0.126) &&
-            [-1, 1].some(
-              (end) =>
-                robotPenaltyOverlap(poses[a.id], end, this.robotVisual) ||
-                robotPenaltyOverlap(poses[b.id], end, this.robotVisual),
+    const atLine = byLine && this.pushingAtLine();
+    if (!atLine) this.pushingSettled = false;
+    const pushing = byLine
+      ? atLine && !this.pushingSettled
+      : MATCH_ROBOTS.some(
+          (a) =>
+            poses[a.id] &&
+            MATCH_ROBOTS.some(
+              (b) =>
+                poses[b.id] &&
+                a.team !== b.team &&
+                distance(poses[a.id], poses[b.id]) <= 0.205 &&
+                (distance(poses[a.id], poses.ball) <= 0.126 ||
+                  distance(poses[b.id], poses.ball) <= 0.126) &&
+                [-1, 1].some(
+                  (end) =>
+                    robotPenaltyOverlap(poses[a.id], end, this.robotVisual) ||
+                    robotPenaltyOverlap(poses[b.id], end, this.robotVisual),
+                ),
             ),
-        ),
-    );
+        );
     const repeatedDefense = Boolean(
       defenders && this.multipleDefenseOffenses[defenders.team] > 0,
     );
@@ -1878,6 +2026,15 @@ export class RefereeMatch {
         target: `farther:${defenders.team}`,
         discretionary: true,
       };
+      if (byLine)
+        return this.liveDefinition(
+          'combined',
+          `${robotName(defenders.team)} 1 and ${robotName(defenders.team)} 2 overlap their own penalty area, and a defender has reached the pushing line during contact with an opponent. Resolve pushing first.${repeatedDefense ? ' This team has already committed multiple defense in this session; the repeat offender may instead be treated as damaged.' : ''}`,
+          [
+            [{ action: 'pushing' }],
+            [relocation, ...(repeatedDefense ? [repeatedDamage] : [])],
+          ],
+        );
       return this.liveDefinition(
         'combined',
         `${robotName(defenders.team)} 1 and ${robotName(defenders.team)} 2 overlap the same penalty area while opponents touch and contest the ball there. If you judge the contact pushing, resolve it first.${repeatedDefense ? ' This team has already committed multiple defense in this session; the repeat offender may instead be treated as damaged.' : ''}`,
@@ -1898,7 +2055,10 @@ export class RefereeMatch {
     if (defenders) {
       return this.liveDefinition(
         repeatedDefense ? 'repeat-defense' : 'multiple',
-        `${robotName(defenders.team)} 1 and ${robotName(defenders.team)} 2 overlap the same penalty area. Compare their distances to the ball.${repeatedDefense ? ' This team has already committed multiple defense in this session; the repeat offender may instead be treated as damaged.' : ''}`,
+        // Whole sentences per rule set keep each translation natural.
+        this.rules.multipleDefense.areas === 'own'
+          ? `${robotName(defenders.team)} 1 and ${robotName(defenders.team)} 2 overlap their own penalty area. Compare their distances to the ball.${repeatedDefense ? ' This team has already committed multiple defense in this session; the repeat offender may instead be treated as damaged.' : ''}`
+          : `${robotName(defenders.team)} 1 and ${robotName(defenders.team)} 2 overlap the same penalty area. Compare their distances to the ball.${repeatedDefense ? ' This team has already committed multiple defense in this session; the repeat offender may instead be treated as damaged.' : ''}`,
         [
           [
             { action: 'multiple', target: `farther:${defenders.team}` },
@@ -1916,6 +2076,12 @@ export class RefereeMatch {
       );
     }
     if (pushing) {
+      if (byLine)
+        return this.liveDefinition(
+          'pushing',
+          'Opposing robots are in contact, directly or through the ball, and the defender has reached the pushing line.',
+          [[{ action: 'pushing' }]],
+        );
       return this.liveDefinition(
         'pushing',
         'Opposing robots touch, at least one overlaps a penalty area, and a robot contacts the ball. Assess the contact.',
@@ -1978,6 +2144,14 @@ export class RefereeMatch {
           target: returning,
         },
       ];
+    if (
+      this.rules.lackOfProgress.returnServedRobotsFirst &&
+      current.some((call) => call.action === 'lack-progress')
+    ) {
+      const waiting = this.servedOutRobots();
+      if (waiting.length)
+        return waiting.map((target) => ({ action: 'return' as const, target }));
+    }
     return (definition.steps[step] ?? []).flatMap((entry) => {
       if (entry.target?.startsWith('farther'))
         return this.fartherDefenders(
@@ -1991,6 +2165,15 @@ export class RefereeMatch {
         },
       ];
     });
+  }
+  /** Out-of-bounds robots that may come back now, in bench order. */
+  private servedOutRobots() {
+    return Object.values(this.bench)
+      .filter(
+        (entry) =>
+          this.servingOutOfBounds(entry.robot) && this.canReturn(entry.robot),
+      )
+      .map((entry) => entry.robot);
   }
   private returnRequest(item: ActiveIncident) {
     const call = item.definition.steps[item.step]?.find(
@@ -2013,7 +2196,7 @@ export class RefereeMatch {
     );
     return (
       robots.every(Boolean) &&
-      [-1, 1].some((end) =>
+      this.multipleDefenseEnds(team).some((end) =>
         robots.every((pose) =>
           robotPenaltyOverlap(pose, end, this.robotVisual),
         ),
@@ -2025,6 +2208,15 @@ export class RefereeMatch {
     if (item.progressResumed)
       return 'Progress has resumed. No count or lack-of-progress placement is needed; let play continue.';
     const returning = this.returnRequest(item);
+    if (
+      returning &&
+      this.servingOutOfBounds(returning) &&
+      (this.rules.outOfBounds.returnNeedsInterruption ||
+        this.rules.outOfBounds.returnPlacement === 'own-corner')
+    )
+      return this.canReturn(returning)
+        ? 'This robot has served at least one minute and a game interruption has occurred. Place it in the area of its own corner.'
+        : 'An out-of-bounds robot stays off for at least one minute and then returns at the next game interruption, such as a kickoff, lack of progress or pushing. Keep it off until then and until its corner area is clear.';
     if (returning)
       return this.canReturn(returning)
         ? 'This robot is now repaired and eligible to return. Place it at the furthest clear neutral spot facing its own goal.'
@@ -2045,7 +2237,7 @@ export class RefereeMatch {
       title: item.definition.title,
       step: item.step + 1,
       steps: item.definition.steps.length,
-      rule: ruleUrl(item.definition),
+      rule: ruleUrl(item.definition, this.rulesetId),
       clue: early
         ? 'Watch the rest of the recorded situation before making a call.'
         : this.countFor !== null
@@ -2057,17 +2249,48 @@ export class RefereeMatch {
         ? []
         : this.expected().map((call) => ({
             ...call,
-            label: `${REFEREE_ACTIONS.find((action) => action.id === call.action)?.label ?? call.action}${call.target ? ` · ${robotName(call.target)}` : ''}`,
+            label: `${refereeActionLabel(call.action, this.rulesetId)}${call.target ? ` · ${robotName(call.target)}` : ''}`,
           })),
     };
   }
 
   private hintClue(item: ActiveIncident) {
-    const id = item.definition.id.replace(/^live-/, '');
+    const id = caseKind(item.definition);
     if (item.progressResumed)
       return 'The ball has moved away from the stalled position. Check whether a count is still necessary.';
-    if (this.returnRequest(item))
+    const requested = this.returnRequest(item);
+    if (
+      requested &&
+      this.servingOutOfBounds(requested) &&
+      this.rules.outOfBounds.returnNeedsInterruption
+    )
+      return 'Check whether the full minute has passed and whether a game interruption has occurred since then. A kickoff alone does not shorten the minute.';
+    if (requested)
       return 'Check the selected robot’s repair status, remaining waiting time, kickoff eligibility and a clear neutral spot.';
+    if (id === 'all-out')
+      return 'Count the robots on the field. With nobody left, play cannot simply continue.';
+    if (id === 'pushed-ramp')
+      return 'Check whether an opponent drove the robot onto the ramp and whether it has touched the wall. Pushed out is available to the referee here.';
+    if (
+      this.rules.lackOfProgress.returnServedRobotsFirst &&
+      ['deadlock', 'repeat-progress'].includes(id) &&
+      this.servedOutRobots().length
+    )
+      return 'Look at the bench before you touch the ball: a robot whose minute has passed comes back first.';
+    if (this.rules.pushing.basis === 'line' && id === 'combined')
+      return 'There are two questions: pushing and multiple defense. Pushing is decided by the pushing line; moving the ball can change which defender is farther away.';
+    if (
+      this.rules.pushing.basis === 'line' &&
+      ['pushing', 'midfield'].includes(id)
+    )
+      return 'Find the defender and the pushing line in its own penalty area. Contact counts, directly or through the ball, once the defender’s body reaches that line.';
+    if (this.rules.holding.consequence === 'damaged' && id === 'holding')
+      return 'Check whether the ball still rolls and whether another robot can reach it. Holding during gameplay has a stated consequence for the robot.';
+    if (
+      this.rules.outOfBounds.voidGoals === 'penalized-robot' &&
+      id === 'out-goal'
+    )
+      return 'Identify which robot scored. Only a goal by the robot that is out of bounds is affected.';
     if (['goal', 'own-goal', 'post'].includes(id))
       return 'Watch for contact with the INSIDE back wall, not just the post or goal line. The team attacking that end is awarded one point, regardless of the last touch.';
     if (id === 'out-goal')
@@ -2180,16 +2403,79 @@ export class RefereeMatch {
       .map((entry) => entry.id);
   }
 
-  private returnTimeEligible(id: string) {
+  /** A robot called out of bounds, as opposed to a damaged or inspected one. */
+  private servingOutOfBounds(id: string) {
+    return this.bench[id]?.reason === OUT_OF_BOUNDS;
+  }
+  /** The penalty time itself has passed; other return conditions may remain. */
+  private penaltyServed(id: string) {
+    const entry = this.bench[id];
+    return Boolean(entry && this.clock + 1e-8 >= entry.eligibleAt);
+  }
+  /**
+   * Out-of-bounds robots whose minute has passed and that are only waiting for
+   * a game interruption (rule sets with outOfBounds.returnNeedsInterruption).
+   */
+  private awaitingInterruption(id: string) {
     const entry = this.bench[id];
     return Boolean(
       entry?.ready &&
-      (this.clock + 1e-8 >= entry.eligibleAt ||
-        (this.kickoffDue && this.kickoffSerial >= entry.kickoff)),
+      this.servingOutOfBounds(id) &&
+      this.rules.outOfBounds.returnNeedsInterruption &&
+      this.penaltyServed(id) &&
+      !this.kickoffDue &&
+      this.lastInterruptionAt + 1e-8 < entry.eligibleAt,
+    );
+  }
+  private returnTimeEligible(id: string) {
+    const entry = this.bench[id];
+    if (!entry?.ready) return false;
+    const served = this.clock + 1e-8 >= entry.eligibleAt;
+    const kickoffException =
+      this.kickoffDue && this.kickoffSerial >= entry.kickoff;
+    if (!this.servingOutOfBounds(id)) return served || kickoffException;
+    const out = this.rules.outOfBounds;
+    if (out.kickoffEndsPenaltyEarly && kickoffException) return true;
+    if (!served) return false;
+    // A pending kick-off is itself a game interruption.
+    return (
+      !out.returnNeedsInterruption ||
+      this.kickoffDue ||
+      this.lastInterruptionAt + 1e-8 >= entry.eligibleAt
+    );
+  }
+  /** Where the rule set places this robot when it comes back, if that is free. */
+  private returnSpot(id: string): Pose | null {
+    if (
+      !this.servingOutOfBounds(id) ||
+      this.rules.outOfBounds.returnPlacement !== 'own-corner'
+    )
+      return this.neutralSpot(true, id);
+    const actors = this.match.state.actors;
+    const free = ownCornerSpots(-this.match.attackDirection(teamOf(id))).filter(
+      (spot) =>
+        Object.entries(actors).every(
+          ([other, pose]) =>
+            other === id ||
+            distance(spot, pose) >= (other === 'ball' ? 0.123 : 0.205),
+        ),
+    );
+    // Either own-half corner satisfies the text; prefer the one away from play.
+    return (
+      free.sort(
+        (a, b) => distance(b, actors.ball) - distance(a, actors.ball),
+      )[0] ?? null
     );
   }
   canReturn(id: string) {
-    return this.returnTimeEligible(id) && Boolean(this.neutralSpot(true, id));
+    return this.returnTimeEligible(id) && Boolean(this.returnSpot(id));
+  }
+  /**
+   * Kick-offs are read from kickoffDue; every other interruption of running
+   * play is recorded here so waiting out-of-bounds robots may come back.
+   */
+  private noteInterruption() {
+    this.lastInterruptionAt = this.clock;
   }
   private focusIncident(item: ActiveIncident) {
     const original = this.active;
@@ -2252,11 +2538,12 @@ export class RefereeMatch {
   private pushedOutCorrection(
     target: string,
     actors: Record<string, Pose>,
+    wallClearance = 0.005,
   ): Pose | null {
     const original = actors[target];
     const radius = RCJ_SIMULATOR_GUIDES.robotCollisionRadius;
     const clampInside = (pose: Pose): Pose =>
-      clampRobotToField(pose, this.robotVisual, 0.005);
+      clampRobotToField(pose, this.robotVisual, wallClearance);
     const candidates: Pose[] = [];
     const grid = 0.005;
     const reach = 32;
@@ -2305,11 +2592,17 @@ export class RefereeMatch {
     return 'other';
   }
 
+  /** Calls whose published consequence is that the robot is deemed damaged. */
+  private get deemedDamagedActions(): string[] {
+    return this.rules.holding.consequence === 'damaged'
+      ? ['ball-out', 'early-start', 'holding']
+      : ['ball-out', 'early-start'];
+  }
   private sameRefereeAction(entry: RequiredCall, submitted: RefereeCall) {
     return (
       entry.action === submitted.action ||
       (submitted.action === 'damaged' &&
-        ['ball-out', 'early-start'].includes(entry.action))
+        this.deemedDamagedActions.includes(entry.action))
     );
   }
 
@@ -2410,12 +2703,17 @@ export class RefereeMatch {
     const topic = item.scoreTopic ?? trainingTopic(item.definition);
     const scored = !item.scoreNeutral && this.topics.includes(topic);
     const appliedRules = correct
-      ? rulesForDecision(item.definition, match!.action, {
-          kickoffDue: this.kickoffDue,
-          returnReason: submitted.target
-            ? this.bench[submitted.target]?.reason
-            : undefined,
-        })
+      ? rulesForDecision(
+          item.definition,
+          match!.action,
+          {
+            kickoffDue: this.kickoffDue,
+            returnReason: submitted.target
+              ? this.bench[submitted.target]?.reason
+              : undefined,
+          },
+          this.rulesetId,
+        )
       : [];
 
     const effect = this.apply(submitted);
@@ -2429,10 +2727,10 @@ export class RefereeMatch {
         if (resolved.item === item || resolved.item.finished) continue;
         if (
           ['both-damaged', 'damage-exception'].includes(
-            item.definition.id.replace(/^live-/, ''),
+            caseKind(item.definition),
           ) ||
           ['both-damaged', 'damage-exception'].includes(
-            resolved.item.definition.id.replace(/^live-/, ''),
+            caseKind(resolved.item.definition),
           )
         )
           continue;
@@ -2492,12 +2790,10 @@ export class RefereeMatch {
       assessment,
       effect,
       detail,
-      rule: ruleUrl(item.definition),
+      rule: ruleUrl(item.definition, this.rulesetId),
       scored,
     });
-    const label =
-      REFEREE_ACTIONS.find((action) => action.id === submitted.action)?.label ??
-      submitted.action;
+    const label = refereeActionLabel(submitted.action, this.rulesetId);
     this.history.unshift({
       call: `${label}${submitted.target ? ` · ${robotName(submitted.target)}` : ''}`,
       verdict: feedbackVerdict,
@@ -2510,7 +2806,7 @@ export class RefereeMatch {
       title: 'Decision recorded',
       detail,
       effect,
-      rule: appliedRules[0]?.url ?? ruleUrl(item.definition),
+      rule: appliedRules[0]?.url ?? ruleUrl(item.definition, this.rulesetId),
       appliedRules,
       final,
     };
@@ -2597,9 +2893,7 @@ export class RefereeMatch {
     const choices = this.expected();
     const explanation = this.explanation(item);
     const sameAction = (entry: RequiredCall) =>
-      entry.action === submitted.action ||
-      (submitted.action === 'damaged' &&
-        ['ball-out', 'early-start'].includes(entry.action));
+      this.sameRefereeAction(entry, submitted);
     const match = choices.find(
       (entry) =>
         sameAction(entry) &&
@@ -2613,12 +2907,17 @@ export class RefereeMatch {
     const correct =
       Boolean(match) && !premature && !kickoffBlocked && this.countFor === null;
     const appliedRules = correct
-      ? rulesForDecision(item.definition, match!.action, {
-          kickoffDue: this.kickoffDue,
-          returnReason: submitted.target
-            ? this.bench[submitted.target]?.reason
-            : undefined,
-        })
+      ? rulesForDecision(
+          item.definition,
+          match!.action,
+          {
+            kickoffDue: this.kickoffDue,
+            returnReason: submitted.target
+              ? this.bench[submitted.target]?.reason
+              : undefined,
+          },
+          this.rulesetId,
+        )
       : [];
     const verdict = correct
       ? match?.discretionary
@@ -2660,16 +2959,14 @@ export class RefereeMatch {
       }
       this.assess(item, 'wrong');
     }
-    const label =
-      REFEREE_ACTIONS.find((action) => action.id === submitted.action)?.label ??
-      submitted.action;
+    const label = refereeActionLabel(submitted.action, this.rulesetId);
     const detail = kickoffBlocked
       ? 'Each team needs a working robot before arranging and signalling kickoff.'
       : premature
         ? 'That part of the incident has not happened yet. Watch the complete evidence before deciding.'
         : correct
           ? explanation
-          : `Expected ${choices.map((entry) => `${REFEREE_ACTIONS.find((action) => action.id === entry.action)?.label}${entry.target ? ` (${robotName(entry.target)})` : ''}`).join(' or ')}. ${explanation}`;
+          : `Expected ${choices.map((entry) => `${refereeActionLabel(entry.action, this.rulesetId)}${entry.target ? ` (${robotName(entry.target)})` : ''}`).join(' or ')}. ${explanation}`;
     if (correct)
       item.step = match?.complete
         ? item.definition.steps.length
@@ -2691,7 +2988,7 @@ export class RefereeMatch {
       detail:
         item.assisted && correct ? `Assisted decision. ${detail}` : detail,
       effect,
-      rule: appliedRules[0]?.url ?? ruleUrl(item.definition),
+      rule: appliedRules[0]?.url ?? ruleUrl(item.definition, this.rulesetId),
       appliedRules,
       final,
     };
@@ -2771,15 +3068,24 @@ export class RefereeMatch {
     if (this.damage?.robot === id)
       this.damage = { ...this.damage, removed: true };
     const ready = reason === 'Out of bounds' || reason === 'Early start';
+    const waiting =
+      reason === OUT_OF_BOUNDS ? this.rules.outOfBounds.penaltySeconds : 60;
     this.bench[id] = {
       robot: id,
       reason,
       removedAt: this.clock,
-      eligibleAt: this.clock + (inspection ? 0 : 60),
+      eligibleAt: this.clock + (inspection ? 0 : waiting),
       ready,
       readyAt: ready ? this.clock : this.clock + this.simulatedRepairDelay(id),
       kickoff: this.kickoffSerial + 1,
     };
+    if (reason === 'Holding')
+      return `${robotName(id)} removed as damaged; motors off. It lost its inspection sticker and returns only after the mechanism complies and it is inspected again.`;
+    if (
+      reason === OUT_OF_BOUNDS &&
+      this.rules.outOfBounds.returnNeedsInterruption
+    )
+      return `${robotName(id)} removed; motors off. ${'Minimum one-minute penalty set; after it the robot returns at the next game interruption.'}`;
     return `${robotName(id)} removed; motors off. ${inspection ? 'Await official correction and permission.' : '60-second timer set; it runs when you resume the match.'}`;
   }
 
@@ -2825,7 +3131,7 @@ export class RefereeMatch {
       item.stopsPlay = false;
       if (
         ['goal', 'own-goal', 'out-goal', 'pushing-goal', 'post'].includes(
-          item.definition.id.replace(/^live-/, ''),
+          caseKind(item.definition),
         )
       )
         this.invalidGoalPassage = null;
@@ -2848,14 +3154,25 @@ export class RefereeMatch {
               : 'Damaged',
         action === 'inspect',
       );
-      if (action === 'ball-out') return `${result} ${placeBall(false)}`;
+      if (action === 'ball-out') {
+        // Retrieving the ball interrupts running play.
+        this.noteInterruption();
+        return `${result} ${placeBall(false)}`;
+      }
       return result;
     }
-    if (action === 'pushing') return placeBall(true);
+    if (action === 'pushing') {
+      this.noteInterruption();
+      const moved = placeBall(true);
+      if (this.rules.pushing.basis === 'line')
+        this.pushingSettled = this.pushingAtLine();
+      return moved;
+    }
     if (action === 'lack-progress') {
       this.countFor = null;
       this.countCompleted = false;
       this.countAnchor = null;
+      this.noteInterruption();
       return placeBall(false, true);
     }
     if (action === 'count') {
@@ -2869,13 +3186,23 @@ export class RefereeMatch {
         return 'That robot is already off the field; no further relocation is needed.';
       if (action === 'return' && !this.bench[target])
         return 'That robot is already on the field; no additional return is needed.';
-      const spot = this.neutralSpot(true, target);
+      const ownCorner =
+        action === 'return' &&
+        this.servingOutOfBounds(target) &&
+        this.rules.outOfBounds.returnPlacement === 'own-corner';
+      const spot =
+        action === 'return'
+          ? this.returnSpot(target)
+          : this.neutralSpot(true, target);
       if (!spot)
-        return 'No neutral spot is clear. Keep the robot off until one becomes available.';
+        return ownCorner
+          ? 'Neither own corner is clear. Keep the robot off until one becomes available.'
+          : 'No neutral spot is clear. Keep the robot off until one becomes available.';
       actors[target] = {
         ...spot,
-        yaw:
-          action === 'return'
+        yaw: ownCorner
+          ? spot.yaw
+          : action === 'return'
             ? Math.atan2(
                 -spot.x,
                 -this.match.attackDirection(teamOf(target)) *
@@ -2915,6 +3242,8 @@ export class RefereeMatch {
           if (pending.definition.id === 'live-ready') pending.finished = true;
         this.observations.delete(`ready::${this.kickoffSerial}`);
       }
+      if (ownCorner)
+        return `${robotName(target)} returned in the area of its own corner. The rules name no orientation; it faces the center of the field.`;
       return `${robotName(target)} ${action === 'return' ? 'returned facing its own goal' : 'relocated'} at the furthest clear neutral spot.`;
     }
     if (action === 'keep-out')
@@ -2923,16 +3252,41 @@ export class RefereeMatch {
       const pose = actors[target];
       if (!pose)
         return `${robotName(target)} is off the field; the correction was recorded without moving a robot.`;
-      const correction = this.pushedOutCorrection(target, actors);
+      const correction = this.pushedOutCorrection(
+        target,
+        actors,
+        caseKind(item.definition) === 'pushed-ramp'
+          ? SPEC.wedge.run + 0.005
+          : 0.005,
+      );
       if (!correction)
         return 'Pushed out called; the robot stays in play, but no collision-free correction is currently available.';
       this.match.state.actors[target] = correction;
+      if (caseKind(item.definition) === 'pushed-ramp')
+        return 'Pushed out called; the robot stays in play and is moved off the ramp with a small collision-free correction.';
       return 'Pushed out called; the robot stays in play and a small collision-free correction restores field clearance.';
     }
     if (action === 'correct-setup') {
       this.invalidGoalPassage = null;
       this.match.restart('neutral');
       return 'Neutral kickoff positions corrected; robots remain halted for your signal.';
+    }
+    if (
+      action === 'neutral' &&
+      this.rules.kickoff.neutralWhenAllRobotsOut &&
+      !MATCH_ROBOTS.some((robot) => this.match.state.actors[robot.id])
+    ) {
+      // Nobody can be started. The kick-off is due (an interruption) and is
+      // arranged once each team has a robot that was allowed to return.
+      this.invalidGoalPassage = null;
+      this.match.restart('neutral');
+      this.opening = false;
+      if (!this.kickoffDue) this.kickoffSerial++;
+      this.kickoffDue = true;
+      this.kickoffTeam = 'neutral';
+      this.waitingFor = 0;
+      item.stopsPlay = false;
+      return 'Neutral kickoff called with no robot on the field. It is arranged as soon as each team has a robot that may return.';
     }
     if (action === 'start' || action === 'neutral') {
       item.releaseAfterCall = true;
@@ -2943,6 +3297,7 @@ export class RefereeMatch {
       if (action === 'neutral') {
         this.invalidGoalPassage = null;
         this.match.restart('neutral');
+        this.noteInterruption();
       }
       return action === 'neutral'
         ? 'Neutral kickoff arranged and signalled.'
@@ -2966,12 +3321,16 @@ export class RefereeMatch {
     }
     if (action === 'pause') {
       item.stopsPlay = true;
+      this.noteInterruption();
       return 'All robots stopped in place, untouched. The official check / ball replacement now takes place.';
     }
     if (action === 'interference')
       return 'The team intervention was stopped before contact; the robots remain in their original positions.';
-    if (action === 'holding')
+    if (action === 'holding') {
+      if (this.rules.holding.consequence === 'damaged')
+        return this.remove(target, 'Holding');
       return 'Robot flagged for mechanism inspection. The training match remains paused for your review; no invented fixed holding penalty is awarded.';
+    }
     if (action === 'void') {
       this.fixtureEnded = true;
       this.drillReady = true;

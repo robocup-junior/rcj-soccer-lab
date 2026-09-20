@@ -16,7 +16,11 @@ import type { ActorDefinition, Pose } from '@/lib/simulator/types';
 import type { DamageCue, DamagePlayback } from '@/lib/simulator/damage-effects';
 import { createDamageEffects } from './damage-effects';
 import { createPenaltyEvidence } from './penalty-evidence';
-import { penaltyAreaOutline } from '@/lib/simulator/referee-geometry';
+import {
+  penaltyAreaOutline,
+  pushingLineSegment,
+} from '@/lib/simulator/referee-geometry';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
 
 export type CameraPreset =
   | 'broadcast'
@@ -75,6 +79,8 @@ type SceneHandles = {
   selectionIndicator: PC.Entity;
   selectionDisc: PC.Entity;
   selectionArrow: PC.Entity;
+  /** Field marking of rule sets with a pushing line; null hides it. */
+  setPushingLine: (depth: number | null) => void;
   dispose: () => void;
   setCameraPreset: (preset: CameraPreset, poses: Record<string, Pose>) => void;
   updateCameraTarget: (
@@ -1532,6 +1538,34 @@ function buildScene(
 
   const damageEffects = createDamageEffects(pc, app);
   const penaltyEvidence = createPenaltyEvidence(pc, app);
+
+  // "An extra black line drawn within the penalty area." Built on demand so
+  // rule sets without it render the field exactly as before.
+  const pushingLines = new pc.Entity('Pushing lines');
+  pushingLines.enabled = false;
+  app.root.addChild(pushingLines);
+  const pushingLineMaterial = makeMaterial(pc, '#050706', { gloss: 0.05 });
+  let pushingLineDepth: number | null = null;
+  const setPushingLine = (depth: number | null) => {
+    pushingLines.enabled = depth !== null;
+    if (depth === null || depth === pushingLineDepth) return;
+    pushingLineDepth = depth;
+    // destroy() removes the child from the list it is iterating over.
+    for (const child of pushingLines.children.slice()) child.destroy();
+    for (const end of [-1, 1] as const) {
+      const [from, to] = pushingLineSegment(end, depth);
+      const line = addSegment(
+        pc,
+        pushingLines,
+        pushingLineMaterial,
+        from,
+        to,
+        0.01,
+      );
+      // Just above the turf and the white stripes it meets at both ends.
+      line.setLocalPosition((from[0] + to[0]) / 2, 0.0012, from[1]);
+    }
+  };
   app.start();
   updateOrbit();
 
@@ -1557,6 +1591,7 @@ function buildScene(
     setDamageCue: (cue, timing) => damageEffects.setCue(cue, timing),
     setPenaltyEvidence: (enabled, poses, visual) =>
       penaltyEvidence.set(enabled, poses, visual),
+    setPushingLine,
     dispose: () => {
       disposed = true;
       visualRevision += 1;
@@ -1616,6 +1651,15 @@ export function PlayCanvasViewport({
   const [engineError, setEngineError] = useState<string | null>(null);
   const [robotAssetError, setRobotAssetError] = useState<string | null>(null);
   const [sceneVersion, setSceneVersion] = useState(0);
+  // The field follows the rule set in force for this part of the app.
+  const { ruleset } = useRuleset();
+  const pushingLineDepth = ruleset.gameplay.pushing.lineDepth;
+  const pushingLineProvisional =
+    pushingLineDepth !== null && ruleset.gameplay.pushing.lineProvisional;
+
+  useEffect(() => {
+    sceneRef.current?.setPushingLine(pushingLineDepth);
+  }, [pushingLineDepth, sceneVersion]);
 
   useEffect(() => {
     posesRef.current = poses;
@@ -1852,6 +1896,11 @@ export function PlayCanvasViewport({
             </p>
           </div>
         </div>
+      ) : null}
+      {pushingLineProvisional && !engineError ? (
+        <p className="viewport-field-note">
+          Pushing line: provisional position
+        </p>
       ) : null}
       {robotAssetError && !engineError ? (
         <div className="absolute bottom-3 left-1/2 max-w-[min(90%,28rem)] -translate-x-1/2 rounded-lg border border-amber-300/25 bg-[#071016]/90 px-3 py-2 text-center text-xs text-amber-100 shadow-lg backdrop-blur">

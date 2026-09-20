@@ -1,5 +1,14 @@
-import { RULE_DOCUMENTS, RULE_SECTIONS, sectionUrl } from '../rulebook/catalog';
-import type { RefereeAction, RefereeCase } from './referee-cases';
+import { rulebookCatalog } from '../rulebook/catalog';
+import {
+  CERTIFICATION_RULESET_ID,
+  gameplayRulesFor,
+} from '../rulesets/gameplay';
+import { getRuleset } from '../rulesets/registry';
+import {
+  caseKind,
+  type RefereeAction,
+  type RefereeCase,
+} from './referee-cases';
 import { COMMITTEE_TRAINING_POLICY } from './training-policy';
 
 export type AppliedRule = {
@@ -67,51 +76,88 @@ const provisions = {
 } as const;
 type Provision = keyof typeof provisions;
 
+/** Provision labels that a later rule set words differently. */
+const PROVISIONS_BY_RULESET: Readonly<
+  Record<string, Partial<Record<Provision, string>>>
+> = {
+  '2027': {
+    neutral: 'Neutral kickoff: exclusion circle and an empty field',
+    holding: 'Holding during gameplay: deemed damaged, inspection sticker lost',
+    multiple: 'Multiple defense in a team’s own penalty area',
+    pushing: 'Pushing line and ball relocation',
+    progress: 'Count, waiting robots first, then neutral placement',
+    out: 'Removal for at least one minute',
+    outGoal: 'Goals scored by the penalized robot',
+    outReturn: 'Return at an interruption, in the robot’s own corner',
+    pushed: 'Pushed out of bounds or onto the ramp',
+  },
+};
+
 // Inspection must check both the mechanism and its observed ball control.
 const HOLDING_INSPECTION_NOTE =
   'Inspect both ball control under rule 2.5 and the 1.5 cm ball-capturing-zone limit under rule 6.2.1. A compliant capture depth alone does not establish legal holding behavior: check freedom of movement, opponent access and the permitted dribbler exception.';
 
-function reference(key: Provision, note?: string): AppliedRule {
+/** Lesson links name the rule set only when it is not the original one. */
+function lessonUrl(sectionId: string, rulesetId: string) {
+  return (
+    `?mode=rules&rule=${encodeURIComponent(sectionId)}` +
+    (rulesetId === CERTIFICATION_RULESET_ID
+      ? ''
+      : `&ruleset=${encodeURIComponent(rulesetId)}`)
+  );
+}
+const PROVISIONAL_LINE_NOTE =
+  'The position of the pushing line has not been published yet. The line in this Lab is a provisional placeholder at mid-depth of the penalty area.';
+
+function reference(
+  key: Provision,
+  note: string | undefined,
+  rulesetId: string,
+): AppliedRule {
   const [anchor, provision] = provisions[key];
-  const section = RULE_SECTIONS.find(
-    (item) => item.document === 'soccer' && item.anchor === anchor,
-  )!;
+  const catalog = rulebookCatalog(rulesetId);
+  const section = catalog.sectionByAnchor('soccer', anchor)!;
+  const original = rulesetId === CERTIFICATION_RULESET_ID;
+  const ownArea = gameplayRulesFor(rulesetId).multipleDefense.areas === 'own';
   return {
     id: key,
     sectionId: section.id,
-    document: 'Soccer rules 2026',
+    document: getRuleset(rulesetId).soccerDocumentLabel,
     number: section.number,
     title: section.title,
-    provision,
-    url: sectionUrl(section),
-    lessonUrl: `?mode=rules&rule=${encodeURIComponent(section.id)}`,
+    provision: PROVISIONS_BY_RULESET[rulesetId]?.[key] ?? provision,
+    url: catalog.sectionUrl(section),
+    lessonUrl: lessonUrl(section.id, rulesetId),
     ...(key === 'multiple'
-      ? { quote: 'at least partially in a penalty area' }
+      ? {
+          quote: ownArea
+            ? 'at least partially in their own penalty area'
+            : 'at least partially in a penalty area',
+        }
       : {}),
     ...(note
       ? { note }
-      : key === 'outGoal'
+      : key === 'outGoal' && original
         ? { note: COMMITTEE_TRAINING_POLICY.outCarrierPassage }
         : key === 'pushed'
           ? { note: COMMITTEE_TRAINING_POLICY.pushedOut }
           : {}),
   };
 }
-function penaltyLine(): AppliedRule {
-  const section = RULE_SECTIONS.find(
-    (item) => item.id === 'field:penalty-areas',
-  )!;
+function penaltyLine(rulesetId: string): AppliedRule {
+  const catalog = rulebookCatalog(rulesetId);
+  const section = catalog.section('field:penalty-areas')!;
   return {
     id: 'penalty-line',
     sectionId: section.id,
-    document: RULE_DOCUMENTS.find((item) => item.id === 'field')!.title,
+    document: catalog.documents.find((item) => item.id === 'field')!.title,
     number: section.number,
     title: section.title,
     provision: 'White boundary marking',
     quote: 'The line is part of the area.',
     note: 'Body overlap onto the stripe counts as partial entry. One partial robot alone does not establish multiple defense.',
-    url: sectionUrl(section),
-    lessonUrl: `?mode=rules&rule=${encodeURIComponent(section.id)}`,
+    url: catalog.sectionUrl(section),
+    lessonUrl: lessonUrl(section.id, rulesetId),
   };
 }
 
@@ -120,8 +166,10 @@ export function rulesForDecision(
   item: RefereeCase,
   action: RefereeAction,
   context: { kickoffDue?: boolean; returnReason?: string } = {},
+  rulesetId: string = CERTIFICATION_RULESET_ID,
 ): AppliedRule[] {
-  const id = item.id.replace(/^live-/, '');
+  const id = caseKind(item);
+  const rules = gameplayRulesFor(rulesetId);
   let keys: Provision[] = [];
   let line = false;
   switch (action) {
@@ -131,7 +179,9 @@ export function rulesForDecision(
           ? ['waitingGoal']
           : id === 'pushing-goal'
             ? ['score', 'pushing']
-            : ['score'];
+            : id === 'out-goal'
+              ? ['score', 'outGoal']
+              : ['score'];
       break;
     case 'no-goal':
       keys =
@@ -172,7 +222,10 @@ export function rulesForDecision(
       keys = ['ballOut', 'damage'];
       break;
     case 'holding':
-      keys = ['holding', 'compliance'];
+      keys =
+        rules.holding.consequence === 'damaged'
+          ? ['holding', 'damage', 'compliance']
+          : ['holding', 'compliance'];
       break;
     case 'waive-out':
       keys = ['pushed'];
@@ -205,7 +258,10 @@ export function rulesForDecision(
         keys.push('neutral');
       break;
     case 'neutral':
-      keys = ['interruption', 'neutral', 'kickoff'];
+      keys =
+        id === 'all-out'
+          ? ['neutral', 'kickoffReturn']
+          : ['interruption', 'neutral', 'kickoff'];
       break;
     case 'pause':
       keys =
@@ -238,7 +294,8 @@ export function rulesForDecision(
       } else if (['pushing', 'midfield'].includes(id)) {
         keys = ['pushing'];
         line = true;
-      } else if (id === 'post') keys = ['score'];
+      } else if (id === 'pushed-ramp') keys = ['pushed'];
+      else if (id === 'post') keys = ['score'];
       else if (id === 'unstick') keys = ['unstick'];
       else if (['interruption', 'spectator'].includes(id))
         keys = ['interruption'];
@@ -248,7 +305,9 @@ export function rulesForDecision(
   }
   const notes: Partial<Record<Provision, string>> =
     action === 'holding' ? { compliance: HOLDING_INSPECTION_NOTE } : {};
+  if (rules.pushing.basis === 'line' && rules.pushing.lineProvisional)
+    notes.pushing = PROVISIONAL_LINE_NOTE;
   return [...new Set(keys)]
-    .map((key) => reference(key, notes[key]))
-    .concat(line ? [penaltyLine()] : []);
+    .map((key) => reference(key, notes[key], rulesetId))
+    .concat(line ? [penaltyLine(rulesetId)] : []);
 }

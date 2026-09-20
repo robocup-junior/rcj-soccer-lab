@@ -14,9 +14,150 @@ import { pose, type RuleClip } from '@/lib/rulebook/animations';
 import { tournamentPoints } from '@/lib/rulebook/scoring';
 import { RCJ_FIELD_DERIVED as FIELD } from '@/lib/simulator/field-spec';
 import type { RobotVisualId } from '@/lib/simulator/robot-models';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
 import { cn } from '@/lib/utils';
 
+/** The kicker test of the rule set in force: goal rebound or vertical height. */
 export function KickerWorkbench({
+  robotVisual,
+}: {
+  robotVisual: RobotVisualId;
+}) {
+  const { ruleset } = useRuleset();
+  const test = ruleset.gameplay.kickerTest;
+  return test.procedure === 'vertical-height' ? (
+    <VerticalKickerWorkbench limit={(test.maximumHeight ?? 1) * 100} />
+  ) : (
+    <ReboundKickerWorkbench robotVisual={robotVisual} />
+  );
+}
+
+function VerticalKickerWorkbench({ limit }: { limit: number }) {
+  const [height, setHeight] = useState(80);
+  const passes = height <= limit;
+  // 1 cm = 1.6 px; the floor is at y = 300.
+  const y = (cm: number) => 300 - cm * 1.6;
+  return (
+    <section className="rule-lab">
+      <div className="lab-heading">
+        <div>
+          <h2>Vertical kicker test bench</h2>
+          <p>
+            Pilot procedure of this rule set; an illustration, not a
+            measurement.
+          </p>
+        </div>
+      </div>
+      <div className="lab-segmented">
+        <Button variant="outline" onClick={() => setHeight(60)}>
+          Well below the limit
+        </Button>
+        <Button variant="outline" onClick={() => setHeight(limit)}>
+          Exactly at the limit
+        </Button>
+        <Button variant="outline" onClick={() => setHeight(limit + 25)}>
+          Above the limit
+        </Button>
+      </div>
+      <LabRange
+        label="Highest point of the ball"
+        value={height}
+        min={30}
+        max={170}
+        unit="cm"
+        onChange={setHeight}
+      />
+      <svg
+        className="field-diagram"
+        viewBox="0 0 360 330"
+        aria-label={`Vertical kicker test: the ball rises to ${height} cm; the limit is ${limit} cm`}
+      >
+        <rect x="0" y="0" width="360" height="330" fill="#0b1118" />
+        {/* wall with a measuring tape */}
+        <rect x="262" y="14" width="14" height="286" fill="#1f2a35" />
+        <rect x="246" y="14" width="10" height="286" fill="#e9c550" />
+        {[0, 25, 50, 75, 100, 125, 150, 175].map((cm) => (
+          <g key={cm}>
+            <line
+              x1="246"
+              x2="256"
+              y1={y(cm)}
+              y2={y(cm)}
+              stroke="#0b1118"
+              strokeWidth="1.5"
+            />
+            <text x="284" y={y(cm) + 4} fill="#9fb3c2" fontSize="11">
+              {cm}
+            </text>
+          </g>
+        ))}
+        <line
+          x1="40"
+          x2="256"
+          y1={y(limit)}
+          y2={y(limit)}
+          stroke={passes ? '#67e8f9' : '#fca5a5'}
+          strokeDasharray="6 5"
+          strokeWidth="2"
+        />
+        <text x="44" y={y(limit) - 7} fill="#d7e7f1" fontSize="12">
+          {limit} cm
+        </text>
+        <line
+          x1="20"
+          x2="340"
+          y1="300"
+          y2="300"
+          stroke="#347351"
+          strokeWidth="4"
+        />
+        {/* robot on its back, kicker facing up */}
+        <rect x="120" y="274" width="70" height="26" rx="5" fill="#2774d8" />
+        <rect x="146" y="262" width="18" height="12" fill="#9fb3c2" />
+        <line
+          x1="155"
+          x2="155"
+          y1="258"
+          y2={y(height) + 8}
+          stroke="#f59e0b"
+          strokeDasharray="3 6"
+          strokeWidth="2"
+        />
+        <circle cx="155" cy={y(height)} r="7" fill="#f97316" />
+        <text
+          x="180"
+          y="322"
+          textAnchor="middle"
+          fill={passes ? '#67e8f9' : '#fca5a5'}
+          fontSize="14"
+        >
+          {passes
+            ? 'Illustrated outcome: pass'
+            : 'Illustrated outcome: adjust kicker'}
+        </text>
+      </svg>
+      <div className="lab-fact">
+        <strong>
+          <span>{height} cm</span>
+          {' · '}
+          <span>{passes ? 'within the limit' : 'above the limit'}</span>
+        </strong>
+        <p>
+          The robot lies on its back with the kicker facing up, the ball rests
+          in the ball-capturing zone, and the kick goes straight up. The test is
+          passed if the ball does not rise above the limit.
+        </p>
+      </div>
+      <p className="rule-small">
+        Use the tournament ball of the robot’s sub-league and measure beside a
+        wall with a measuring tape. The main-league procedure is not substituted
+        for the separate Entry appendix.
+      </p>
+    </section>
+  );
+}
+
+function ReboundKickerWorkbench({
   robotVisual,
 }: {
   robotVisual: RobotVisualId;

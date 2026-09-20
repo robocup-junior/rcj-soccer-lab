@@ -9,6 +9,8 @@ import { RCJ_FIELD_DERIVED as FIELD } from './field-spec';
 import { robotTouchesFieldWall } from './referee-geometry';
 import type { Pose } from './types';
 import type { TrainingTopic } from './referee-training';
+import { gameplayRulesFor } from '../rulesets/gameplay';
+import type { GameplayRules } from '../rulesets/types';
 
 const distance = (a: Pose, b: Pick<Pose, 'x' | 'z'>) =>
   Math.hypot(a.x - b.x, a.z - b.z);
@@ -28,6 +30,8 @@ export class ContinuousDirector {
   constructor(
     private randomSource: { random(): number },
     private topics: readonly TrainingTopic[],
+    /** Staged faults must be infringements under the session's rule set. */
+    private rules: GameplayRules = gameplayRulesFor(),
   ) {}
   private random() {
     return this.randomSource.random();
@@ -70,7 +74,14 @@ export class ContinuousDirector {
         robot: robot.id,
         elapsed: 0,
         reached: 0,
-        end: poses[robot.id].z < 0 ? -1 : 1,
+        // Two teammates in the OPPONENT's area are legal where multiple
+        // defense only concerns a team's own penalty area.
+        end:
+          topic === 'multiple' && this.rules.multipleDefense.areas === 'own'
+            ? -match.attackDirection(robot.team as 'blue' | 'yellow')
+            : poses[robot.id].z < 0
+              ? -1
+              : 1,
         side: poses[robot.id].x < 0 ? -1 : 1,
       };
     }

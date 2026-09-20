@@ -1,5 +1,5 @@
 {
-  "checkedOn": "2026-09-05",
+  "checkedOn": "2026-09-19",
   "documents": [
     {
       "id": "soccer",
@@ -10,6 +10,7 @@
       "paragraphCount": 221,
       "footnoteCount": 29,
       "sha256": "23d09750ff4937a5adb0ed86fea95105bfec750fed7ce84644cb04788465a0b1",
+      "contentSha256": "91a717198daac91f6bbad4fa02c921c2fa8c11d947261f1f0de5dc3f43fe0b32",
       "duplicateAnchors": []
     },
     {
@@ -21,6 +22,7 @@
       "paragraphCount": 41,
       "footnoteCount": 1,
       "sha256": "3c3d0eb21b897a6a69a21cf522c0beeead3f60992630adee0f7050a4e67216b4",
+      "contentSha256": "db3d95be2d5761dc71d1a0ea3b0a2b924b6a4f43ddfd2a6ee59b7fb106cb6f0d",
       "duplicateAnchors": []
     },
     {
@@ -32,6 +34,7 @@
       "paragraphCount": 21,
       "footnoteCount": 2,
       "sha256": "389b69c069eef50797883888ff92cd1197b433cc1f3ce7de1c6fc70542ce8267",
+      "contentSha256": "872017c9c6d510fcf66598f127071fc0e9ece129613fa38fcb29e71503e49e95",
       "duplicateAnchors": []
     },
     {
@@ -43,6 +46,7 @@
       "paragraphCount": 270,
       "footnoteCount": 0,
       "sha256": "477511788b3196555d706000ade216201c2dbb6d24cb4847ece8806ce2c59fa7",
+      "contentSha256": "e77ecee85dfc1ff6948d9c3a6f8f6243f7cdcdd873f15bdf60c203b5dbd585ac",
       "duplicateAnchors": [
         "documentation-and-community-contribution",
         "short-form-video-tdp",
@@ -58,6 +62,7 @@
       "paragraphCount": 59,
       "footnoteCount": 5,
       "sha256": "7d3bc1748724668b3998f8d8a622787b6eafd29715918771bded102622882733",
+      "contentSha256": "d1ac32308ad4e7d5befc05a239ce2867923e359aa06eb6a8c9809908740ee4d3",
       "duplicateAnchors": []
     },
     {
@@ -69,6 +74,7 @@
       "paragraphCount": 216,
       "footnoteCount": 3,
       "sha256": "b94c925edf9072745b590c0302a0c50fcd0f27d78be42f522d66ba571f4b5743",
+      "contentSha256": "5f3c0d19dca65546db117f685da268ce96db4cd934b582b14b332e65caa6c05c",
       "duplicateAnchors": []
     }
   ],
