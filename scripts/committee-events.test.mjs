@@ -112,12 +112,12 @@ test('correct general and technical checks have a non-silent celebration fallbac
   }
 });
 
-test('eight general speakers rotate with equal speaking turns, not equal paired appearances', () => {
-  assert.equal(CHARACTERS.length, 8);
+test('all general speakers rotate with equal speaking turns, not equal paired appearances', () => {
+  assert.equal(CHARACTERS.length, 11);
   for (const outcome of outcomes) {
     let history = createCommitteeHistory();
     const speakers = [];
-    for (let index = 0; index < 32; index++) {
+    for (let index = 0; index < CHARACTERS.length * 4; index++) {
       const result = select(
         { topic: 'general', outcome, id: String(index) },
         history,
@@ -126,7 +126,10 @@ test('eight general speakers rotate with equal speaking turns, not equal paired 
       speakers.push(result.dialogue.character);
       history = result.history;
     }
-    assert.equal(new Set(speakers.slice(0, 8)).size, 8);
+    assert.equal(
+      new Set(speakers.slice(0, CHARACTERS.length)).size,
+      CHARACTERS.length,
+    );
     for (const character of CHARACTERS)
       assert.equal(
         history.turns[character.id],
@@ -159,7 +162,7 @@ test('Jakub always appears with Caroline while Caroline may speak on her own', (
   let history = createCommitteeHistory();
   let jakubTurns = 0,
     carolineTurns = 0;
-  for (let index = 0; index < 32; index++) {
+  for (let index = 0; index < CHARACTERS.length * 4; index++) {
     const result = select({ outcome: 'recorded', topic: 'general' }, history);
     assert.ok(result);
     if (result.dialogue.character === 'jakub') {
@@ -184,7 +187,7 @@ test('Jakub always appears with Caroline while Caroline may speak on her own', (
 test('returning speakers vary their recorded line before repeating it', () => {
   let history = createCommitteeHistory();
   const seen = new Map();
-  for (let index = 0; index < 16; index++) {
+  for (let index = 0; index < CHARACTERS.length * 2; index++) {
     const result = select({ topic: 'general', outcome: 'recorded' }, history);
     assert.ok(result);
     const previous = seen.get(result.dialogue.character);
@@ -192,7 +195,7 @@ test('returning speakers vary their recorded line before repeating it', () => {
     seen.set(result.dialogue.character, result.dialogue.id);
     history = result.history;
   }
-  assert.equal(seen.size, 8);
+  assert.equal(seen.size, CHARACTERS.length);
 });
 
 test('selection creates immutable history updates and bounds recent lines to 96', () => {
@@ -270,7 +273,7 @@ test('certification permits only neutral recorded lines for every topic', () => 
 test('neutral character selection cannot reveal the topic or correctness of an assessment', () => {
   for (const context of ['certification', 'continuous']) {
     let history = createCommitteeHistory();
-    for (let index = 0; index < 24; index++) {
+    for (let index = 0; index < CHARACTERS.length * 3; index++) {
       const expected = select(
         { context, topic: 'general', outcome: 'recorded' },
         history,

@@ -1,6 +1,9 @@
 // Reviewed committee copy, grouped by English source to keep all three
 // translations together. Exported shape matches the main generator's MANUAL.
+import newCharacterEntries from './committee-new-translations.mjs';
+
 const entries = [
+  ...newCharacterEntries,
   [
     'Playful fictional committee voices, not real quotations or official rule decisions; the sourced feedback remains authoritative.',
     'Hravé fiktívne hlasy členov komisie, nie skutočné citáty ani oficiálne rozhodnutia; rozhodujúce sú vysvetlenia podložené zdrojmi.',

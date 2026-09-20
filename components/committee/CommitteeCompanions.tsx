@@ -75,6 +75,24 @@ export const COMMITTEE_TOUR = [
     hint: 'Training certification is not an official competition appointment.',
   },
   {
+    characters: ['hikaru'],
+    title: 'Build your understanding',
+    text: 'Check the selected rule version before practising. Compare versions when you want to see what changed. Even three generations of soldering samurai read the instructions first.',
+    hint: 'The selected rules matter more than the maker’s confidence.',
+  },
+  {
+    characters: ['hadi'],
+    title: 'Evidence beats hype',
+    text: 'Use the match review to compare your calls with the explanations. During certification, our comments stay neutral. Nobody here can buy a better result with imaginary tokens.',
+    hint: 'Our character jokes never replace the sourced rule feedback.',
+  },
+  {
+    characters: ['ivan'],
+    title: 'Bring the team, keep the focus',
+    text: 'Learn together and compare what you noticed in the replay. Our reactions are optional: switch them or their motion off whenever you want a quieter session. The imaginary party can wait.',
+    hint: 'Skip this tour at any time and reopen it from Meet the Characters.',
+  },
+  {
     characters: ['jakub', 'caroline'],
     title: 'See you on the field!',
     text: 'Learn together, try a tricky situation, and keep asking why. You can switch our reactions and motion off at any time, or come back here to meet everyone again.',

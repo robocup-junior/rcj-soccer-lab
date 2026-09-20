@@ -33,6 +33,9 @@ const ids = [
   'david',
   'jakub',
   'caroline',
+  'hikaru',
+  'hadi',
+  'ivan',
 ];
 const topics = new Set([
   'out',
@@ -49,7 +52,7 @@ const topics = new Set([
 const outcomes = new Set(['correct', 'retry', 'recorded', 'study', 'complete']);
 const poses = new Set(['celebrate', 'explain', 'encourage']);
 
-test('the committee cast has eight stable identities and safe local image paths', () => {
+test('the committee cast has eleven stable identities and safe local image paths', () => {
   assert.deepEqual(
     CHARACTERS.map((character) => character.id),
     ids,
@@ -60,7 +63,19 @@ test('the committee cast has eight stable identities and safe local image paths'
   );
   assert.deepEqual(
     CHARACTERS.map((character) => character.name),
-    ['Marek', 'Isa', 'Tom', 'Will', 'Roberto', 'David', 'Jakub', 'Caroline'],
+    [
+      'Marek',
+      'Isa',
+      'Tom',
+      'Will',
+      'Roberto',
+      'David',
+      'Jakub',
+      'Caroline',
+      'Hikaru',
+      'Hadi',
+      'Ivan',
+    ],
   );
   for (const character of CHARACTERS) {
     assert.equal(character.asset, `/characters/${character.id}.png`);
@@ -172,7 +187,7 @@ test('recorded dialogue stays separate from coaching and factual rule explanatio
       /\byou (?:are|became) certified\b|\brule \d|\b60[- ]second|\bone[- ]minute penalty|\bcross(?:ing|ed)? the white line\b/i,
       entry.id,
     );
-    if (entry.character === 'finance')
+    if (['finance', 'hadi'].includes(entry.character))
       assert.doesNotMatch(
         entry.text,
         /[€$£]\s*\d|guaranteed (?:return|profit)/i,
@@ -203,7 +218,23 @@ test('every shipped character has a full-resolution three-pose PNG and a recorde
     assert.ok(entry.prompt.length > 100);
     assert.ok(entry.verified.length > 100);
   }
-  const serialized = JSON.stringify([manifest, refresh]);
+  const newcomers = JSON.parse(
+    readFileSync(
+      new URL('../docs/committee-new-characters.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  assert.deepEqual(
+    newcomers.characters.map(({ id }) => id),
+    ['hikaru', 'hadi', 'ivan'],
+  );
+  assert.match(newcomers.identity, /fictional/);
+  for (const entry of newcomers.characters) {
+    assert.equal(entry.asset, `/characters/${entry.id}.png`);
+    assert.ok(entry.prompt.length > 100);
+    assert.ok(entry.verified.length > 100);
+  }
+  const serialized = JSON.stringify([manifest, refresh, newcomers]);
   for (const character of CHARACTERS) {
     const file = readFileSync(
       new URL(`../public${character.asset}`, import.meta.url),

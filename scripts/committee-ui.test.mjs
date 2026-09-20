@@ -76,8 +76,8 @@ const {
 const render = (Component, props = {}) =>
   renderToStaticMarkup(createElement(Component, props));
 
-test('tour introduces all eight people in seven slides, always pairing Jakub and Caroline', () => {
-  assert.equal(COMMITTEE_TOUR.length, 7);
+test('tour introduces all eleven people in ten slides, always pairing Jakub and Caroline', () => {
+  assert.equal(COMMITTEE_TOUR.length, 10);
   assert.deepEqual(
     new Set(COMMITTEE_TOUR.flatMap((slide) => slide.characters)),
     new Set(CHARACTERS.map((character) => character.id)),
@@ -97,7 +97,7 @@ test('tour introduces all eight people in seven slides, always pairing Jakub and
     assert.match(html, /data-pose="explain"/);
     assert.match(html, /Meet your guide/);
   }
-  assert.equal(seen.size, 8);
+  assert.equal(seen.size, CHARACTERS.length);
 });
 
 test('tour explains every main mode without changing navigation or claiming official appointment', () => {
