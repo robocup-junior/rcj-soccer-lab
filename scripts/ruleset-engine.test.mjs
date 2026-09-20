@@ -465,6 +465,20 @@ test('return placement: own corner for out-of-bounds robots in 2027, neutral spo
   blocked.match.state.actors['yellow-1'] = { ...left };
   blocked.match.state.actors['yellow-2'] = { ...right };
   assert.equal(blocked.canReturn('blue-1'), false);
+  // ...and comes back as soon as one of them is free again, never deadlocked.
+  blocked.match.state.actors['yellow-1'] = { x: 0, z: 0, yaw: 0 };
+  assert.equal(blocked.canReturn('blue-1'), true);
+  blocked.active = {
+    definition: findRefereeCase('return-ready'),
+    variant: plain,
+    step: 0,
+  };
+  blocked.apply({ action: 'return', target: 'blue-1' });
+  assert.equal(blocked.bench['blue-1'], undefined);
+  assert.ok(
+    distance(blocked.match.state.actors['blue-1'], left) < 1e-9,
+    'placed on the corner that is free again',
+  );
 });
 
 test('multiple defense: attackers in the opponent’s area infringe in 2026 only', () => {
