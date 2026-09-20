@@ -1,0 +1,156 @@
+[
+  {
+    "mode": "continuous",
+    "seed": 11,
+    "policy": "perfect",
+    "hash": "1d54dee6efbf4f00826363184ac30071d1e5311ab4ea711b259fb4cd90c9dfc2",
+    "report": {
+      "correct": 68,
+      "wrong": 0,
+      "missed": 6,
+      "assisted": 0,
+      "assessed": 74,
+      "accuracy": 92
+    },
+    "calls": 100,
+    "score": {
+      "blue": 7,
+      "yellow": 11
+    }
+  },
+  {
+    "mode": "continuous",
+    "seed": 2026,
+    "policy": "perfect",
+    "hash": "e3a6c8b9bf082d2ab106d2fd22910023a591051bbec63fdca181a5f349705afc",
+    "report": {
+      "correct": 75,
+      "wrong": 0,
+      "missed": 4,
+      "assisted": 0,
+      "assessed": 79,
+      "accuracy": 95
+    },
+    "calls": 113,
+    "score": {
+      "blue": 12,
+      "yellow": 17
+    }
+  },
+  {
+    "mode": "continuous",
+    "seed": 77,
+    "policy": "sloppy",
+    "hash": "8bc58c40cd525cbe815f542a7197947aaf1122d135f968aac789be0a28c1faa0",
+    "report": {
+      "correct": 48,
+      "wrong": 52,
+      "missed": 1,
+      "assisted": 0,
+      "assessed": 101,
+      "accuracy": 48
+    },
+    "calls": 140,
+    "score": {
+      "blue": 11,
+      "yellow": 7
+    }
+  },
+  {
+    "mode": "continuous",
+    "seed": 4242,
+    "policy": "idle",
+    "hash": "cb2c3edccdc4c1d5fce506f1cc9bf098efe3ff0c275f2623ae01da678cefdf2b",
+    "report": {
+      "correct": 0,
+      "wrong": 0,
+      "missed": 24,
+      "assisted": 0,
+      "assessed": 24,
+      "accuracy": 0
+    },
+    "calls": 1,
+    "score": {
+      "blue": 0,
+      "yellow": 0
+    }
+  },
+  {
+    "mode": "continuous",
+    "seed": 90210,
+    "policy": "perfect",
+    "robotVisual": "xlc-open-2020",
+    "hash": "d747ed64c9345306ad626f7df77d8d2593c4c20a1c3121788f921568af930712",
+    "report": {
+      "correct": 57,
+      "wrong": 0,
+      "missed": 6,
+      "assisted": 0,
+      "assessed": 63,
+      "accuracy": 90
+    },
+    "calls": 84,
+    "score": {
+      "blue": 12,
+      "yellow": 2
+    }
+  },
+  {
+    "mode": "step",
+    "seed": 11,
+    "policy": "perfect",
+    "hash": "4a95a0fbaed8228bf92d66d118f7fb1c9b7e71777369019fab6a33b422132227",
+    "report": {
+      "correct": 72,
+      "wrong": 0,
+      "missed": 0,
+      "assisted": 0,
+      "assessed": 72,
+      "accuracy": 100
+    },
+    "calls": 104,
+    "score": {
+      "blue": 6,
+      "yellow": 8
+    }
+  },
+  {
+    "mode": "step",
+    "seed": 2026,
+    "policy": "sloppy",
+    "hash": "0d68ec9adc09b2a215791f4f7d3af7bca530ebe72f9eae935b7929b6dbbd06a4",
+    "report": {
+      "correct": 36,
+      "wrong": 46,
+      "missed": 0,
+      "assisted": 0,
+      "assessed": 82,
+      "accuracy": 44
+    },
+    "calls": 158,
+    "score": {
+      "blue": 15,
+      "yellow": 7
+    }
+  },
+  {
+    "mode": "step",
+    "seed": 31337,
+    "policy": "perfect",
+    "robotVisual": "xlc-innovation-2021",
+    "hash": "7e98dc984f05c976cc301af086a8492f33a7ad8e1a9879854f7acbd914982573",
+    "report": {
+      "correct": 98,
+      "wrong": 0,
+      "missed": 1,
+      "assisted": 0,
+      "assessed": 99,
+      "accuracy": 99
+    },
+    "calls": 142,
+    "score": {
+      "blue": 17,
+      "yellow": 15
+    }
+  }
+]

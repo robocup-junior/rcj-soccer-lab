@@ -264,7 +264,11 @@ export function RefMateConsole({
                     <small>{bench.reason}</small>
                     <small>
                       {bench.ready ? 'Ready' : 'Repairing'} ·{' '}
-                      {bench.eligible ? 'Eligible' : 'Waiting'}
+                      {bench.eligible
+                        ? 'Eligible'
+                        : bench.awaitingInterruption
+                          ? 'Next interruption'
+                          : 'Waiting'}
                     </small>
                   </>
                 ) : (

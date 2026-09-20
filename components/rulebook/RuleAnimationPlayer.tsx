@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pause, Play, RotateCcw } from 'lucide-react';
 import { AnswerChoice, AnswerFeedback } from './AnswerFeedback';
 import { LearningSaveStatus, useLearningSave } from './useLearningSave';
-import { CLIP_ASSESSMENTS } from '@/lib/rulebook/clip-assessments';
+import { clipAssessmentFor } from '@/lib/rulebook/learning-bank';
 import { orderedAnswers } from '@/lib/rulebook/answer-order';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -59,16 +59,18 @@ export function RuleAnimationPlayer({
   const answerAttempts = useRef(new Map<string, number>());
   const firstAnswers = useRef(new Map<string, number>());
   const completedQuestions = useRef(new Set<string>());
-  const assessment = CLIP_ASSESSMENTS[clip.id];
+  const assessment = clipAssessmentFor(clip.id);
   const locked =
     learningMode === 'certification' && (alreadyAnswered || answer !== null);
   const explained =
     (learningMode === 'practice' && guided) ||
     answer !== null ||
     alreadyAnswered;
-  const duration = explained
-    ? clip.frames[clip.frames.length - 1].at
-    : assessment.decisionAt;
+  // Workbench clips (for example the kicker bench) have no decision point.
+  const duration =
+    explained || !assessment
+      ? clip.frames[clip.frames.length - 1].at
+      : assessment.decisionAt;
   const scene = useMemo(
     () => sampleClip(clip, Math.min(time, duration)),
     [clip, time, duration],
@@ -144,7 +146,7 @@ export function RuleAnimationPlayer({
           ))}
         </div>
       )}
-      <p className="lesson-observation">{assessment.context}</p>
+      {assessment && <p className="lesson-observation">{assessment.context}</p>}
       {learningMode === 'practice' && answer === null && !guided && (
         <Button
           variant="ghost"

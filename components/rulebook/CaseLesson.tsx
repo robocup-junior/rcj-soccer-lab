@@ -5,13 +5,14 @@ import { AnswerChoice, AnswerFeedback } from './AnswerFeedback';
 import { Button } from '@/components/ui/button';
 import { RefereeMatch } from '@/lib/simulator/referee-match';
 import {
-  REFEREE_ACTIONS,
+  refereeActionLabel,
   type RefereeCase,
   type RefereeCall,
 } from '@/lib/simulator/referee-cases';
 import { MATCH_ACTORS, MATCH_ROBOTS, MATCH_STEP } from '@/lib/simulator/match';
 import { lessonChoices } from '@/lib/rulebook/learning';
 import type { RobotVisualId } from '@/lib/simulator/robot-models';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
 import { PlayCanvasViewport } from '@/components/simulator/PlayCanvasViewport';
 import type {
   RuleLearningEvent,
@@ -28,10 +29,12 @@ function startLesson(
   item: RefereeCase,
   visual: RobotVisualId,
   lockRobotVisual = false,
+  rulesetId?: string,
 ) {
   const session = new RefereeMatch(CASE_LESSON_SEED, {
     robotVisual: visual,
     lockRobotVisual,
+    rulesetId,
   });
   session.beginCase(item);
   return session;
@@ -51,11 +54,18 @@ export function CaseLesson({
   certificationRunId?: string | null;
   onLearningEvent?: (event: RuleLearningEvent) => void | Promise<void>;
 }) {
+  // Certification lessons are rendered inside a scope pinned to its rule set.
+  const { rulesetId } = useRuleset();
   const [initialRobotVisual] = useState(robotVisual);
   const lockedRobotVisual =
     learningMode === 'certification' ? initialRobotVisual : robotVisual;
   const [session, setSession] = useState(() =>
-    startLesson(item, lockedRobotVisual, learningMode === 'certification'),
+    startLesson(
+      item,
+      lockedRobotVisual,
+      learningMode === 'certification',
+      rulesetId,
+    ),
   );
   const evidence = useRef(newCaseEvidence(initialRobotVisual));
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
@@ -228,7 +238,7 @@ export function CaseLesson({
     }
   };
   const label = (choice: RefereeCall) =>
-    `${REFEREE_ACTIONS.find((action) => action.id === choice.action)?.label}${choice.target ? ` · ${MATCH_ROBOTS.find((robot) => robot.id === choice.target)?.label ?? choice.target}` : ''}`;
+    `${refereeActionLabel(choice.action, rulesetId)}${choice.target ? ` · ${MATCH_ROBOTS.find((robot) => robot.id === choice.target)?.label ?? choice.target}` : ''}`;
   const feedback = frame.feedback;
   const correct =
     feedback && ['correct', 'supported'].includes(feedback.verdict);
@@ -292,6 +302,7 @@ export function CaseLesson({
               item,
               lockedRobotVisual,
               learningMode === 'certification',
+              rulesetId,
             );
             setSession(next);
             setFrame(next.snapshot());

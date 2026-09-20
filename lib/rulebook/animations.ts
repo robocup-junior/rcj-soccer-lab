@@ -33,7 +33,7 @@ export function neutralPlacement(
   );
 }
 
-type Keyframe = {
+export type Keyframe = {
   at: number;
   label: string;
   poses?: Record<string, Pose | null>;
@@ -87,7 +87,8 @@ const neutral = {
 };
 const far = pose(FIELD.neutralSpotX, FIELD.neutralSpotZ, P);
 
-function make(
+/** Compact constructor shared with the clips that later rule sets add. */
+export function makeClip(
   id: string,
   title: string,
   anchor: string,
@@ -110,6 +111,8 @@ function make(
     ...(alsoAnchors ? { alsoAnchors } : {}),
   };
 }
+
+const make = makeClip;
 
 /** Authored teaching scenes. Time is illustrative unless a clock is labelled. */
 export const RULE_CLIPS: RuleClip[] = [

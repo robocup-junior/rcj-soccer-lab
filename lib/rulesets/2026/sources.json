@@ -1,0 +1,35 @@
+{
+  "id": "2026",
+  "documents": [
+    {
+      "id": "soccer",
+      "title": "Soccer rules",
+      "url": "https://robocup-junior.github.io/soccer-rules/master/rules.html"
+    },
+    {
+      "id": "field",
+      "title": "Field specification",
+      "url": "https://robocup-junior.github.io/soccer-rules/master/field_specification.html"
+    },
+    {
+      "id": "ball",
+      "title": "Ball specification",
+      "url": "https://robocup-junior.github.io/soccer-rules/master/ball_specification.html"
+    },
+    {
+      "id": "scoring",
+      "title": "Awards & interviews",
+      "url": "https://robocup-junior.github.io/soccer-rules/master/scoring.html"
+    },
+    {
+      "id": "superteam",
+      "title": "SuperTeam rules",
+      "url": "https://robocup-junior.github.io/soccer-rules/master/superteam_rules.html"
+    },
+    {
+      "id": "entry",
+      "title": "Entry league",
+      "url": "https://robocup-junior.github.io/soccer-rules-entry/master/rules.html"
+    }
+  ]
+}

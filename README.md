@@ -4,7 +4,8 @@ Learn the rules. Play a match. Practise refereeing.
 
 An interactive RoboCupJunior Soccer training application with a 3D field,
 rule-linked exercises, referee assessments and local video reconstruction.
-Designed for teams, volunteers and referees learning the 2026 rules together.
+Designed for teams, volunteers and referees learning the rules together. It
+works with the 2026 rules and the 2027 draft, side by side.
 
 **[Open the app](https://robocup-junior.github.io/rcj-soccer-lab/)** ·
 [User guide](docs/application-guide.md) ·
@@ -13,13 +14,19 @@ Designed for teams, volunteers and referees learning the 2026 rules together.
 
 ## Explore
 
-| Mode             | What you can do                                                                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Rules**        | Read official source documents alongside 111 decision exercises, animated situations and technical workbenches. Orbit and replay situations from different angles. |
-| **Play**         | Arrange robots and the ball, drive manually, play against AI, or play local two-player matches using WASD and arrow keys.                                          |
-| **Referee**      | Practise Step or Continuous matches using classic or RefMate-style controls. Review decisions, missed incidents and the match timeline afterward.                  |
-| **Video replay** | Open a local recording, calibrate the field, track robots and the ball, review uncertain positions, save an editable replay or export a 3D video.                  |
-| **Academy**      | Keep device-local progress and game history, take a training-certification round, and optionally submit it for GitHub-verified publication.                        |
+| Mode                   | What you can do                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Rules**              | Read official source documents alongside more than 110 decision exercises, animated situations and technical workbenches. Orbit and replay situations from different angles.         |
+| **Play**               | Arrange robots and the ball, drive manually, play against AI, or play local two-player matches using WASD and arrow keys.                                                            |
+| **Referee**            | Practise Step or Continuous matches using classic or RefMate-style controls. Review decisions, missed incidents and the match timeline afterward.                                    |
+| **Version comparison** | Pick two versions of the rules and see what changed, what a referee does differently, and where to practise it. Open points of a draft are listed with the assumption the Lab makes. |
+| **Video replay**       | Open a local recording, calibrate the field, track robots and the ball, review uncertain positions, save an editable replay or export a 3D video.                                    |
+| **Academy**            | Keep device-local progress and game history, take a training-certification round, and optionally submit it for GitHub-verified publication.                                          |
+
+The **Rules version** selector in the header switches the Rules tab, the Play
+field and Referee training between the 2026 rules and the 2027 draft. Training
+certification always uses the 2026 rules. Maintainers: see
+[adding a rules version](docs/adding-a-rules-version.md).
 
 English, Slovak, German and Japanese are available. Official rule calls remain
 recognizable in English. Optional illustrated committee companions offer a
@@ -50,6 +57,7 @@ pnpm typecheck
 pnpm test:reconstruction
 pnpm test:referee
 pnpm test:rules
+pnpm test:rulesets
 pnpm test:i18n
 pnpm build
 ```
@@ -99,7 +107,8 @@ The app's **Embed** control provides a complete link for the selected situation.
 ```text
 components/          Application screens, 3D viewport and controls
 lib/simulator/       Field specification, match engines and referee cases
-lib/rulebook/        Rule index, learning exercises and source references
+lib/rulebook/        Learning exercises, rule-linked lessons and source references
+lib/rulesets/        One folder per rules version: index, engine parameters, changes
 lib/reconstruction/  Local tracking, media utilities and portable replay format
 lib/github/          Public submission protocol and signature verification
 public/              Browser-ready robot models and committee artwork

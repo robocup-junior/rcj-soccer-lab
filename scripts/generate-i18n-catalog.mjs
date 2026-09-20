@@ -7,6 +7,7 @@ import goalAssignmentTranslations from './goal-assignment-translations.mjs';
 import clipQuestionTranslations from './clip-question-translations.mjs';
 import placementQuestionTranslations from './placement-question-translations.mjs';
 import lessonUiTranslations from './lesson-ui-translations.mjs';
+import rulesetTranslations from './ruleset-translations.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUTPUT = path.join(ROOT, 'lib', 'i18n', 'catalog.generated.json');
@@ -114,6 +115,7 @@ const CACHE_INVALIDATION_TERMS = [
 
 const PRESERVED_SENTENCES = new Set([
   'at least partially in a penalty area',
+  'at least partially in their own penalty area',
   'The line is part of the area.',
   'Blue 1',
   'Blue 2',
@@ -954,6 +956,7 @@ for (const locale of TARGETS)
     clipQuestionTranslations[locale],
     placementQuestionTranslations[locale],
     lessonUiTranslations[locale],
+    rulesetTranslations[locale],
   );
 const hasLetters = (value) => /\p{L}/u.test(value);
 
@@ -1107,17 +1110,28 @@ async function extract() {
     }
   }
 
-  const officialIndex = JSON.parse(
-    await readFile(
-      path.join(ROOT, 'lib', 'rulebook', 'official-index.json'),
-      'utf8',
-    ),
-  );
-  for (const document of officialIndex.documents)
-    if (looksHuman(document.title ?? '')) exact.add(normalize(document.title));
-  for (const section of officialIndex.sections)
-    for (const key of ['title', 'chapter'])
-      if (looksHuman(section[key] ?? '')) exact.add(normalize(section[key]));
+  // Headings of every registered rule set are navigation labels.
+  const rulesetsRoot = path.join(ROOT, 'lib', 'rulesets');
+  for (const entry of await readdir(rulesetsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    let officialIndex;
+    try {
+      officialIndex = JSON.parse(
+        await readFile(
+          path.join(rulesetsRoot, entry.name, 'official-index.json'),
+          'utf8',
+        ),
+      );
+    } catch {
+      continue;
+    }
+    for (const document of officialIndex.documents)
+      if (looksHuman(document.title ?? ''))
+        exact.add(normalize(document.title));
+    for (const section of officialIndex.sections)
+      for (const key of ['title', 'chapter'])
+        if (looksHuman(section[key] ?? '')) exact.add(normalize(section[key]));
+  }
 
   const exactTeamVariants = [];
   for (const phrase of exact) exactTeamVariants.push(swappedTeams(phrase));

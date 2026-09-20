@@ -12,9 +12,11 @@ import {
   BookOpen,
   CircleDot,
   Gamepad2,
+  GitCompareArrows,
   GraduationCap,
   Languages,
   Scale,
+  ScrollText,
   Film,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,21 +49,36 @@ import { CommitteeCompanions } from '@/components/committee/CommitteeCompanions'
 import type { CertificationGameLaunch } from '@/lib/account';
 import type { RefereeCertificationBridge } from '@/lib/certification/client-types';
 import { LEARNING_SITUATIONS } from '@/lib/rulebook/learning';
+import { learningBank } from '@/lib/rulebook/learning-bank';
 import type { MatchReplay } from '@/lib/certification/replay';
+import {
+  CERTIFICATION_RULESET_LOCK,
+  RulesetScope,
+  useRuleset,
+} from '@/components/rulesets/RulesetProvider';
+import {
+  CERTIFICATION_RULESET_ID,
+  RULESETS,
+  comparisonPartner,
+  rulesetOptionLabel,
+} from '@/lib/rulesets/registry';
 
 const tabs = [
   { id: 'rules', label: 'Rules', icon: BookOpen },
   { id: 'play', label: 'Play', icon: Gamepad2 },
   { id: 'referee', label: 'Referee', icon: Scale },
+  { id: 'compare', label: 'Version comparison', icon: GitCompareArrows },
   { id: 'reconstruct', label: 'Video replay', icon: Film },
   { id: 'academy', label: 'Academy', icon: GraduationCap },
 ] as const;
 const ReconstructionWorkspace = lazy(
   () => import('../reconstruction/ReconstructionWorkspace'),
 );
+const VersionComparison = lazy(() => import('../compare/VersionComparison'));
 
 export function SimulatorApp() {
   const { locale, setLocale } = useLocalization();
+  const { selectedId: rulesetId, select: selectRuleset } = useRuleset();
   const {
     account,
     beginCertificationGame,
@@ -104,10 +121,10 @@ export function SimulatorApp() {
       setNav(next);
       setVisited((current) => [...new Set([...current, next.mode])]);
       const url = new URL(window.location.href);
-      url.search = navigationSearch(next, visual, locale);
+      url.search = navigationSearch(next, visual, locale, rulesetId);
       window.history.pushState(null, '', url);
     },
-    [locale, nav, robotVisual],
+    [locale, nav, robotVisual, rulesetId],
   );
   const openRule = useCallback(
     (sectionId: string) =>
@@ -215,10 +232,27 @@ export function SimulatorApp() {
   const changeRobotVisual = (value: RobotVisualId) => {
     setRobotVisual(value);
     const url = new URL(window.location.href);
-    url.search = navigationSearch(nav, value, locale);
+    url.search = navigationSearch(nav, value, locale, rulesetId);
     window.history.replaceState(null, '', url);
   };
-  const embedded = SCENARIOS.find((item) => item.id === nav.embed);
+  // Certification rounds, their games and saved replays are assigned and
+  // verified under one fixed rule set, whatever the header selection says.
+  const rulesPinned =
+    nav.certificationTrack === 'rules' &&
+    certificationRound?.status === 'in-progress';
+  const refereePinned =
+    Boolean(savedReview) ||
+    nav.certificationTrack === 'step' ||
+    nav.certificationTrack === 'continuous';
+  const certificationPinned =
+    (nav.mode === 'rules' && rulesPinned) ||
+    (nav.mode === 'referee' && refereePinned);
+  const activeRulesetId = certificationPinned
+    ? CERTIFICATION_RULESET_ID
+    : rulesetId;
+  const embedded =
+    learningBank(rulesetId).scenarios.find((item) => item.id === nav.embed) ??
+    SCENARIOS.find((item) => item.id === nav.embed);
   if (embedded)
     return (
       <main className="embed-shell lesson-embed">
@@ -292,6 +326,30 @@ export function SimulatorApp() {
           ))}
         </nav>
         <div className="app-header-actions">
+          <label
+            className="app-ruleset-select"
+            data-draft={
+              RULESETS.find((item) => item.id === activeRulesetId)?.status ===
+              'draft'
+            }
+            title={certificationPinned ? CERTIFICATION_RULESET_LOCK : undefined}
+          >
+            <ScrollText aria-hidden="true" />
+            <span className="sr-only">Rules version</span>
+            <NativeSelect
+              size="sm"
+              aria-label="Rules version"
+              value={activeRulesetId}
+              disabled={certificationPinned}
+              onChange={(event) => selectRuleset(event.target.value)}
+            >
+              {RULESETS.map((item) => (
+                <NativeSelectOption key={item.id} value={item.id}>
+                  {rulesetOptionLabel(item)}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </label>
           {nav.mode !== 'academy' && (
             <NativeSelect
               className="app-robot-select"
@@ -348,21 +406,28 @@ export function SimulatorApp() {
         </div>
       </header>
       {visited.includes('rules') && (
-        <Rulebook
-          robotVisual={robotVisual}
-          active={nav.mode === 'rules'}
-          sectionId={nav.sectionId}
-          situationId={nav.situationId}
-          onSelect={(sectionId, situationId) =>
-            navigate({ mode: 'rules', sectionId, situationId })
-          }
-          learning={
-            nav.certificationTrack === 'rules' &&
-            certificationRound?.status === 'in-progress'
-              ? certificationRuleLearningBridge
-              : practiceRuleLearningBridge
-          }
-        />
+        <RulesetScope
+          rulesetId={rulesPinned ? CERTIFICATION_RULESET_ID : null}
+          reason={CERTIFICATION_RULESET_LOCK}
+        >
+          <Rulebook
+            robotVisual={robotVisual}
+            active={nav.mode === 'rules'}
+            sectionId={nav.sectionId}
+            situationId={nav.situationId}
+            onSelect={(sectionId, situationId) =>
+              navigate({ mode: 'rules', sectionId, situationId })
+            }
+            onCompare={() =>
+              navigate({ mode: 'compare', certificationTrack: null })
+            }
+            learning={
+              rulesPinned
+                ? certificationRuleLearningBridge
+                : practiceRuleLearningBridge
+            }
+          />
+        </RulesetScope>
       )}
       {visited.includes('play') && (
         <MatchPlay
@@ -375,29 +440,63 @@ export function SimulatorApp() {
         />
       )}
       {visited.includes('referee') && (
-        <RefereePlay
-          key={
-            savedReview
-              ? `review:${savedReview.id}`
-              : nav.certificationTrack === 'step' ||
-                  nav.certificationTrack === 'continuous'
-                ? `certification:${nav.certificationTrack}`
-                : 'practice'
-          }
-          robotVisual={robotVisual}
-          savedReview={savedReview?.replay}
-          active={nav.mode === 'referee'}
-          onExit={() => {
-            setSavedReview(null);
-            navigate({
-              mode: savedReview ? 'academy' : 'play',
-              certificationTrack: null,
-            });
-          }}
-          onOpenRule={openRule}
-          tracking={practiceTrackingBridge}
-          certification={certificationBridge}
-        />
+        <RulesetScope
+          rulesetId={refereePinned ? CERTIFICATION_RULESET_ID : null}
+          reason={CERTIFICATION_RULESET_LOCK}
+        >
+          <RefereePlay
+            key={
+              savedReview
+                ? `review:${savedReview.id}`
+                : nav.certificationTrack === 'step' ||
+                    nav.certificationTrack === 'continuous'
+                  ? `certification:${nav.certificationTrack}`
+                  : // A practice match is played under one rule set from start
+                    // to finish; choosing another one starts a new match.
+                    `practice:${rulesetId}`
+            }
+            robotVisual={robotVisual}
+            savedReview={savedReview?.replay}
+            active={nav.mode === 'referee'}
+            onExit={() => {
+              setSavedReview(null);
+              navigate({
+                mode: savedReview ? 'academy' : 'play',
+                certificationTrack: null,
+              });
+            }}
+            onOpenRule={openRule}
+            tracking={practiceTrackingBridge}
+            certification={certificationBridge}
+          />
+        </RulesetScope>
+      )}
+      {visited.includes('compare') && (
+        <Suspense fallback={<output>Loading the comparison…</output>}>
+          <VersionComparison
+            active={nav.mode === 'compare'}
+            compareWith={nav.compareWith ?? comparisonPartner(rulesetId)}
+            onCompareWithChange={(compareWith) => navigate({ compareWith })}
+            onOpenRule={(sectionId, targetRulesetId) => {
+              selectRuleset(targetRulesetId);
+              navigate({
+                mode: 'rules',
+                sectionId,
+                situationId: null,
+                certificationTrack: null,
+              });
+            }}
+            onOpenSituation={(situationId, sectionId, targetRulesetId) => {
+              selectRuleset(targetRulesetId);
+              navigate({
+                mode: 'rules',
+                sectionId,
+                situationId,
+                certificationTrack: null,
+              });
+            }}
+          />
+        </Suspense>
       )}
       {visited.includes('reconstruct') && (
         <Suspense fallback={<p role="status">Loading video replay tools…</p>}>

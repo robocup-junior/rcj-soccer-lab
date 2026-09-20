@@ -4,7 +4,14 @@ import {
   type RuleClip,
   type RuleScene,
 } from '../rulebook/animations';
+import { OVERLAY_CASES, OVERLAY_CLIPS } from '../rulebook/overlays';
+import { rulebookCatalog } from '../rulebook/catalog';
+import {
+  CERTIFICATION_RULESET_ID,
+  gameplayRulesFor,
+} from '../rulesets/gameplay';
 import type { Pose } from './types';
+import type { TrainingTopic } from './referee-training';
 import { COMMITTEE_TRAINING_POLICY } from './training-policy';
 import { RCJ_FIELD_DERIVED as FIELD } from './field-spec';
 import { clampRobotToField } from './referee-geometry';
@@ -108,6 +115,22 @@ export const REFEREE_ACTIONS = [
   },
 ] as const;
 export type RefereeAction = (typeof REFEREE_ACTIONS)[number]['id'];
+
+/**
+ * Button and review label of a call under a rule set. Action ids never change
+ * (stored evidence uses them); only what a call is called may.
+ */
+export function refereeActionLabel(
+  action: string,
+  rulesetId?: string | null,
+): string {
+  if (
+    action === 'holding' &&
+    gameplayRulesFor(rulesetId).holding.consequence === 'damaged'
+  )
+    return 'Holding · remove as damaged';
+  return REFEREE_ACTIONS.find((entry) => entry.id === action)?.label ?? action;
+}
 export type RefereeCall = { action: RefereeAction; target?: string };
 export type RequiredCall = RefereeCall & {
   discretionary?: boolean;
@@ -127,12 +150,30 @@ export type RefereeCase = {
   explanation: string;
   steps: RequiredCall[][];
   anchor?: string;
-  bench?: { robot: string; waited: number; ready: boolean }[];
+  /** `reason` defaults to a repaired damaged robot ('Repair exercise'). */
+  bench?: { robot: string; waited: number; ready: boolean; reason?: string }[];
   kickoff?: boolean;
   kickoffTeam?: 'blue' | 'yellow' | 'neutral';
   opponentDamage?: boolean;
   repeated?: boolean;
+  /**
+   * A case added by a later rule set names the original case whose scene
+   * handling, hints and rule references it shares. See caseKind().
+   */
+  like?: string;
+  /** Scoring topic, when it differs from the one derived from caseKind(). */
+  topic?: TrainingTopic;
+  /** Overrides requiresStoppage(), e.g. when a goal stands in a new variant. */
+  stopsPlay?: boolean;
 };
+
+/**
+ * Behavioural identity of a case. Live incidents ('live-…') and cases that a
+ * later rule set models on an original one ('like') share its handling.
+ */
+export function caseKind(item: Pick<RefereeCase, 'id' | 'like'>) {
+  return (item.like ?? item.id).replace(/^live-/, '');
+}
 const call = (
   action: RefereeAction,
   target?: string,
@@ -639,7 +680,8 @@ export function transformPose(value: Pose, variant: Variant): Pose {
   return { x, z, yaw: Math.atan2(Math.sin(yaw), Math.cos(yaw)) };
 }
 export function evidenceClip(item: RefereeCase): RuleClip {
-  const source = RULE_CLIPS.find((clip) => clip.id === item.clip)!;
+  const source = (RULE_CLIPS.find((clip) => clip.id === item.clip) ??
+    OVERLAY_CLIPS.find((clip) => clip.id === item.clip))!;
   // Cutting the timeline also prevents interpolation toward a later referee action.
   return {
     ...source,
@@ -662,7 +704,7 @@ export function caseScene(
       transformPose(value, variant),
     ]),
   );
-  if (item.id === 'out-goal') {
+  if (caseKind(item) === 'out-goal' && item.clip === 'goal-contact') {
     // The shared shot reaches the mouth at 3 s and the back wall at 4 s.
     // Show the earlier infringement, not just a text-only assertion: Blue 2
     // reaches the physical wall at 1.5 s and stays there until removed.
@@ -696,23 +738,42 @@ export function evidenceDuration(item: RefereeCase) {
 
 /** §2.11: ordinary corrections/removals take place while the game continues. */
 export function requiresStoppage(item: RefereeCase) {
-  const id = item.id.replace(/^live-/, '');
+  if (item.stopsPlay !== undefined) return item.stopsPlay;
+  const id = caseKind(item);
   return (
     ['goal', 'own-goal', 'interruption', 'spectator', 'preflight'].includes(
       id,
     ) || Boolean(item.kickoff)
   );
 }
-export function ruleUrl(item: RefereeCase) {
-  const anchor =
-    item.anchor ?? RULE_CLIPS.find((clip) => clip.id === item.clip)!.anchor;
-  return `https://robocup-junior.github.io/soccer-rules/master/rules.html#${anchor}`;
+export function ruleAnchor(item: RefereeCase) {
+  return (
+    item.anchor ??
+    (RULE_CLIPS.find((clip) => clip.id === item.clip) ??
+      OVERLAY_CLIPS.find((clip) => clip.id === item.clip))!.anchor
+  );
+}
+/** Official source of a case in the given rule set (certification's by default). */
+export function ruleUrl(item: RefereeCase, rulesetId?: string | null) {
+  const catalog = rulebookCatalog(rulesetId ?? CERTIFICATION_RULESET_ID);
+  return `${catalog.documentUrl('soccer')}#${ruleAnchor(item)}`;
+}
+/** Original cases and the ones later rule sets add, by id. */
+export function findRefereeCase(id: string) {
+  return (
+    REFEREE_CASES.find((item) => item.id === id) ??
+    OVERLAY_CASES.find((item) => item.id === id)
+  );
 }
 
 export class IncidentBag {
   private randomState: number;
   private bag: RefereeCase[] = [];
-  constructor(readonly seed: number) {
+  constructor(
+    readonly seed: number,
+    /** Drill catalogue of the selected rule set. */
+    private readonly cases: readonly RefereeCase[] = REFEREE_CASES,
+  ) {
     this.randomState = seed >>> 0 || 1;
   }
   random() {
@@ -725,7 +786,7 @@ export class IncidentBag {
   }
   next() {
     if (!this.bag.length) {
-      this.bag = [...REFEREE_CASES];
+      this.bag = [...this.cases];
       for (let i = this.bag.length - 1; i > 0; i--) {
         const j = Math.floor(this.random() * (i + 1));
         [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];

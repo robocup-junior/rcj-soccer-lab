@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   committeeTopic,
   emitCommitteeEvent,
@@ -47,14 +54,21 @@ import {
 } from '@/lib/simulator/situation-replay';
 import {
   REFEREE_ACTIONS,
-  REFEREE_CASES,
   REFEREE_FAMILIES,
+  refereeActionLabel,
   type RefereeCall,
 } from '@/lib/simulator/referee-cases';
 import type { RobotVisualId } from '@/lib/simulator/robot-models';
-import { robotPenaltyOverlap } from '@/lib/simulator/referee-geometry';
+import {
+  robotPenaltyOverlap,
+  robotReachesPushingLine,
+} from '@/lib/simulator/referee-geometry';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/components/i18n/LocalizationProvider';
+import { useRuleset } from '@/components/rulesets/RulesetProvider';
+import { learningBank } from '@/lib/rulebook/learning-bank';
+import { gameplayRulesFor } from '@/lib/rulesets/gameplay';
+import { rulesetOptionLabel } from '@/lib/rulesets/registry';
 import { appendLocaleToSearch } from '@/lib/i18n';
 import { createResultSaveTracker } from '@/lib/account/result-save';
 import {
@@ -77,10 +91,8 @@ import {
 
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
-const callLabel = (call: RefereeCall) => {
-  const action =
-    REFEREE_ACTIONS.find((entry) => entry.id === call.action)?.label ??
-    call.action;
+const callLabel = (call: RefereeCall, rulesetId?: string) => {
+  const action = refereeActionLabel(call.action, rulesetId);
   const target = call.target
     ? (MATCH_ROBOTS.find((robot) => robot.id === call.target)?.label ??
       (call.target === 'blue'
@@ -172,6 +184,14 @@ export function RefereePlay({
   savedReview?: MatchReplay;
 }) {
   const { locale } = useLocalization();
+  // Inside a certification or review scope this is the certification rule set.
+  const { ruleset, rulesetId, lockedReason } = useRuleset();
+  // Memoized so the compiler treats both as read-only values.
+  const REFEREE_CASES = useMemo(
+    () => learningBank(rulesetId).cases,
+    [rulesetId],
+  );
+  const rules = useMemo(() => gameplayRulesFor(rulesetId), [rulesetId]);
   const initialCertificationAttempt = certification?.attempt ?? null;
   const initialMode = savedReview?.mode ?? certification?.mode ?? 'step';
   const initialDuration =
@@ -192,6 +212,7 @@ export function RefereePlay({
         duration: initialDuration,
         topics: ALL_TRAINING_TOPICS,
         lockRobotVisual: Boolean(certification),
+        rulesetId,
       });
     try {
       const evidence = savedReview ?? initialCertificationAttempt?.checkpoint;
@@ -760,6 +781,7 @@ export function RefereePlay({
         mode,
         duration,
         topics: trainingTopics,
+        rulesetId,
       });
       setSession(next);
       setSessionKind('practice');
@@ -769,7 +791,7 @@ export function RefereePlay({
       setTopic('random');
       setRunning(false);
     },
-    [certification, robotVisual, mode, duration, trainingTopics],
+    [certification, robotVisual, mode, duration, trainingTopics, rulesetId],
   );
   const whistle = useCallback(() => {
     if (replay || !certificationSessionReady) return;
@@ -1285,12 +1307,36 @@ export function RefereePlay({
                         session.robotVisual,
                       ),
                     );
+                    const lineDepth = rules.pushing.lineDepth;
+                    // The scoreboard can cover the far penalty area, so say
+                    // in words which robots have reached the pushing line.
+                    const atLine =
+                      lineDepth !== null &&
+                      [-1, 1].some((end) =>
+                        robotReachesPushingLine(
+                          view.actors[robot.id],
+                          end,
+                          lineDepth,
+                          session.robotVisual,
+                        ),
+                      );
                     return (
                       <span
                         key={robot.id}
-                        className={overlaps ? 'text-rose-300' : 'text-white/65'}
+                        className={
+                          atLine
+                            ? 'text-amber-300'
+                            : overlaps
+                              ? 'text-rose-300'
+                              : 'text-white/65'
+                        }
                       >
-                        {robot.label}: {overlaps ? 'overlapping' : 'outside'}
+                        {robot.label}:{' '}
+                        {atLine
+                          ? 'at the pushing line'
+                          : overlaps
+                            ? 'overlapping'
+                            : 'outside'}
                       </span>
                     );
                   },
@@ -1472,7 +1518,12 @@ export function RefereePlay({
         >
           <div className="referee-heading">
             <div>
-              <p className="rule-kicker">AI MATCH / REFEREE</p>
+              <p className="rule-kicker">
+                {`AI MATCH / REFEREE / ${ruleset.shortLabel}`}
+                {ruleset.status === 'draft' && (
+                  <span className="ruleset-draft-badge">Draft</span>
+                )}
+              </p>
               <h1>Make the call</h1>
             </div>
             <Button
@@ -1613,7 +1664,7 @@ export function RefereePlay({
                         })
                       }
                     >
-                      {action.label}
+                      {refereeActionLabel(action.id, rulesetId)}
                     </Button>
                   ))}
                 </div>
@@ -1677,6 +1728,24 @@ export function RefereePlay({
               {certification ? 'Certification attempt' : 'Match setup'} ·{' '}
               {frame.trainingMode === 'continuous' ? 'Continuous' : 'Step mode'}
             </summary>
+            <p className="match-ruleset-note">
+              <strong>{rulesetOptionLabel(ruleset)}</strong>
+              {lockedReason ? (
+                <span>{lockedReason}</span>
+              ) : (
+                <span>
+                  Choose the rules version in the header. Changing it starts a
+                  new practice match.
+                </span>
+              )}
+              {rules.pushing.lineDepth !== null && (
+                <span>
+                  {rules.pushing.lineProvisional
+                    ? 'The field shows the pushing line at a provisional position.'
+                    : 'The field shows the pushing line.'}
+                </span>
+              )}
+            </p>
             <label htmlFor="referee-mode">Refereeing mode</label>
             <NativeSelect
               id="referee-mode"
@@ -1938,12 +2007,14 @@ export function RefereePlay({
                         <span>
                           <b>You:</b>{' '}
                           {event.actual
-                            ? callLabel(event.actual)
+                            ? callLabel(event.actual, rulesetId)
                             : 'No call within the decision window'}
                         </span>
                         <span>
                           <b>Expected:</b>{' '}
-                          {event.expected.map(callLabel).join(' or ')}
+                          {event.expected
+                            .map((call) => callLabel(call, rulesetId))
+                            .join(' or ')}
                         </span>
                         <small>{event.effect}</small>
                         {event.actual && event.at - event.eventAt > 0.5 && (
@@ -2390,7 +2461,7 @@ export function RefereePlay({
                       })
                     }
                   >
-                    {action.label}
+                    {refereeActionLabel(action.id, rulesetId)}
                   </Button>
                 ))}
               </div>
@@ -2416,7 +2487,9 @@ export function RefereePlay({
                   <output>
                     {entry.eligible
                       ? 'Eligible'
-                      : `${Math.ceil(entry.remaining)} s`}
+                      : entry.awaitingInterruption
+                        ? 'Next interruption'
+                        : `${Math.ceil(entry.remaining)} s`}
                   </output>
                   <Button
                     size="sm"
@@ -2442,7 +2515,9 @@ export function RefereePlay({
               <p>
                 {frame.trainingMode === 'continuous'
                   ? 'Return now always follows your decision, even if the robot is not yet eligible. That judgment is reviewed after full time.'
-                  : 'Return needs your permission. Timers use simulated play time; a new kickoff can allow an earlier return.'}
+                  : rules.outOfBounds.returnNeedsInterruption
+                    ? 'Return needs your permission. Timers use simulated play time; after the full penalty a robot waits for the next interruption.'
+                    : 'Return needs your permission. Timers use simulated play time; a new kickoff can allow an earlier return.'}
               </p>
             </section>
           )}

@@ -1,0 +1,1313 @@
+// Reviewed translations for lib/rulesets/2027/learning.ts: replay questions,
+// knowledge checks, referee drills and the reworded 2026 situations.
+// Rows are [English, Slovak, German, Japanese]; see interface.mjs for the terms.
+//
+// A row that names a team is written once. The index derives the mirrored row
+// (Blue <-> Yellow) in every language, so team words must use the stems
+// modr-/žlt-, Blau/Gelb (blau-/gelb-) and 青/黄.
+const rows = [
+  // Replay: contact at the pushing line
+  [
+    'Contact at the pushing line',
+    'Kontakt na čiare tlačenia',
+    'Kontakt an der Pushing-Linie',
+    'プッシングラインでの接触',
+  ],
+  [
+    'Blue approaches the ball in front of the defender',
+    'Modrý tím sa blíži k lopte pred obrancom',
+    'Blau nähert sich dem Ball vor dem Verteidiger',
+    '青が守備ロボットの前のボールに近づく',
+  ],
+  [
+    'Robot-ball-robot contact, short of the line',
+    'Kontakt robot–lopta–robot pred čiarou',
+    'Kontakt Roboter–Ball–Roboter vor der Linie',
+    'ロボット・ボール・ロボットの接触（ラインの手前）',
+  ],
+  [
+    'Defender has not reached the line',
+    'Obranca čiaru nedosiahol',
+    'Verteidiger hat die Linie nicht erreicht',
+    '守備ロボットはラインに達していない',
+  ],
+  [
+    'Blue keeps driving: the defender reaches the line',
+    'Modrý tím tlačí ďalej: obranca dosiahne čiaru',
+    'Blau schiebt weiter: Der Verteidiger erreicht die Linie',
+    '青が押し続け、守備ロボットがラインに達する',
+  ],
+  [
+    'Pushing · provisional line position',
+    'Tlačenie · predbežná poloha čiary',
+    'Pushing · vorläufige Linienposition',
+    'プッシング · ラインは暫定位置',
+  ],
+  [
+    'Referee moves the ball to the far spot',
+    'Rozhodca presunie loptu na vzdialený bod',
+    'Der Schiedsrichter legt den Ball auf den entfernten Punkt',
+    '審判がボールを遠いスポットへ移す',
+  ],
+  [
+    'Blue pushes the ball and the Yellow defender back until the defender reaches the pushing line. What do you call under the 2027 draft?',
+    'Modrý tím tlačí loptu a žltého obrancu dozadu, až kým obranca nedosiahne čiaru tlačenia. Čo podľa návrhu 2027 odpískate?',
+    'Blau schiebt den Ball und den Verteidiger von Gelb zurück, bis der Verteidiger die Pushing-Linie erreicht. Was pfeifst du nach dem Entwurf 2027?',
+    '青がボールと黄の守備ロボットを押し込み、守備ロボットがプッシングラインに達しました。2027年ドラフトではどう判定しますか？',
+  ],
+  [
+    'Pushing: move the ball to the furthest unoccupied neutral spot',
+    'Tlačenie: presuniem loptu na najvzdialenejší neobsadený neutrálny bod',
+    'Pushing: den Ball auf den am weitesten entfernten freien Neutralpunkt legen',
+    'プッシング：ボールを最も遠い空きニュートラルスポットへ移す',
+  ],
+  [
+    'Play on: pushing needs direct robot-to-robot contact',
+    'Pokračovanie hry: tlačenie vyžaduje priamy kontakt robota s robotom',
+    'Weiterspielen: Pushing setzt direkten Kontakt zwischen Robotern voraus',
+    'プレー続行：プッシングにはロボット同士の直接の接触が必要',
+  ],
+  [
+    'Pushing only if you judge the contact to be too hard',
+    'Tlačenie len vtedy, ak kontakt posúdim ako príliš tvrdý',
+    'Pushing nur, wenn du den Kontakt für zu hart hältst',
+    '接触が強すぎると判断した場合のみプッシング',
+  ],
+  [
+    'In the 2027 draft, robot-to-robot or robot-ball-robot contact in which the defender reaches the pushing line is pushing. The call no longer depends on discretion. The line position shown here is provisional.',
+    'V návrhu 2027 je kontakt robot–robot alebo robot–lopta–robot, pri ktorom obranca dosiahne čiaru tlačenia, tlačením. Rozhodnutie už nezávisí od uváženia rozhodcu. Poloha čiary zobrazená tu je predbežná.',
+    'Im Entwurf 2027 ist Kontakt Roboter–Roboter oder Roboter–Ball–Roboter, bei dem der Verteidiger die Pushing-Linie erreicht, Pushing. Die Entscheidung hängt nicht mehr vom Ermessen ab. Die hier gezeigte Linienposition ist vorläufig.',
+    '2027年ドラフトでは、ロボット同士またはロボット・ボール・ロボットの接触で守備ロボットがプッシングラインに達するとプッシングです。判定は裁量によらなくなりました。ここに表示しているラインの位置は暫定です。',
+  ],
+
+  // Replay: the same contact at midfield
+  [
+    'The same approach at midfield',
+    'Rovnaký nábeh v strede ihriska',
+    'Derselbe Angriff im Mittelfeld',
+    '同じ接近を中盤で',
+  ],
+  [
+    'Contact far from both penalty areas',
+    'Kontakt ďaleko od oboch pokutových území',
+    'Kontakt weit entfernt von beiden Strafräumen',
+    'どちらのペナルティエリアからも離れた接触',
+  ],
+  [
+    'No defender at a pushing line',
+    'Žiadny obranca na čiare tlačenia',
+    'Kein Verteidiger an einer Pushing-Linie',
+    'プッシングライン上に守備ロボットはいない',
+  ],
+  [
+    'The opponents touch each other and the ball at midfield. Is this pushing under the 2027 draft?',
+    'Súperi sa v strede ihriska dotýkajú navzájom aj lopty. Je to podľa návrhu 2027 tlačenie?',
+    'Die Gegner berühren einander und den Ball im Mittelfeld. Ist das nach dem Entwurf 2027 Pushing?',
+    '両者が中盤で互いに接触し、ボールにも触れています。2027年ドラフトではプッシングになりますか？',
+  ],
+  [
+    'No; no defender has reached a pushing line',
+    'Nie; žiadny obranca nedosiahol čiaru tlačenia',
+    'Nein; kein Verteidiger hat eine Pushing-Linie erreicht',
+    'いいえ。どの守備ロボットもプッシングラインに達していない',
+  ],
+  [
+    'The 2027 pushing rule depends on the defender reaching the pushing line inside its penalty area. Midfield contact cannot meet that condition; assess other infringements separately.',
+    'Pravidlo o tlačení z roku 2027 závisí od toho, či obranca dosiahne čiaru tlačenia vo svojom pokutovom území. Kontakt v strede ihriska túto podmienku splniť nemôže; iné priestupky posúďte osobitne.',
+    'Die Pushing-Regel 2027 hängt davon ab, dass der Verteidiger die Pushing-Linie in seinem Strafraum erreicht. Kontakt im Mittelfeld kann diese Bedingung nicht erfüllen; beurteile andere Verstöße getrennt.',
+    '2027年のプッシング規則は、守備ロボットが自陣ペナルティエリア内のプッシングラインに達することが条件です。中盤での接触はこの条件を満たしません。他の反則は別に判断します。',
+  ],
+
+  // Replay: two attackers in the opponent's area
+  [
+    'Two attackers in the opponent’s area',
+    'Dvaja útočníci v súperovom území',
+    'Zwei Angreifer im gegnerischen Strafraum',
+    '相手エリアに入った攻撃側の2台',
+  ],
+  [
+    'Blue attacks the goal Yellow defends',
+    'Modrý tím útočí na bránku, ktorú bráni žltý tím',
+    'Blau greift das Tor an, das Gelb verteidigt',
+    '青が、黄の守るゴールを攻める',
+  ],
+  [
+    'Both Blue robots partly overlap Yellow’s penalty area',
+    'Oba modré roboty čiastočne zasahujú do pokutového územia žltého tímu',
+    'Beide blauen Roboter stehen teilweise im Strafraum von Gelb',
+    '青の2台が一部ずつ黄のペナルティエリアに入っている',
+  ],
+  [
+    'Not their own penalty area',
+    'Nie je to ich vlastné pokutové územie',
+    'Nicht ihr eigener Strafraum',
+    '自陣のペナルティエリアではない',
+  ],
+  [
+    'No relocation · play continues',
+    'Bez premiestnenia · hra pokračuje',
+    'Kein Versetzen · das Spiel läuft weiter',
+    '移動なし · プレー続行',
+  ],
+  [
+    'Two Blue attackers partly overlap the penalty area of the goal Yellow defends. Is this multiple defense under the 2027 draft?',
+    'Dvaja modrí útočníci čiastočne zasahujú do pokutového územia pri bránke, ktorú bráni žltý tím. Je to podľa návrhu 2027 viacnásobná obrana?',
+    'Zwei Angreifer von Blau stehen teilweise im Strafraum des Tors, das Gelb verteidigt. Ist das nach dem Entwurf 2027 Mehrfachverteidigung?',
+    '青の攻撃ロボット2台が、黄の守るゴールのペナルティエリアに一部ずつ入っています。2027年ドラフトでは複数守備になりますか？',
+  ],
+  [
+    'Yes; relocate the Blue robot farther from the ball',
+    'Áno; premiestnim modrého robota, ktorý je ďalej od lopty',
+    'Ja; den blauen Roboter versetzen, der weiter vom Ball entfernt ist',
+    'はい。ボールから遠いほうの青のロボットを移す',
+  ],
+  [
+    'No; multiple defense applies only in a team’s own penalty area',
+    'Nie; viacnásobná obrana platí len vo vlastnom pokutovom území tímu',
+    'Nein; Mehrfachverteidigung gilt nur im eigenen Strafraum eines Teams',
+    'いいえ。複数守備は自陣のペナルティエリアにのみ適用される',
+  ],
+  [
+    'The 2027 draft limits multiple defense to two robots partly inside their own penalty area. Attackers are not relocated; a robot fully inside any penalty area is still out of bounds.',
+    'Návrh 2027 obmedzuje viacnásobnú obranu na dva roboty čiastočne vo vlastnom pokutovom území. Útočníci sa nepremiestňujú; robot, ktorý je celý v ktoromkoľvek pokutovom území, je naďalej mimo ihriska.',
+    'Der Entwurf 2027 beschränkt Mehrfachverteidigung auf zwei Roboter, die teilweise im eigenen Strafraum stehen. Angreifer werden nicht versetzt; ein Roboter, der vollständig in einem Strafraum steht, ist weiterhin im Aus.',
+    '2027年ドラフトでは、複数守備は自陣のペナルティエリアに一部入った2台に限られます。攻撃側のロボットは移動させません。どちらのペナルティエリアでも、完全に入ったロボットは引き続きアウトオブバウンズです。',
+  ],
+
+  // Replay: a locked ball under challenge
+  [
+    'Blue 1 leaves the field as damaged',
+    'Blue 1 opúšťa ihrisko ako poškodený',
+    'Blue 1 verlässt das Feld als beschädigt',
+    'Blue 1は故障扱いで退場する',
+  ],
+  [
+    'The ball stays fixed to Blue 1 while it moves, and Yellow cannot free it. What follows under the 2027 draft?',
+    'Lopta zostáva počas pohybu pripevnená k Blue 1 a žltý tím ju nedokáže uvoľniť. Čo podľa návrhu 2027 nasleduje?',
+    'Der Ball bleibt an Blue 1 fixiert, während er fährt, und Gelb kann ihn nicht lösen. Was folgt nach dem Entwurf 2027?',
+    'Blue 1が動いてもボールは固定されたままで、黄はボールを奪えません。2027年ドラフトではどうなりますか？',
+  ],
+  [
+    'Blue 1 is deemed damaged and loses its inspection sticker until it complies',
+    'Blue 1 sa považuje za poškodeného a stráca nálepku z technickej kontroly, kým nevyhovie pravidlám',
+    'Blue 1 gilt als beschädigt und verliert seinen Inspektionsaufkleber, bis er regelkonform ist',
+    'Blue 1は故障扱いとなり、適合するまで検査ステッカーを失う',
+  ],
+  [
+    'Play continues; the mechanism is checked after the game',
+    'Hra pokračuje; mechanizmus sa skontroluje po zápase',
+    'Das Spiel läuft weiter; der Mechanismus wird nach dem Spiel geprüft',
+    'プレーを続け、機構は試合後に確認する',
+  ],
+  [
+    'A ball fixed to the moving robot and inaccessible to opponents is holding, not the backspin-dribbler exception. During gameplay the 2027 draft deems the robot damaged; it needs a compliant mechanism and a new inspection before it returns.',
+    'Lopta pripevnená k pohybujúcemu sa robotovi a neprístupná súperom je držanie lopty, nie výnimka pre dribbler so spätnou rotáciou. Návrh 2027 považuje takého robota počas hry za poškodeného; pred návratom potrebuje vyhovujúci mechanizmus a novú technickú kontrolu.',
+    'Ein am fahrenden Roboter fixierter, für Gegner unzugänglicher Ball ist Ballhalten, nicht die Ausnahme für Dribbler mit Rückwärtsdrall. Im laufenden Spiel gilt der Roboter nach dem Entwurf 2027 als beschädigt; vor der Rückkehr braucht er einen regelkonformen Mechanismus und eine neue Inspektion.',
+    '動いているロボットに固定され、相手が届かないボールはボール保持であり、バックスピンドリブラーの例外には当たりません。2027年ドラフトでは、試合中のこのロボットは故障扱いとなり、復帰には適合した機構と再検査が必要です。',
+  ],
+
+  // Replay: wall contact
+  [
+    'At least 60 s · match continues',
+    'Najmenej 60 s · zápas pokračuje',
+    'Mindestens 60 s · das Spiel läuft weiter',
+    '最低60秒 · 試合は続行',
+  ],
+  [
+    'Minute served · waiting for an interruption',
+    'Minúta odpykaná · čaká sa na prerušenie hry',
+    'Minute verbüßt · Warten auf eine Unterbrechung',
+    '1分経過 · 中断を待機中',
+  ],
+  [
+    'Play is still running',
+    'Hra stále beží',
+    'Das Spiel läuft noch',
+    'プレーはまだ続いている',
+  ],
+  [
+    'Interruption: the robot returns in its own corner',
+    'Prerušenie hry: robot sa vracia do vlastného rohu',
+    'Unterbrechung: Der Roboter kehrt in seiner eigenen Ecke zurück',
+    '中断：ロボットは自陣コーナーへ復帰',
+  ],
+  [
+    'Own corner area · time compressed',
+    'Priestor vlastného rohu · čas je skrátený',
+    'Bereich der eigenen Ecke · Zeit gerafft',
+    '自陣コーナー付近 · 時間は短縮表示',
+  ],
+  [
+    'Out of bounds: remove Blue 1 for at least one minute',
+    'Mimo ihriska: odstránim Blue 1 najmenej na jednu minútu',
+    'Aus: Blue 1 für mindestens eine Minute vom Feld nehmen',
+    'アウトオブバウンズとしてBlue 1を最低1分間退場させる',
+  ],
+  [
+    'Wall contact is out of bounds. In the 2027 draft the minute is a minimum: the match clock continues, and after the minute the robot returns at the next game interruption, in the area of its own corner.',
+    'Kontakt so stenou znamená opustenie ihriska. V návrhu 2027 je minúta minimom: zápasový čas beží ďalej a po uplynutí minúty sa robot vráti pri najbližšom prerušení hry do priestoru svojho vlastného rohu.',
+    'Wandkontakt ist Aus. Im Entwurf 2027 ist die Minute eine Mindestdauer: Die Spieluhr läuft weiter, und nach der Minute kehrt der Roboter bei der nächsten Spielunterbrechung im Bereich seiner eigenen Ecke zurück.',
+    '壁への接触はアウトオブバウンズです。2027年ドラフトでは1分は最低時間です。試合時計は進み続け、1分経過後、ロボットは次の試合の中断時に自陣コーナー付近へ復帰します。',
+  ],
+
+  // Replay: pushed onto the ramp
+  [
+    'An opponent pushes a robot onto the ramp',
+    'Súper zatlačí robota na rampu',
+    'Ein Gegner schiebt einen Roboter auf die Rampe',
+    '相手がロボットをスロープへ押し上げる',
+  ],
+  [
+    'Opponents near the side wall',
+    'Súperi pri bočnej stene',
+    'Gegner nahe der Seitenwand',
+    '側壁付近の両チームのロボット',
+  ],
+  [
+    'Blue drives Yellow 1 onto the ramp',
+    'Modrý tím zatlačí Yellow 1 na rampu',
+    'Blau schiebt Yellow 1 auf die Rampe',
+    '青がYellow 1をスロープへ押し上げる',
+  ],
+  [
+    'On the ramp · no wall contact',
+    'Na rampe · bez kontaktu so stenou',
+    'Auf der Rampe · kein Wandkontakt',
+    'スロープ上 · 壁には触れていない',
+  ],
+  [
+    'Example: pushed out called, small correction',
+    'Príklad: ohlásené vytlačenie, malá korekcia',
+    'Beispiel: Hinausgeschoben angesagt, kleine Korrektur',
+    '例：押し出しを宣告し、小さく位置を修正',
+  ],
+  [
+    'Blue pushes Yellow 1 onto the ramp along the wall; Yellow 1 has not touched the wall. What may you do under the 2027 draft?',
+    'Modrý tím zatlačí Yellow 1 na rampu pozdĺž steny; Yellow 1 sa steny nedotkol. Čo môžete podľa návrhu 2027 urobiť?',
+    'Blau schiebt Yellow 1 auf die Rampe an der Wand; Yellow 1 hat die Wand nicht berührt. Was darfst du nach dem Entwurf 2027 tun?',
+    '青がYellow 1を壁沿いのスロープへ押し上げましたが、Yellow 1は壁に触れていません。2027年ドラフトでは何ができますか？',
+  ],
+  [
+    'Call pushed out and move Blue 1 slightly back onto the field',
+    'Ohlásim vytlačenie a Blue 1 mierne posuniem späť na ihrisko',
+    'Hinausgeschoben ansagen und Blue 1 leicht zurück aufs Feld schieben',
+    '押し出しを宣告し、Blue 1を少しだけフィールド内へ戻す',
+  ],
+  [
+    'Nothing; you may only act once Blue 1 touches the wall',
+    'Nič; konať môžem až vtedy, keď sa Blue 1 dotkne steny',
+    'Nichts; du darfst erst handeln, wenn Blue 1 die Wand berührt',
+    '何もできない。Blue 1が壁に触れてから対応する',
+  ],
+  [
+    'Remove Blue 1 for one minute',
+    'Odstránim Blue 1 na jednu minútu',
+    'Blue 1 für eine Minute vom Feld nehmen',
+    'Blue 1を1分間退場させる',
+  ],
+  [
+    'The 2027 draft extends pushed out to a robot that an opponent pushes onto the ramp. The referee may call it and move the robot slightly back; no penalty is involved.',
+    'Návrh 2027 rozširuje vytlačenie aj na robota, ktorého súper zatlačí na rampu. Rozhodca ho môže ohlásiť a robota mierne posunúť späť; nejde o žiadny trest.',
+    'Der Entwurf 2027 erweitert Hinausgeschoben auf einen Roboter, den ein Gegner auf die Rampe schiebt. Der Schiedsrichter darf es ansagen und den Roboter leicht zurückschieben; eine Strafe gibt es nicht.',
+    '2027年ドラフトは、相手にスロープへ押し上げられたロボットにも押し出しを適用します。審判は押し出しを宣告してロボットを少し戻すことができ、ペナルティはありません。',
+  ],
+
+  // Replay: the penalized robot scores
+  [
+    'The penalized robot scores',
+    'Skóruje potrestaný robot',
+    'Der bestrafte Roboter trifft',
+    'ペナルティを受けたロボットが得点する',
+  ],
+  [
+    'Blue 1 drifts towards the side wall',
+    'Blue 1 sa posúva k bočnej stene',
+    'Blue 1 driftet zur Seitenwand',
+    'Blue 1が側壁のほうへ流れていく',
+  ],
+  [
+    'Out of bounds · not yet removed',
+    'Mimo ihriska · zatiaľ neodstránený',
+    'Aus · noch nicht entfernt',
+    'アウトオブバウンズ · まだ退場していない',
+  ],
+  [
+    'Blue 1 drives back to the ball',
+    'Blue 1 sa vracia k lopte',
+    'Blue 1 fährt zurück zum Ball',
+    'Blue 1がボールへ戻る',
+  ],
+  ['Blue 1 shoots', 'Blue 1 strieľa', 'Blue 1 schießt', 'Blue 1がシュートする'],
+  [
+    'Shot by the penalized robot',
+    'Strela potrestaného robota',
+    'Schuss des bestraften Roboters',
+    'ペナルティを受けたロボットのシュート',
+  ],
+  [
+    'Blue 1 removed · penalty starts',
+    'Blue 1 odstránený · trest sa začína',
+    'Blue 1 entfernt · die Strafe beginnt',
+    'Blue 1退場 · ペナルティ開始',
+  ],
+  [
+    'Blue 1 touched the wall, was not removed, and then scores itself. What do you decide under the 2027 draft?',
+    'Blue 1 sa dotkol steny, nebol odstránený a potom sám skóruje. Ako podľa návrhu 2027 rozhodnete?',
+    'Blue 1 hat die Wand berührt, wurde nicht entfernt und trifft dann selbst. Wie entscheidest du nach dem Entwurf 2027?',
+    'Blue 1は壁に触れましたが退場しておらず、その後自ら得点しました。2027年ドラフトではどう判定しますか？',
+  ],
+  [
+    'The goal counts, because Blue 1 was still on the field',
+    'Gól platí, pretože Blue 1 bol ešte na ihrisku',
+    'Das Tor zählt, weil Blue 1 noch auf dem Feld war',
+    'Blue 1はまだフィールド上にいたので、ゴールを認める',
+  ],
+  [
+    'No goal; remove Blue 1 for its out-of-bounds penalty',
+    'Gól neplatí; odstránim Blue 1, aby si odpykal trest za opustenie ihriska',
+    'Kein Tor; Blue 1 für seine Aus-Strafe vom Feld nehmen',
+    'ゴールは認めず、Blue 1をアウトオブバウンズのペナルティで退場させる',
+  ],
+  [
+    'A goal scored by the penalized robot is not granted. A goal by its teammate would count, and an own goal by the penalized robot would count for the opponent.',
+    'Gól, ktorý strelí potrestaný robot, sa neuzná. Gól jeho spoluhráča by platil a vlastný gól potrestaného robota by sa počítal súperovi.',
+    'Ein Tor des bestraften Roboters wird nicht gegeben. Ein Tor seines Teamkollegen würde zählen, und ein Eigentor des bestraften Roboters würde für den Gegner zählen.',
+    'ペナルティを受けたロボットによるゴールは認められません。チームメイトのゴールであれば有効で、ペナルティを受けたロボットのオウンゴールは相手の得点になります。',
+  ],
+
+  // Scene of the combined drill, and the reworded order lesson
+  [
+    'Pushing at the line and two defenders',
+    'Tlačenie na čiare a dvaja obrancovia',
+    'Pushing an der Linie und zwei Verteidiger',
+    'ライン上でのプッシングと2台の守備ロボット',
+  ],
+  [
+    'Blue attacks; Yellow 2 drops back',
+    'Modrý tím útočí; Yellow 2 sa sťahuje dozadu',
+    'Blau greift an; Yellow 2 zieht sich zurück',
+    '青が攻め、Yellow 2が下がる',
+  ],
+  [
+    'Defender at the pushing line',
+    'Obranca na čiare tlačenia',
+    'Verteidiger an der Pushing-Linie',
+    '守備ロボットがプッシングライン上にいる',
+  ],
+  [
+    'Defender at the pushing line; second defender in the area',
+    'Obranca na čiare tlačenia; druhý obranca v pokutovom území',
+    'Verteidiger an der Pushing-Linie; zweiter Verteidiger im Strafraum',
+    '守備ロボットがプッシングライン上、もう1台の守備ロボットもエリア内',
+  ],
+  [
+    'The defender has reached the pushing line and two Blue robots partly overlap their own penalty area. Which correction comes first?',
+    'Obranca dosiahol čiaru tlačenia a dva modré roboty čiastočne zasahujú do vlastného pokutového územia. Ktorá náprava je prvá?',
+    'Der Verteidiger hat die Pushing-Linie erreicht, und zwei blaue Roboter stehen teilweise im eigenen Strafraum. Welche Korrektur kommt zuerst?',
+    '守備ロボットがプッシングラインに達し、青の2台が一部ずつ自陣のペナルティエリアに入っています。どちらを先に処置しますか？',
+  ],
+  [
+    'Pushing called',
+    'Odpískané tlačenie',
+    'Pushing gepfiffen',
+    'プッシングを判定',
+  ],
+  [
+    'Contact with the defender at the pushing line',
+    'Kontakt s obrancom na čiare tlačenia',
+    'Kontakt mit dem Verteidiger an der Pushing-Linie',
+    'プッシングライン上の守備ロボットとの接触',
+  ],
+  [
+    'You call pushing while two Blue robots also partly overlap their own penalty area. Which correction should you make first?',
+    'Odpískate tlačenie a zároveň dva modré roboty čiastočne zasahujú do vlastného pokutového územia. Ktorú nápravu vykonáte ako prvú?',
+    'Du pfeifst Pushing, während zugleich zwei blaue Roboter teilweise im eigenen Strafraum stehen. Welche Korrektur führst du zuerst aus?',
+    'プッシングを判定し、同時に青の2台が一部ずつ自陣のペナルティエリアに入っています。どちらを先に処置しますか？',
+  ],
+
+  // Knowledge check: late team
+  [
+    'Late team: the 10–0 limit',
+    'Meškajúci tím: limit 10–0',
+    'Verspätetes Team: das 10–0-Limit',
+    '遅刻チーム：10–0の上限',
+  ],
+  [
+    'Blue has not appeared with a working robot, and the referee has been adding one goal per 30 seconds. What happens when the penalty reaches 10–0 under the 2027 draft?',
+    'Modrý tím sa nedostavil s funkčným robotom a rozhodca pridáva jeden gól za každých 30 sekúnd. Čo sa podľa návrhu 2027 stane, keď trest dosiahne stav 10–0?',
+    'Blau ist nicht mit einem funktionierenden Roboter erschienen, und der Schiedsrichter gibt alle 30 Sekunden ein Tor. Was geschieht nach dem Entwurf 2027, wenn die Strafe 10–0 erreicht?',
+    '青は動作するロボットを用意して現れず、審判は30秒ごとに1点を加えています。2027年ドラフトでは、ペナルティが10–0に達するとどうなりますか？',
+  ],
+  [
+    'The referee keeps adding goals until Blue arrives',
+    'Rozhodca pridáva góly ďalej, kým modrý tím nepríde',
+    'Der Schiedsrichter gibt weiter Tore, bis Blau eintrifft',
+    '青が来るまで審判は得点を加え続ける',
+  ],
+  [
+    'Blue automatically loses the game',
+    'Modrý tím zápas automaticky prehráva',
+    'Blau verliert das Spiel automatisch',
+    '青は自動的に敗戦となる',
+  ],
+  [
+    'The game is cancelled and recorded 0–0',
+    'Zápas sa zruší a zapíše sa 0–0',
+    'Das Spiel wird abgesagt und mit 0–0 gewertet',
+    '試合は中止となり、0–0として記録される',
+  ],
+  [
+    'The 2027 draft ends the late-arrival penalty at 10–0 with an automatic loss. A team counts as late when it does not show up with at least one working robot; awarding the goals remains at the referee’s discretion.',
+    'Návrh 2027 ukončuje trest za meškanie pri stave 10–0 automatickou prehrou. Tím sa považuje za meškajúci, ak sa nedostaví aspoň s jedným funkčným robotom; pridávanie gólov zostáva na uvážení rozhodcu.',
+    'Der Entwurf 2027 beendet die Verspätungsstrafe bei 10–0 mit einer automatischen Niederlage. Ein Team gilt als verspätet, wenn es nicht mit mindestens einem funktionierenden Roboter erscheint; die Vergabe der Tore bleibt im Ermessen des Schiedsrichters.',
+    '2027年ドラフトでは、遅刻のペナルティは10–0で自動的な敗戦となって終わります。動作するロボットを少なくとも1台用意して現れないチームが遅刻とみなされ、得点を加えるかどうかは引き続き審判の裁量です。',
+  ],
+  [
+    'The referee may penalize late arrival by one goal per 30 seconds. This penalty is discretionary, not automatic; under the 2027 draft it ends with an automatic loss at 10–0.',
+    'Rozhodca môže za meškanie udeliť jeden gól za každých 30 sekúnd. Tento trest závisí od jeho uváženia a nie je automatický; podľa návrhu 2027 sa končí automatickou prehrou pri stave 10–0.',
+    'Die Schiedsrichter können Verspätung mit einem Tor je 30 Sekunden bestrafen. Die Strafe liegt in ihrem Ermessen und ist nicht automatisch; nach dem Entwurf 2027 endet sie bei 10–0 mit einer automatischen Niederlage.',
+    '審判は遅刻30秒ごとに1点のペナルティを科すことができます。これは審判の裁量であり、自動適用ではありません。2027年ドラフトでは、10–0に達すると自動的な敗戦で終わります。',
+  ],
+
+  // Knowledge check: nobody left on the field
+  [
+    'Nobody left on the field',
+    'Na ihrisku nikto nezostal',
+    'Niemand mehr auf dem Feld',
+    'フィールドに誰も残っていない',
+  ],
+  [
+    'All four robots have been removed and nobody is left on the field. How does play continue under the 2027 draft?',
+    'Všetky štyri roboty boli odstránené a na ihrisku nikto nezostal. Ako podľa návrhu 2027 hra pokračuje?',
+    'Alle vier Roboter wurden entfernt, und niemand ist mehr auf dem Feld. Wie geht das Spiel nach dem Entwurf 2027 weiter?',
+    '4台のロボットがすべて退場し、フィールドには誰も残っていません。2027年ドラフトでは、試合はどのように続きますか？',
+  ],
+  [
+    'With a neutral kick-off',
+    'Neutrálnym výkopom',
+    'Mit einem neutralen Anstoß',
+    'ニュートラルキックオフで再開する',
+  ],
+  [
+    'The ball stays where it is until a robot returns',
+    'Lopta zostáva na mieste, kým sa nejaký robot nevráti',
+    'Der Ball bleibt liegen, bis ein Roboter zurückkehrt',
+    'ロボットが復帰するまでボールはそのままにする',
+  ],
+  [
+    'With a kick-off for the team that lost its last robot later',
+    'Výkopom tímu, ktorý prišiel o posledného robota neskôr',
+    'Mit einem Anstoß für das Team, das seinen letzten Roboter später verloren hat',
+    '最後のロボットを後から失ったチームのキックオフで再開する',
+  ],
+  [
+    'The 2027 draft adds this case to the neutral kick-off. Robots come back for it as soon as they are allowed to return.',
+    'Návrh 2027 dopĺňa tento prípad k neutrálnemu výkopu. Roboty sa naň vracajú hneď, ako sa smú vrátiť.',
+    'Der Entwurf 2027 ergänzt diesen Fall beim neutralen Anstoß. Roboter kommen dafür zurück, sobald sie zurückkehren dürfen.',
+    '2027年ドラフトは、この場合をニュートラルキックオフに追加しました。ロボットは、復帰が認められ次第、そのために戻ります。',
+  ],
+
+  // Knowledge check: consequence of ball holding
+  [
+    'Consequence of ball holding',
+    'Následok držania lopty',
+    'Folge des Ballhaltens',
+    'ボール保持への処置',
+  ],
+  [
+    'During a game, a robot traps the ball so that it cannot roll and opponents cannot reach it. What does the 2027 draft prescribe?',
+    'Robot počas zápasu uväzní loptu tak, že sa nemôže kotúľať a súperi sa k nej nedostanú. Čo predpisuje návrh 2027?',
+    'Während eines Spiels klemmt ein Roboter den Ball so ein, dass er nicht rollen kann und Gegner ihn nicht erreichen. Was schreibt der Entwurf 2027 vor?',
+    '試合中、ロボットがボールを固定し、ボールは転がらず、相手も届きません。2027年ドラフトは何を定めていますか？',
+  ],
+  [
+    'A warning; the mechanism is checked at the next daily inspection',
+    'Napomenutie; mechanizmus sa skontroluje pri najbližšej dennej technickej kontrole',
+    'Eine Verwarnung; der Mechanismus wird bei der nächsten täglichen Inspektion geprüft',
+    '警告を与え、機構は次の日次検査で確認する',
+  ],
+  [
+    'A one-minute out-of-bounds penalty',
+    'Minútový trest za opustenie ihriska',
+    'Eine einminütige Aus-Strafe',
+    '1分間のアウトオブバウンズのペナルティ',
+  ],
+  [
+    'The robot is deemed damaged and loses its inspection sticker until it complies',
+    'Robot sa považuje za poškodeného a stráca nálepku z technickej kontroly, kým nevyhovie pravidlám',
+    'Der Roboter gilt als beschädigt und verliert seinen Inspektionsaufkleber, bis er regelkonform ist',
+    'ロボットは故障扱いとなり、適合するまで検査ステッカーを失う',
+  ],
+  [
+    'Holding during gameplay now has a stated consequence. The robot leaves as damaged and needs a compliant mechanism and a new inspection before it may return. A rotating dribbler that leaves the ball accessible is still allowed.',
+    'Držanie lopty počas hry má teraz stanovený následok. Robot odchádza ako poškodený a pred návratom potrebuje vyhovujúci mechanizmus a novú technickú kontrolu. Rotujúci dribbler, ktorý necháva loptu prístupnú, je naďalej povolený.',
+    'Ballhalten im laufenden Spiel hat jetzt eine festgelegte Folge. Der Roboter verlässt das Feld als beschädigt und braucht vor der Rückkehr einen regelkonformen Mechanismus und eine neue Inspektion. Ein rotierender Dribbler, der den Ball zugänglich lässt, bleibt erlaubt.',
+    '試合中のボール保持への処置が明記されました。ロボットは故障扱いで退場し、復帰には適合した機構と再検査が必要です。ボールに相手が届く状態を保つ回転式ドリブラーは、引き続き認められます。',
+  ],
+
+  // Knowledge check: whose penalty area
+  [
+    'Multiple defense: whose penalty area?',
+    'Viacnásobná obrana: čie pokutové územie?',
+    'Mehrfachverteidigung: wessen Strafraum?',
+    '複数守備：どちらのペナルティエリア？',
+  ],
+  [
+    'Two Blue robots partly overlap the penalty area of the goal they are attacking. Neither is fully inside. What applies under the 2027 draft?',
+    'Dva modré roboty čiastočne zasahujú do pokutového územia pri bránke, na ktorú útočia. Ani jeden nie je celý vnútri. Čo platí podľa návrhu 2027?',
+    'Zwei blaue Roboter stehen teilweise im Strafraum des Tors, das sie angreifen. Keiner steht vollständig darin. Was gilt nach dem Entwurf 2027?',
+    '青の2台が、攻めているゴールのペナルティエリアに一部ずつ入っています。どちらも完全には入っていません。2027年ドラフトではどうなりますか？',
+  ],
+  [
+    'Multiple defense: move the Blue robot farther from the ball',
+    'Viacnásobná obrana: premiestnim modrého robota, ktorý je ďalej od lopty',
+    'Mehrfachverteidigung: den blauen Roboter versetzen, der weiter vom Ball entfernt ist',
+    '複数守備として、ボールから遠いほうの青のロボットを移す',
+  ],
+  [
+    'Nothing; multiple defense only concerns a team’s own penalty area',
+    'Nič; viacnásobná obrana sa týka len vlastného pokutového územia tímu',
+    'Nichts; Mehrfachverteidigung betrifft nur den eigenen Strafraum eines Teams',
+    '何もしない。複数守備は自陣のペナルティエリアだけが対象',
+  ],
+  [
+    'Both Blue robots are out of bounds',
+    'Oba modré roboty sú mimo ihriska',
+    'Beide blauen Roboter sind im Aus',
+    '青の2台ともアウトオブバウンズになる',
+  ],
+  [
+    'The 2027 draft adds “their own” to the multiple-defense rule. Attackers partly inside the opponent’s area are not relocated. Full entry into any penalty area is still out of bounds.',
+    'Návrh 2027 dopĺňa do pravidla o viacnásobnej obrane slová „their own“. Útočníci čiastočne v súperovom území sa nepremiestňujú. Úplný vstup do ktoréhokoľvek pokutového územia naďalej znamená opustenie ihriska.',
+    'Der Entwurf 2027 ergänzt die Regel zur Mehrfachverteidigung um „their own“. Angreifer, die teilweise im gegnerischen Strafraum stehen, werden nicht versetzt. Vollständiges Eindringen in einen Strafraum ist weiterhin Aus.',
+    '2027年ドラフトは、複数守備の規則に「their own」（自陣の）を加えました。相手のエリアに一部入っている攻撃側のロボットは移動させません。どちらのペナルティエリアでも、完全に入ると引き続きアウトオブバウンズです。',
+  ],
+
+  // Knowledge checks: pushing line
+  [
+    'What makes contact pushing',
+    'Čo robí z kontaktu tlačenie',
+    'Was Kontakt zu Pushing macht',
+    '接触がプッシングになる条件',
+  ],
+  [
+    'What makes contact in the penalty area pushing under the 2027 draft?',
+    'Čo podľa návrhu 2027 robí z kontaktu v pokutovom území tlačenie?',
+    'Was macht Kontakt im Strafraum nach dem Entwurf 2027 zu Pushing?',
+    '2027年ドラフトでは、ペナルティエリアでの接触は何によってプッシングになりますか？',
+  ],
+  [
+    'The defender reaches the pushing line during robot-to-robot or robot-ball-robot contact',
+    'Obranca počas kontaktu robot–robot alebo robot–lopta–robot dosiahne čiaru tlačenia',
+    'Der Verteidiger erreicht im Kontakt Roboter–Roboter oder Roboter–Ball–Roboter die Pushing-Linie',
+    'ロボット同士またはロボット・ボール・ロボットの接触中に、守備ロボットがプッシングラインに達する',
+  ],
+  [
+    'The referee judges the contact to be too hard',
+    'Rozhodca posúdi kontakt ako príliš tvrdý',
+    'Der Schiedsrichter hält den Kontakt für zu hart',
+    '審判が接触を強すぎると判断する',
+  ],
+  [
+    'Any contact between opponents while one of them touches the ball',
+    'Akýkoľvek kontakt súperov, pri ktorom sa jeden z nich dotýka lopty',
+    'Jeder Kontakt zwischen Gegnern, bei dem einer von ihnen den Ball berührt',
+    '一方がボールに触れている間の相手同士のあらゆる接触',
+  ],
+  [
+    'The discretionary wording is replaced by an objective test: contact, directly or through the ball, in which the defender reaches the pushing line. The consequence is unchanged: the ball goes to the furthest unoccupied neutral spot, and a resulting goal is not granted.',
+    'Formuláciu o uvážení rozhodcu nahrádza objektívne kritérium: kontakt, priamy alebo cez loptu, pri ktorom obranca dosiahne čiaru tlačenia. Následok sa nemení: lopta ide na najvzdialenejší neobsadený neutrálny bod a gól, ktorý z toho vznikne, sa neuzná.',
+    'Die Ermessensformulierung wird durch ein objektives Kriterium ersetzt: Kontakt, direkt oder über den Ball, bei dem der Verteidiger die Pushing-Linie erreicht. Die Folge bleibt gleich: Der Ball kommt auf den am weitesten entfernten freien Neutralpunkt, und ein daraus entstehendes Tor wird nicht gegeben.',
+    '裁量による文言は、客観的な基準に置き換えられました。直接またはボールを介した接触で、守備ロボットがプッシングラインに達することです。処置は変わりません。ボールは最も遠い空きニュートラルスポットへ移し、それによって生じたゴールは認められません。',
+  ],
+  [
+    'Where the pushing line is',
+    'Kde je čiara tlačenia',
+    'Wo die Pushing-Linie liegt',
+    'プッシングラインの位置',
+  ],
+  [
+    'What does the 2027 draft say about the pushing line itself?',
+    'Čo hovorí návrh 2027 o samotnej čiare tlačenia?',
+    'Was sagt der Entwurf 2027 über die Pushing-Linie selbst?',
+    '2027年ドラフトは、プッシングラインそのものについて何と述べていますか？',
+  ],
+  [
+    'It is the front edge of the penalty area',
+    'Je to predná hrana pokutového územia',
+    'Sie ist die Vorderkante des Strafraums',
+    'ペナルティエリアの前端である',
+  ],
+  [
+    'It is an extra black line inside the penalty area; its position follows in an updated field specification',
+    'Je to ďalšia čierna čiara vnútri pokutového územia; jej polohu určí aktualizovaná špecifikácia ihriska',
+    'Sie ist eine zusätzliche schwarze Linie im Strafraum; ihre Position folgt in einer aktualisierten Spielfeldspezifikation',
+    'ペナルティエリア内に追加される黒い線で、位置は改訂版のフィールド仕様書で示される',
+  ],
+  [
+    'It is the goal line between the posts',
+    'Je to bránková čiara medzi žrďami',
+    'Sie ist die Torlinie zwischen den Pfosten',
+    'ポスト間のゴールラインである',
+  ],
+  [
+    'The draft describes an extra black line inside the penalty area and announces its position for an updated field specification. The line drawn in this Lab is a provisional placeholder.',
+    'Návrh opisuje ďalšiu čiernu čiaru vnútri pokutového územia a jej polohu avizuje v aktualizovanej špecifikácii ihriska. Čiara nakreslená v tomto Labe je predbežná.',
+    'Der Entwurf beschreibt eine zusätzliche schwarze Linie im Strafraum und kündigt ihre Position für eine aktualisierte Spielfeldspezifikation an. Die in diesem Lab gezeichnete Linie ist ein vorläufiger Platzhalter.',
+    'ドラフトは、ペナルティエリア内に追加される黒い線について述べ、その位置は改訂版のフィールド仕様書で示すとしています。このLabに描かれているラインは暫定的なものです。',
+  ],
+
+  // Knowledge check: lack of progress with a robot waiting
+  [
+    'Lack of progress with a robot waiting',
+    'Nedostatok pokroku, keď čaká robot',
+    'Mangelnder Spielfortschritt mit einem wartenden Roboter',
+    'ロボットが待機中の進行の停滞',
+  ],
+  [
+    'You have counted and the ball is still stuck. Blue 2 was called out of bounds 80 seconds ago and is waiting. What do you do first under the 2027 draft?',
+    'Odpočítali ste a lopta je stále zablokovaná. Blue 2 bol pred 80 sekundami potrestaný za opustenie ihriska a čaká. Čo podľa návrhu 2027 urobíte ako prvé?',
+    'Du hast gezählt, und der Ball steckt weiterhin fest. Blue 2 wurde vor 80 Sekunden ins Aus gestellt und wartet. Was tust du nach dem Entwurf 2027 zuerst?',
+    'カウントを終えても、ボールはまだ動きません。Blue 2は80秒前にアウトオブバウンズとなり、待機中です。2027年ドラフトでは、まず何をしますか？',
+  ],
+  [
+    'Move the ball to the nearest unoccupied neutral spot, then return Blue 2',
+    'Presuniem loptu na najbližší neobsadený neutrálny bod a potom vrátim Blue 2',
+    'Den Ball auf den nächsten freien Neutralpunkt legen, dann Blue 2 zurückbringen',
+    'ボールを最寄りの空きニュートラルスポットへ移し、その後Blue 2を復帰させる',
+  ],
+  [
+    'Return Blue 2 and leave the ball; move the ball only if that does not resolve it',
+    'Vrátim Blue 2 a loptu nechám na mieste; presuniem ju len vtedy, ak to situáciu nevyrieši',
+    'Blue 2 zurückbringen und den Ball liegen lassen; den Ball nur versetzen, wenn das die Situation nicht auflöst',
+    'Blue 2を復帰させ、ボールは動かさない。それでも解消しない場合にのみボールを移す',
+  ],
+  [
+    'Keep Blue 2 off until the next kick-off',
+    'Ponechám Blue 2 mimo ihriska do najbližšieho výkopu',
+    'Blue 2 bis zum nächsten Anstoß draußen lassen',
+    '次のキックオフまでBlue 2を場外で待機させる',
+  ],
+  [
+    'Waiting robots whose penalty time has passed come back before the ball is moved. If the lack of progress continues, the usual placement on the nearest unoccupied neutral spot follows.',
+    'Čakajúce roboty, ktorým uplynul trest, sa vracajú skôr, než sa presunie lopta. Ak nedostatok pokroku pretrváva, nasleduje zvyčajné umiestnenie lopty na najbližší neobsadený neutrálny bod.',
+    'Wartende Roboter, deren Strafzeit abgelaufen ist, kommen zurück, bevor der Ball versetzt wird. Hält der mangelnde Spielfortschritt an, folgt die übliche Platzierung auf dem nächsten freien Neutralpunkt.',
+    'ペナルティ時間が経過した待機中のロボットは、ボールを移す前に復帰します。それでも進行の停滞が続く場合は、通常どおり最寄りの空きニュートラルスポットへボールを置きます。',
+  ],
+
+  // Knowledge checks: out-of-bounds minute and interruption
+  [
+    'Out of bounds: a kick-off before the minute',
+    'Mimo ihriska: výkop pred uplynutím minúty',
+    'Aus: ein Anstoß vor Ablauf der Minute',
+    'アウトオブバウンズ：1分経過前のキックオフ',
+  ],
+  [
+    'Blue 1 was called out of bounds 25 seconds ago. Yellow scores and a kick-off is due. May Blue 1 return for it under the 2027 draft?',
+    'Blue 1 bol pred 25 sekundami potrestaný za opustenie ihriska. Žltý tím skóruje a má nasledovať výkop. Smie sa naň Blue 1 podľa návrhu 2027 vrátiť?',
+    'Blue 1 wurde vor 25 Sekunden ins Aus gestellt. Gelb trifft, und ein Anstoß steht an. Darf Blue 1 dafür nach dem Entwurf 2027 zurückkehren?',
+    'Blue 1は25秒前にアウトオブバウンズとなりました。黄が得点し、キックオフを行う予定です。2027年ドラフトでは、Blue 1はこのキックオフで復帰できますか？',
+  ],
+  [
+    'Yes; a kick-off ends the penalty early',
+    'Áno; výkop trest predčasne ukončí',
+    'Ja; ein Anstoß beendet die Strafe vorzeitig',
+    'はい。キックオフでペナルティは早く終わる',
+  ],
+  [
+    'No; the minute is now a minimum',
+    'Nie; minúta je teraz minimum',
+    'Nein; die Minute ist jetzt eine Mindestdauer',
+    'いいえ。1分は最低時間になった',
+  ],
+  [
+    'Only if Blue has no other robot on the field',
+    'Len ak modrý tím nemá na ihrisku iného robota',
+    'Nur wenn Blau keinen anderen Roboter auf dem Feld hat',
+    '青のロボットがフィールドに他にいない場合のみ',
+  ],
+  [
+    'Section 2.8 of the draft makes one minute the minimum and lets the robot return at an interruption after that minute. Section 2.3 still carries the older sentence about returning before a kick-off; this trainer follows the changed section 2.8 and marks that as a training assumption.',
+    'Časť 2.8 návrhu určuje jednu minútu ako minimum a dovoľuje robotovi vrátiť sa pri prerušení hry po jej uplynutí. Časť 2.3 stále obsahuje staršiu vetu o návrate pred výkopom; tento trenažér sa riadi zmenenou časťou 2.8 a označuje to ako tréningový predpoklad.',
+    'Abschnitt 2.8 des Entwurfs macht eine Minute zur Mindestdauer und lässt den Roboter danach bei einer Unterbrechung zurückkehren. Abschnitt 2.3 enthält noch den älteren Satz zur Rückkehr vor einem Anstoß; dieses Training folgt dem geänderten Abschnitt 2.8 und kennzeichnet das als Trainingsannahme.',
+    'ドラフトの2.8節は1分を最低時間とし、その後の中断時にロボットの復帰を認めています。2.3節にはキックオフ前の復帰に関する以前の文が残っていますが、このトレーニングは変更後の2.8節に従い、それをトレーニング上の仮定として明示しています。',
+  ],
+  [
+    'Out of bounds: the minute has passed',
+    'Mimo ihriska: minúta uplynula',
+    'Aus: die Minute ist abgelaufen',
+    'アウトオブバウンズ：1分が経過した',
+  ],
+  [
+    'Blue 1 has been off for 70 seconds after an out-of-bounds call, and play is running normally. When does it return under the 2027 draft?',
+    'Blue 1 je po potrestaní za opustenie ihriska 70 sekúnd mimo a hra normálne beží. Kedy sa podľa návrhu 2027 vráti?',
+    'Blue 1 ist nach einer Aus-Entscheidung seit 70 Sekunden draußen, und das Spiel läuft normal. Wann kehrt er nach dem Entwurf 2027 zurück?',
+    'Blue 1はアウトオブバウンズの判定から70秒間場外にいて、プレーは通常どおり続いています。2027年ドラフトでは、いつ復帰しますか？',
+  ],
+  [
+    'Immediately, because the minute has passed',
+    'Ihneď, pretože minúta uplynula',
+    'Sofort, weil die Minute abgelaufen ist',
+    '1分が経過したので、ただちに',
+  ],
+  [
+    'At the next game interruption, such as a kick-off, lack of progress or pushing',
+    'Pri najbližšom prerušení hry, napríklad pri výkope, nedostatku pokroku alebo tlačení',
+    'Bei der nächsten Spielunterbrechung, etwa bei Anstoß, mangelndem Spielfortschritt oder Pushing',
+    'キックオフ、進行の停滞、プッシングなど、次の試合の中断時',
+  ],
+  [
+    'Only at the next kick-off',
+    'Až pri najbližšom výkope',
+    'Erst beim nächsten Anstoß',
+    '次のキックオフのときだけ',
+  ],
+  [
+    'After the minimum minute the robot waits for the next game interruption. The referee then places it in the area of its own corner.',
+    'Po minimálnej minúte robot čaká na najbližšie prerušenie hry. Rozhodca ho potom umiestni do priestoru jeho vlastného rohu.',
+    'Nach der Mindestminute wartet der Roboter auf die nächste Spielunterbrechung. Der Schiedsrichter setzt ihn dann in den Bereich seiner eigenen Ecke.',
+    '最低時間の1分が過ぎると、ロボットは次の試合の中断を待ちます。その後、審判がロボットを自陣コーナー付近に置きます。',
+  ],
+
+  // Knowledge checks: goals while a robot is out of bounds
+  [
+    'A teammate scores while a robot is out',
+    'Spoluhráč skóruje, kým je robot mimo ihriska',
+    'Ein Teamkollege trifft, während ein Roboter im Aus ist',
+    'ロボットがアウトオブバウンズの間にチームメイトが得点',
+  ],
+  [
+    'Blue 2 touched the wall and has not been removed yet. Its teammate Blue 1 scores. What do you decide under the 2027 draft?',
+    'Blue 2 sa dotkol steny a ešte nebol odstránený. Jeho spoluhráč Blue 1 skóruje. Ako podľa návrhu 2027 rozhodnete?',
+    'Blue 2 hat die Wand berührt und wurde noch nicht entfernt. Sein Teamkollege Blue 1 trifft. Wie entscheidest du nach dem Entwurf 2027?',
+    'Blue 2は壁に触れましたが、まだ退場していません。チームメイトのBlue 1が得点しました。2027年ドラフトではどう判定しますか？',
+  ],
+  [
+    'No goal; the whole team is penalized while Blue 2 is on the field',
+    'Gól neplatí; kým je Blue 2 na ihrisku, je potrestaný celý tím',
+    'Kein Tor; das ganze Team ist bestraft, solange Blue 2 auf dem Feld ist',
+    'ゴールは認めない。Blue 2がフィールドにいる間はチーム全体がペナルティを受ける',
+  ],
+  [
+    'The goal counts; then remove Blue 2',
+    'Gól platí; potom odstránim Blue 2',
+    'Das Tor zählt; danach Blue 2 vom Feld nehmen',
+    'ゴールを認め、その後Blue 2を退場させる',
+  ],
+  [
+    'The goal counts and the out-of-bounds call is cancelled',
+    'Gól platí a trest za opustenie ihriska sa ruší',
+    'Das Tor zählt, und die Aus-Entscheidung wird aufgehoben',
+    'ゴールを認め、アウトオブバウンズの判定は取り消す',
+  ],
+  [
+    'Only goals scored by the penalized robot itself are not granted. The teammate’s goal stands, and Blue 2 still serves its penalty.',
+    'Neuznávajú sa len góly, ktoré strelí samotný potrestaný robot. Gól spoluhráča platí a Blue 2 si trest aj tak odpyká.',
+    'Nur Tore, die der bestrafte Roboter selbst erzielt, werden nicht gegeben. Das Tor des Teamkollegen zählt, und Blue 2 verbüßt trotzdem seine Strafe.',
+    '認められないのは、ペナルティを受けたロボット自身によるゴールだけです。チームメイトのゴールは有効で、Blue 2はそれでもペナルティを受けます。',
+  ],
+  [
+    'Own goal by a penalized robot',
+    'Vlastný gól potrestaného robota',
+    'Eigentor eines bestraften Roboters',
+    'ペナルティを受けたロボットのオウンゴール',
+  ],
+  [
+    'A robot that has been called out of bounds, but is still on the field, puts the ball into its own goal. What do you decide under the 2027 draft?',
+    'Robot, ktorý bol potrestaný za opustenie ihriska, ale je ešte na ihrisku, dopraví loptu do vlastnej bránky. Ako podľa návrhu 2027 rozhodnete?',
+    'Ein Roboter, der ins Aus gestellt wurde, aber noch auf dem Feld ist, befördert den Ball ins eigene Tor. Wie entscheidest du nach dem Entwurf 2027?',
+    'アウトオブバウンズと判定されたもののまだフィールド上にいるロボットが、ボールを自陣ゴールに入れました。2027年ドラフトではどう判定しますか？',
+  ],
+  [
+    'No goal, because the penalized robot scored it',
+    'Gól neplatí, pretože ho strelil potrestaný robot',
+    'Kein Tor, weil der bestrafte Roboter es erzielt hat',
+    'ペナルティを受けたロボットによる得点なので、ゴールは認めない',
+  ],
+  [
+    'Award the goal to the opponent',
+    'Gól priznám súperovi',
+    'Das Tor dem Gegner geben',
+    '相手チームの得点として認める',
+  ],
+  [
+    'Neutral kick-off without a goal',
+    'Neutrálny výkop bez gólu',
+    'Neutraler Anstoß ohne Tor',
+    'ゴールを認めずニュートラルキックオフ',
+  ],
+  [
+    'The draft states the exception explicitly: an own goal by the penalized robot counts against it.',
+    'Návrh túto výnimku uvádza výslovne: vlastný gól potrestaného robota sa počíta v jeho neprospech.',
+    'Der Entwurf nennt die Ausnahme ausdrücklich: Ein Eigentor des bestraften Roboters zählt gegen ihn.',
+    'ドラフトはこの例外を明記しています。ペナルティを受けたロボットのオウンゴールは、そのチームの失点になります。',
+  ],
+
+  // Knowledge check: return position
+  [
+    'Return position after out of bounds',
+    'Miesto návratu po opustení ihriska',
+    'Rückkehrposition nach dem Aus',
+    'アウトオブバウンズ後の復帰位置',
+  ],
+  [
+    'An out-of-bounds robot has served its minute and an interruption allows its return. Where is it placed under the 2027 draft?',
+    'Robot mimo ihriska si odpykal svoju minútu a prerušenie hry umožňuje jeho návrat. Kam sa podľa návrhu 2027 umiestni?',
+    'Ein Roboter im Aus hat seine Minute verbüßt, und eine Unterbrechung erlaubt die Rückkehr. Wohin wird er nach dem Entwurf 2027 gesetzt?',
+    'アウトオブバウンズのロボットが1分を終え、中断によって復帰できるようになりました。2027年ドラフトでは、どこに置きますか？',
+  ],
+  [
+    'On the unoccupied neutral spot furthest from the ball, facing its own goal',
+    'Na neobsadený neutrálny bod najvzdialenejší od lopty, otočený k vlastnej bránke',
+    'Auf den freien Neutralpunkt, der am weitesten vom Ball entfernt ist, mit Blick zum eigenen Tor',
+    'ボールから最も遠い空きニュートラルスポットに、自陣ゴールを向けて',
+  ],
+  [
+    'Where it left the field',
+    'Tam, kde opustil ihrisko',
+    'Dort, wo er das Feld verlassen hat',
+    'フィールドを出た場所',
+  ],
+  [
+    'In the general area of its own corner',
+    'Do priestoru jeho vlastného rohu',
+    'In den allgemeinen Bereich seiner eigenen Ecke',
+    '自陣コーナーのおおよその位置',
+  ],
+  [
+    'The neutral-spot search is gone for out-of-bounds returns. A repaired damaged robot is different: it still returns on the furthest unoccupied neutral spot, facing its own goal.',
+    'Pri návratoch po opustení ihriska sa už neutrálny bod nehľadá. Pri opravenom poškodenom robotovi je to inak: naďalej sa vracia na najvzdialenejší neobsadený neutrálny bod, otočený k vlastnej bránke.',
+    'Bei der Rückkehr aus dem Aus wird kein Neutralpunkt mehr gesucht. Bei einem reparierten beschädigten Roboter ist das anders: Er kehrt weiterhin auf dem am weitesten entfernten freien Neutralpunkt zurück, mit Blick zum eigenen Tor.',
+    'アウトオブバウンズからの復帰では、ニュートラルスポットを探さなくなりました。修理を終えた故障ロボットは別で、引き続き最も遠い空きニュートラルスポットに、自陣ゴールを向けて復帰します。',
+  ],
+
+  // Knowledge checks: vertical kicker test
+  [
+    'Vertical kicker test setup',
+    'Príprava vertikálneho testu kopacieho mechanizmu',
+    'Aufbau des vertikalen Kickertests',
+    '垂直キッカーテストの準備',
+  ],
+  [
+    'How is the kicker test that the 2027 draft pilots set up?',
+    'Ako sa pripravuje test kopacieho mechanizmu, ktorý návrh 2027 pilotne zavádza?',
+    'Wie wird der Kickertest aufgebaut, den der Entwurf 2027 erprobt?',
+    '2027年ドラフトが試行するキッカーテストは、どのように準備しますか？',
+  ],
+  [
+    'The robot kicks from inside one goal at the opposite goal',
+    'Robot kope z vnútra jednej bránky na protiľahlú bránku',
+    'Der Roboter schießt aus einem Tor heraus auf das gegenüberliegende Tor',
+    'ロボットが一方のゴールの中から反対側のゴールへ蹴る',
+  ],
+  [
+    'The robot lies on its back with the kicker facing up and the ball in its ball-capturing zone',
+    'Robot leží na chrbte s kopacím mechanizmom otočeným nahor a lopta je v jeho zóne zachytenia lopty',
+    'Der Roboter liegt auf dem Rücken, der Kicker zeigt nach oben, und der Ball liegt in seiner Ballfangzone',
+    'ロボットをキッカーが上を向くように仰向けに置き、ボールをボール捕捉ゾーンに入れる',
+  ],
+  [
+    'The robot kicks from the center circle at a wall 100 cm away',
+    'Robot kope zo stredového kruhu na stenu vzdialenú 100 cm',
+    'Der Roboter schießt vom Mittelkreis auf eine 100 cm entfernte Wand',
+    'ロボットがセンターサークルから100 cm離れた壁へ蹴る',
+  ],
+  [
+    'The vertical test removes the influence of how the goals of a particular field rebound. It is still done with the tournament ball of the robot’s sub-league.',
+    'Vertikálny test odstraňuje vplyv toho, ako sa lopta odráža od bránok konkrétneho ihriska. Naďalej sa vykonáva s turnajovou loptou podligy daného robota.',
+    'Der vertikale Test beseitigt den Einfluss davon, wie die Tore eines bestimmten Feldes den Ball zurückprallen lassen. Er wird weiterhin mit dem Turnierball der Unterliga des Roboters durchgeführt.',
+    '垂直テストでは、フィールドごとのゴールの跳ね返り方の影響がなくなります。テストは引き続き、そのロボットのサブリーグの大会球で行います。',
+  ],
+  [
+    'Vertical kicker test pass or fail',
+    'Vertikálny test kopacieho mechanizmu: vyhovel, alebo nevyhovel',
+    'Vertikaler Kickertest: bestanden oder nicht',
+    '垂直キッカーテストの合否',
+  ],
+  [
+    'In the vertical kicker test the ball rises to 120 cm. What is the result?',
+    'Pri vertikálnom teste kopacieho mechanizmu lopta vystúpi do výšky 120 cm. Aký je výsledok?',
+    'Beim vertikalen Kickertest steigt der Ball auf 120 cm. Wie lautet das Ergebnis?',
+    '垂直キッカーテストで、ボールが120 cmまで上がりました。結果はどうなりますか？',
+  ],
+  [
+    'Pass; only a ball that leaves the field fails',
+    'Vyhovel; nevyhovie len lopta, ktorá opustí ihrisko',
+    'Bestanden; nur ein Ball, der das Feld verlässt, fällt durch',
+    '合格。不合格になるのはボールがフィールドの外へ出た場合だけ',
+  ],
+  [
+    'Fail; the ball must not rise above 100 cm',
+    'Nevyhovel; lopta nesmie vystúpiť nad 100 cm',
+    'Nicht bestanden; der Ball darf nicht über 100 cm steigen',
+    '不合格。ボールは100 cmを超えてはならない',
+  ],
+  [
+    'Pass if it lands within 30 cm of the robot',
+    'Vyhovel, ak lopta dopadne do 30 cm od robota',
+    'Bestanden, wenn er innerhalb von 30 cm vom Roboter landet',
+    'ロボットから30 cm以内に落ちれば合格',
+  ],
+  [
+    'The test is passed if the ball height does not exceed 100 cm. Measuring beside a wall with a tape makes the height easy to read.',
+    'Test je úspešný, ak výška lopty nepresiahne 100 cm. Pri meraní pri stene pomocou metra sa výška ľahko odčíta.',
+    'Der Test ist bestanden, wenn die Ballhöhe 100 cm nicht übersteigt. Beim Messen neben einer Wand mit einem Maßband lässt sich die Höhe leicht ablesen.',
+    'ボールの高さが100 cmを超えなければ合格です。壁際でメジャーを当てて測ると、高さを読み取りやすくなります。',
+  ],
+
+  // Referee drills
+  [
+    'Blue 2 has already been called out of bounds but is still on the field when its teammate Blue 1 scores.',
+    'Blue 2 už bol potrestaný za opustenie ihriska, ale je ešte na ihrisku, keď jeho spoluhráč Blue 1 skóruje.',
+    'Blue 2 wurde bereits ins Aus gestellt, ist aber noch auf dem Feld, als sein Teamkollege Blue 1 trifft.',
+    'Blue 2はすでにアウトオブバウンズと判定されていますが、チームメイトのBlue 1が得点した時点でまだフィールド上にいます。',
+  ],
+  [
+    'Under the 2027 draft only a goal scored by the penalized robot itself is void. Award Blue the goal, then remove Blue 2 for its penalty.',
+    'Podľa návrhu 2027 je neplatný len gól, ktorý strelí samotný potrestaný robot. Uznajte gól modrému tímu a potom odstráňte Blue 2, aby si odpykal trest.',
+    'Nach dem Entwurf 2027 ist nur ein Tor ungültig, das der bestrafte Roboter selbst erzielt. Gib Blau das Tor und nimm dann Blue 2 für seine Strafe vom Feld.',
+    '2027年ドラフトでは、無効になるのはペナルティを受けたロボット自身によるゴールだけです。青のゴールを認め、その後Blue 2をペナルティで退場させます。',
+  ],
+  [
+    'Blue 1 touched the wall, was not removed, and has now scored the goal itself.',
+    'Blue 1 sa dotkol steny, nebol odstránený a teraz sám strelil gól.',
+    'Blue 1 hat die Wand berührt, wurde nicht entfernt und hat das Tor jetzt selbst erzielt.',
+    'Blue 1は壁に触れましたが退場しておらず、今、自らゴールを決めました。',
+  ],
+  [
+    'A goal scored by the penalized robot is not granted. Disallow it, then remove Blue 1 for its penalty.',
+    'Gól, ktorý strelí potrestaný robot, sa neuzná. Neuznajte ho a potom odstráňte Blue 1, aby si odpykal trest.',
+    'Ein Tor des bestraften Roboters wird nicht gegeben. Erkenne es ab und nimm dann Blue 1 für seine Strafe vom Feld.',
+    'ペナルティを受けたロボットによるゴールは認められません。ゴールを取り消し、その後Blue 1をペナルティで退場させます。',
+  ],
+  [
+    'Blue 1 touched the side wall and was not removed. It then drives back, shoots, and the ball touches the inside back wall of the goal defended by Yellow.',
+    'Blue 1 sa dotkol bočnej steny a nebol odstránený. Potom sa vráti, vystrelí a lopta sa dotkne vnútornej zadnej steny bránky, ktorú bráni žltý tím.',
+    'Blue 1 hat die Seitenwand berührt und wurde nicht entfernt. Dann fährt er zurück, schießt, und der Ball berührt die innere Rückwand des Tors, das Gelb verteidigt.',
+    'Blue 1は側壁に触れましたが、退場していません。その後戻ってシュートし、ボールは黄が守るゴールの内側の奥壁に触れました。',
+  ],
+  [
+    'Blue and the Yellow defender both touch the ball, and the defender has been pushed back onto the pushing line.',
+    'Modrý tím aj žltý obranca sa dotýkajú lopty a obranca bol zatlačený späť na čiaru tlačenia.',
+    'Blau und der Verteidiger von Gelb berühren beide den Ball, und der Verteidiger wurde auf die Pushing-Linie zurückgeschoben.',
+    '青と黄の守備ロボットがともにボールに触れ、守備ロボットはプッシングラインまで押し戻されています。',
+  ],
+  [
+    'Blue and the Yellow defender both touch the ball. Blue keeps driving, and the defender is pushed back onto the provisional pushing line.',
+    'Modrý tím aj žltý obranca sa dotýkajú lopty. Modrý tím tlačí ďalej a obranca je zatlačený späť na predbežnú čiaru tlačenia.',
+    'Blau und der Verteidiger von Gelb berühren beide den Ball. Blau schiebt weiter, und der Verteidiger wird auf die vorläufige Pushing-Linie zurückgeschoben.',
+    '青と黄の守備ロボットがともにボールに触れています。青が押し続け、守備ロボットは暫定のプッシングラインまで押し戻されます。',
+  ],
+  [
+    'Robot-ball-robot contact with the defender at the pushing line is pushing under the 2027 draft. Move the ball to the furthest free neutral spot. The line position is provisional.',
+    'Kontakt robot–lopta–robot s obrancom na čiare tlačenia je podľa návrhu 2027 tlačenie. Presuňte loptu na najvzdialenejší voľný neutrálny bod. Poloha čiary je predbežná.',
+    'Kontakt Roboter–Ball–Roboter mit dem Verteidiger an der Pushing-Linie ist nach dem Entwurf 2027 Pushing. Lege den Ball auf den am weitesten entfernten freien Neutralpunkt. Die Linienposition ist vorläufig.',
+    '守備ロボットがプッシングライン上にいる状態でのロボット・ボール・ロボットの接触は、2027年ドラフトではプッシングです。ボールを最も遠い空きニュートラルスポットへ移します。ラインの位置は暫定です。',
+  ],
+  [
+    'Contact short of the pushing line',
+    'Kontakt pred čiarou tlačenia',
+    'Kontakt vor der Pushing-Linie',
+    'プッシングラインの手前での接触',
+  ],
+  [
+    'Blue and the Yellow defender both touch the ball inside the penalty area. The defender has not reached the pushing line.',
+    'Modrý tím aj žltý obranca sa dotýkajú lopty v pokutovom území. Obranca čiaru tlačenia nedosiahol.',
+    'Blau und der Verteidiger von Gelb berühren beide den Ball im Strafraum. Der Verteidiger hat die Pushing-Linie nicht erreicht.',
+    '青と黄の守備ロボットが、ペナルティエリア内でともにボールに触れています。守備ロボットはプッシングラインに達していません。',
+  ],
+  [
+    'Contact alone is not pushing under the 2027 draft. Until the defender reaches the pushing line, play continues.',
+    'Samotný kontakt nie je podľa návrhu 2027 tlačením. Kým obranca nedosiahne čiaru tlačenia, hra pokračuje.',
+    'Kontakt allein ist nach dem Entwurf 2027 kein Pushing. Bis der Verteidiger die Pushing-Linie erreicht, läuft das Spiel weiter.',
+    '2027年ドラフトでは、接触だけではプッシングになりません。守備ロボットがプッシングラインに達するまで、プレーは続きます。',
+  ],
+  [
+    'The Blue defender has reached the pushing line during contact with an opponent. Both Blue robots also partly overlap their own penalty area.',
+    'Modrý obranca počas kontaktu so súperom dosiahol čiaru tlačenia. Oba modré roboty zároveň čiastočne zasahujú do vlastného pokutového územia.',
+    'Der Verteidiger von Blau hat im Kontakt mit einem Gegner die Pushing-Linie erreicht. Beide blauen Roboter stehen außerdem teilweise im eigenen Strafraum.',
+    '青の守備ロボットが相手との接触中にプッシングラインに達しました。さらに、青の2台とも一部が自陣のペナルティエリアに入っています。',
+  ],
+  [
+    'Both Blue robots partly overlap the penalty area of the goal Yellow defends. Neither is fully inside, and no robots touch.',
+    'Oba modré roboty čiastočne zasahujú do pokutového územia pri bránke, ktorú bráni žltý tím. Ani jeden nie je celý vnútri a žiadne roboty sa nedotýkajú.',
+    'Beide blauen Roboter stehen teilweise im Strafraum des Tors, das Gelb verteidigt. Keiner steht vollständig darin, und keine Roboter berühren sich.',
+    '青の2台が、黄の守るゴールのペナルティエリアに一部ずつ入っています。どちらも完全には入っておらず、ロボット同士の接触もありません。',
+  ],
+  [
+    'Under the 2027 draft multiple defense applies only in a team’s own penalty area. Two attackers partly inside the opponent’s area are left alone.',
+    'Podľa návrhu 2027 platí viacnásobná obrana len vo vlastnom pokutovom území tímu. Dvaja útočníci čiastočne v súperovom území sa nechajú tak.',
+    'Nach dem Entwurf 2027 gilt Mehrfachverteidigung nur im eigenen Strafraum eines Teams. Zwei Angreifer, die teilweise im gegnerischen Strafraum stehen, bleiben unbehelligt.',
+    '2027年ドラフトでは、複数守備は自陣のペナルティエリアにのみ適用されます。相手のエリアに一部入っている攻撃側の2台には、何もしません。',
+  ],
+  [
+    'Under the 2027 draft a robot that holds the ball during gameplay is deemed damaged and loses its inspection sticker. Remove it; it returns only with a compliant mechanism and a new inspection.',
+    'Podľa návrhu 2027 sa robot, ktorý počas hry drží loptu, považuje za poškodeného a stráca nálepku z technickej kontroly. Odstráňte ho; vráti sa len s vyhovujúcim mechanizmom a po novej technickej kontrole.',
+    'Nach dem Entwurf 2027 gilt ein Roboter, der im laufenden Spiel den Ball hält, als beschädigt und verliert seinen Inspektionsaufkleber. Entferne ihn; er kehrt nur mit einem regelkonformen Mechanismus und einer neuen Inspektion zurück.',
+    '2027年ドラフトでは、試合中にボールを保持したロボットは故障扱いとなり、検査ステッカーを失います。退場させてください。復帰には適合した機構と再検査が必要です。',
+  ],
+  [
+    'Kick-off before the minute has passed',
+    'Výkop pred uplynutím minúty',
+    'Anstoß vor Ablauf der Minute',
+    '1分経過前のキックオフ',
+  ],
+  [
+    'A kickoff is now due. Blue 1 was called out of bounds 25 seconds ago and is ready.',
+    'Teraz má nasledovať výkop. Blue 1 bol pred 25 sekundami potrestaný za opustenie ihriska a je pripravený.',
+    'Jetzt steht ein Anstoß an. Blue 1 wurde vor 25 Sekunden ins Aus gestellt und ist bereit.',
+    'これからキックオフを行います。Blue 1は25秒前にアウトオブバウンズとなり、準備はできています。',
+  ],
+  [
+    'The 2027 draft makes the minute a minimum for out-of-bounds robots, so this kickoff does not bring Blue 1 back. This follows section 2.8; a damaged robot could still return here.',
+    'Návrh 2027 určuje minútu pre roboty mimo ihriska ako minimum, takže tento výkop Blue 1 späť nevráti. Vyplýva to z časti 2.8; poškodený robot by sa tu ešte vrátiť mohol.',
+    'Der Entwurf 2027 macht die Minute für Roboter im Aus zur Mindestdauer, daher bringt dieser Anstoß Blue 1 nicht zurück. Das folgt Abschnitt 2.8; ein beschädigter Roboter könnte hier weiterhin zurückkehren.',
+    '2027年ドラフトは、アウトオブバウンズのロボットの1分を最低時間としたため、このキックオフではBlue 1は復帰しません。これは2.8節に基づきます。故障ロボットであれば、ここで復帰できます。',
+  ],
+  [
+    'Kick-off after the minute has passed',
+    'Výkop po uplynutí minúty',
+    'Anstoß nach Ablauf der Minute',
+    '1分経過後のキックオフ',
+  ],
+  [
+    'A kickoff is now due. Blue 1 was called out of bounds 75 seconds ago and is ready.',
+    'Teraz má nasledovať výkop. Blue 1 bol pred 75 sekundami potrestaný za opustenie ihriska a je pripravený.',
+    'Jetzt steht ein Anstoß an. Blue 1 wurde vor 75 Sekunden ins Aus gestellt und ist bereit.',
+    'これからキックオフを行います。Blue 1は75秒前にアウトオブバウンズとなり、準備はできています。',
+  ],
+  [
+    'The minute has been served and a kickoff is a game interruption: permit the return. The robot goes to the area of its own corner.',
+    'Minúta je odpykaná a výkop je prerušením hry: povoľte návrat. Robot ide do priestoru svojho vlastného rohu.',
+    'Die Minute ist verbüßt, und ein Anstoß ist eine Spielunterbrechung: Erlaube die Rückkehr. Der Roboter kommt in den Bereich seiner eigenen Ecke.',
+    '1分は経過しており、キックオフは試合の中断に当たります。復帰を許可します。ロボットは自陣コーナー付近に置かれます。',
+  ],
+  [
+    'Minute served, play running',
+    'Minúta odpykaná, hra beží',
+    'Minute verbüßt, das Spiel läuft',
+    '1分経過、プレーは続行中',
+  ],
+  [
+    'Blue 1 was called out of bounds 75 seconds ago and asks to return. Play is running; there has been no interruption since its minute ended.',
+    'Blue 1 bol pred 75 sekundami potrestaný za opustenie ihriska a žiada o návrat. Hra beží; od uplynutia jeho minúty nenastalo žiadne prerušenie.',
+    'Blue 1 wurde vor 75 Sekunden ins Aus gestellt und möchte zurückkehren. Das Spiel läuft; seit Ablauf seiner Minute gab es keine Unterbrechung.',
+    'Blue 1は75秒前にアウトオブバウンズとなり、復帰を求めています。プレーは続いており、1分が経過してから中断はありません。',
+  ],
+  [
+    'After the minimum minute an out-of-bounds robot returns at the next game interruption, not during running play. Keep it off until then.',
+    'Po minimálnej minúte sa robot mimo ihriska vracia pri najbližšom prerušení hry, nie počas bežiacej hry. Dovtedy ho ponechajte mimo ihriska.',
+    'Nach der Mindestminute kehrt ein Roboter im Aus bei der nächsten Spielunterbrechung zurück, nicht im laufenden Spiel. Lass ihn bis dahin draußen.',
+    '最低時間の1分が過ぎたアウトオブバウンズのロボットは、プレー中ではなく、次の試合の中断時に復帰します。それまでは場外で待機させます。',
+  ],
+  [
+    'Stationary contest with a robot waiting',
+    'Nehybný súboj, keď čaká robot',
+    'Stillstand im Zweikampf mit einem wartenden Roboter',
+    'ロボットが待機中の膠着状態',
+  ],
+  [
+    'The ball and opponents remain stationary. Blue 2 was called out of bounds 75 seconds ago and is waiting. No referee count has been given yet.',
+    'Lopta aj súperi zostávajú bez pohybu. Blue 2 bol pred 75 sekundami potrestaný za opustenie ihriska a čaká. Rozhodca zatiaľ neodpočítaval.',
+    'Ball und Gegner bleiben unbewegt. Blue 2 wurde vor 75 Sekunden ins Aus gestellt und wartet. Der Schiedsrichter hat noch nicht gezählt.',
+    'ボールと相手同士のロボットは動かないままです。Blue 2は75秒前にアウトオブバウンズとなり、待機中です。審判のカウントはまだ行われていません。',
+  ],
+  [
+    'Count first. Under the 2027 draft a waiting robot whose minute has passed returns before the ball is moved; only if play stays stuck do you count again and place the ball on the nearest free neutral spot.',
+    'Najprv odpočítajte. Podľa návrhu 2027 sa čakajúci robot, ktorému uplynula minúta, vracia skôr, než sa presunie lopta; až keď hra zostane zablokovaná, odpočítajte znova a umiestnite loptu na najbližší voľný neutrálny bod.',
+    'Zähle zuerst. Nach dem Entwurf 2027 kehrt ein wartender Roboter, dessen Minute abgelaufen ist, zurück, bevor der Ball versetzt wird; nur wenn das Spiel festgefahren bleibt, zählst du erneut und legst den Ball auf den nächsten freien Neutralpunkt.',
+    'まずカウントします。2027年ドラフトでは、1分が経過した待機中のロボットは、ボールを移す前に復帰します。それでもプレーが動かない場合にのみ、もう一度カウントして、ボールを最寄りの空きニュートラルスポットに置きます。',
+  ],
+  [
+    'All four robots have been called out of bounds at different times. No robot is left on the field.',
+    'Všetky štyri roboty boli v rôznom čase potrestané za opustenie ihriska. Na ihrisku nezostal žiadny robot.',
+    'Alle vier Roboter wurden zu unterschiedlichen Zeiten ins Aus gestellt. Kein Roboter ist mehr auf dem Feld.',
+    '4台のロボットがそれぞれ別の時点でアウトオブバウンズとなりました。フィールドにはロボットが1台も残っていません。',
+  ],
+  [
+    'Under the 2027 draft a neutral kickoff takes place when all robots of both teams are out of the field. Robots come back for it as soon as they are allowed to return.',
+    'Podľa návrhu 2027 nasleduje neutrálny výkop, keď sú všetky roboty oboch tímov mimo ihriska. Roboty sa naň vracajú hneď, ako sa smú vrátiť.',
+    'Nach dem Entwurf 2027 findet ein neutraler Anstoß statt, wenn alle Roboter beider Teams außerhalb des Feldes sind. Roboter kommen dafür zurück, sobald sie zurückkehren dürfen.',
+    '2027年ドラフトでは、両チームのロボットがすべてフィールド外にいる場合、ニュートラルキックオフを行います。ロボットは、復帰が認められ次第、そのために戻ります。',
+  ],
+  [
+    'Pushed onto the ramp',
+    'Zatlačenie na rampu',
+    'Auf die Rampe geschoben',
+    'スロープへの押し上げ',
+  ],
+  [
+    'Blue 1 accidentally pushes Yellow 1 onto the ramp along the wall. Yellow 1 has not touched the wall.',
+    'Blue 1 náhodne zatlačí Yellow 1 na rampu pozdĺž steny. Yellow 1 sa steny nedotkol.',
+    'Blue 1 schiebt Yellow 1 versehentlich auf die Rampe an der Wand. Yellow 1 hat die Wand nicht berührt.',
+    'Blue 1が偶然Yellow 1を壁沿いのスロープへ押し上げました。Yellow 1は壁に触れていません。',
+  ],
+  [
+    "Blue's contact displaces Yellow 1 onto the ramp along the wall. Yellow 1 does not touch the wall. You judge the displacement accidental.",
+    'Kontakt modrého tímu zatlačí Yellow 1 na rampu pozdĺž steny. Yellow 1 sa steny nedotkne. Posúdite to ako náhodné zatlačenie.',
+    'Der Kontakt von Blau schiebt Yellow 1 auf die Rampe an der Wand. Yellow 1 berührt die Wand nicht. Du beurteilst das Verschieben als versehentlich.',
+    '青との接触で、Yellow 1が壁沿いのスロープへ押し上げられます。Yellow 1は壁に触れていません。偶然の押し上げと判断しました。',
+  ],
+  [
+    '{0} drove {1} onto the ramp along the wall. {2} has not touched the wall.',
+    '{0} zatlačil {1} na rampu pozdĺž steny. {2} sa steny nedotkol.',
+    '{0} hat {1} auf die Rampe an der Wand geschoben. {2} hat die Wand nicht berührt.',
+    '{0}が{1}を壁沿いのスロープへ押し上げました。{2}は壁に触れていません。',
+  ],
+  [
+    'The 2027 draft lets the referee call pushed out for a robot that an opponent pushes onto the ramp, and move it slightly back onto the field. Letting play continue is also within the referee’s discretion.',
+    'Návrh 2027 umožňuje rozhodcovi ohlásiť vytlačenie pri robotovi, ktorého súper zatlačí na rampu, a mierne ho posunúť späť na ihrisko. Nechať hru pokračovať je takisto v právomoci rozhodcu.',
+    'Der Entwurf 2027 erlaubt dem Schiedsrichter, für einen Roboter, den ein Gegner auf die Rampe schiebt, Hinausgeschoben anzusagen und ihn leicht zurück aufs Feld zu schieben. Das Spiel weiterlaufen zu lassen liegt ebenfalls im Ermessen des Schiedsrichters.',
+    '2027年ドラフトでは、相手にスロープへ押し上げられたロボットについて、審判は押し出しを宣告し、少しだけフィールド内へ戻すことができます。そのままプレーを続けさせることも、審判の裁量に含まれます。',
+  ],
+
+  // Reworded 2026 situations
+  [
+    'Which limits apply to a main-league Soccer Infrared robot in 2027?',
+    'Ktoré limity platia v roku 2027 pre robota hlavnej ligy Soccer Infrared?',
+    'Welche Grenzwerte gelten 2027 für einen Roboter der Hauptliga Soccer Infrared?',
+    '2027年のメインリーグ Soccer Infrared のロボットには、どの制限が適用されますか？',
+  ],
+  [
+    'The interference requirement covers lights as well as construction colours. The rules specifically warn about bright red lights being mistaken for the ball.',
+    'Požiadavka nerušiť sa vzťahuje na svetlá aj na farby konštrukcie. Pravidlá výslovne upozorňujú, že jasné červené svetlá možno zameniť s loptou.',
+    'Die Anforderung, nicht zu stören, gilt für Lichter ebenso wie für Konstruktionsfarben. Die Regeln warnen ausdrücklich davor, dass helle rote Lichter mit dem Ball verwechselt werden.',
+    '干渉に関する要件は、機体の色だけでなくライトにも適用されます。ルールは特に、明るい赤色のライトがボールと誤認されることに注意を促しています。',
+  ],
+  [
+    'The main-league IR ball',
+    'IR lopta hlavnej ligy',
+    'Der IR-Ball der Hauptliga',
+    'メインリーグのIRボール',
+  ],
+  [
+    'Which ball-size distinction applies to the main rules since 2026 and the separate Entry format?',
+    'Aký rozdiel vo veľkosti lopty platí od roku 2026 medzi hlavnými pravidlami a samostatným formátom Entry?',
+    'Welcher Unterschied in der Ballgröße gilt seit 2026 zwischen den Hauptregeln und dem separaten Entry-Format?',
+    '2026年以降のメインルールと、別形式のEntryとでは、ボールの大きさにどのような違いがありますか？',
+  ],
+  [
+    'The 42 mm ball has been the main-league size since 2026; do not apply the legacy large-ball specification to it. Tournament organizers provide game balls, not necessarily practice balls.',
+    'Lopta s priemerom 42 mm je veľkosťou hlavnej ligy od roku 2026; neuplatňujte na ňu staršiu špecifikáciu veľkej lopty. Organizátori turnaja poskytujú zápasové lopty, nie nevyhnutne tréningové.',
+    'Der 42-mm-Ball ist seit 2026 die Größe der Hauptliga; wende die alte Spezifikation des großen Balls nicht darauf an. Turnierveranstalter stellen Spielbälle, aber nicht unbedingt Übungsbälle.',
+    '42 mmのボールは2026年からメインリーグのサイズです。従来の大きいボールの仕様を当てはめてはいけません。大会主催者は試合球を用意しますが、練習球まで用意するとは限りません。',
+  ],
+  [
+    'Both Blue robots partly overlap their own penalty area; neither is fully inside and no pushing occurs. Blue 1 is 20 cm from the ball and Blue 2 is 45 cm away. Which relocation is correct?',
+    'Oba modré roboty čiastočne zasahujú do vlastného pokutového územia; ani jeden nie je celý vnútri a nedochádza k tlačeniu. Blue 1 je 20 cm od lopty a Blue 2 je vzdialený 45 cm. Ktoré premiestnenie je správne?',
+    'Beide blauen Roboter stehen teilweise im eigenen Strafraum; keiner steht vollständig darin, und es gibt kein Pushing. Blue 1 ist 20 cm vom Ball entfernt, Blue 2 45 cm. Welches Versetzen ist richtig?',
+    '青の2台が一部ずつ自陣のペナルティエリアに入っています。どちらも完全には入っておらず、プッシングもありません。Blue 1はボールから20 cm、Blue 2は45 cmの位置にいます。正しい移動はどれですか？',
+  ],
+  [
+    'Both Blue robots partly overlap their own penalty area. Which one should you move to the furthest unoccupied neutral spot?',
+    'Oba modré roboty čiastočne zasahujú do vlastného pokutového územia. Ktorého z nich presuniete na najvzdialenejší neobsadený neutrálny bod?',
+    'Beide blauen Roboter stehen teilweise im eigenen Strafraum. Welchen versetzt du auf den am weitesten entfernten freien Neutralpunkt?',
+    '青の2台が一部ずつ自陣のペナルティエリアに入っています。どちらを最も遠い空きニュートラルスポットへ移しますか？',
+  ],
+  [
+    'For two same-team robots partly inside their own penalty area, move the one farther from the ball. Here that is Blue 2.',
+    'Pri dvoch robotoch jedného tímu čiastočne vo vlastnom pokutovom území premiestnite toho, ktorý je ďalej od lopty. Tu je to Blue 2.',
+    'Bei zwei Robotern desselben Teams, die teilweise im eigenen Strafraum stehen, versetze den, der weiter vom Ball entfernt ist. Hier ist das Blue 2.',
+    '同じチームの2台が一部ずつ自陣のペナルティエリアに入っている場合は、ボールから遠いほうを移します。ここではBlue 2です。',
+  ],
+  [
+    'Both Blue robots partly overlap their own penalty area. Compare their distances to the ball.',
+    'Oba modré roboty čiastočne zasahujú do vlastného pokutového územia. Porovnajte ich vzdialenosti od lopty.',
+    'Beide blauen Roboter stehen teilweise im eigenen Strafraum. Vergleiche ihre Abstände zum Ball.',
+    '青の2台が一部ずつ自陣のペナルティエリアに入っています。ボールまでの距離を比べます。',
+  ],
+  [
+    'Contact alone does not establish pushing: no defender has reached a pushing line.',
+    'Samotný kontakt neznamená tlačenie: žiadny obranca nedosiahol čiaru tlačenia.',
+    'Kontakt allein begründet kein Pushing: Kein Verteidiger hat eine Pushing-Linie erreicht.',
+    '接触だけではプッシングになりません。どの守備ロボットもプッシングラインに達していません。',
+  ],
+  [
+    'Remove Blue 1. Its penalty of at least one minute starts at removal; the training timer advances when you resume the match.',
+    'Odstráňte Blue 1. Jeho trest najmenej jednej minúty sa začína odstránením; tréningový časovač beží ďalej, keď zápas obnovíte.',
+    'Nimm Blue 1 vom Feld. Seine Strafe von mindestens einer Minute beginnt mit dem Entfernen; der Trainingstimer läuft weiter, wenn du das Spiel fortsetzt.',
+    'Blue 1を退場させます。最低1分のペナルティは退場の時点から始まり、トレーニングのタイマーは試合を再開すると進みます。',
+  ],
+  [
+    'Full entry is out of bounds. Remove the robot for at least one minute; it returns at the first game interruption after that.',
+    'Úplný vstup robota znamená opustenie ihriska. Odstráňte robota najmenej na jednu minútu; vráti sa pri prvom prerušení hry po jej uplynutí.',
+    'Vollständiges Eindringen ist Aus. Nimm den Roboter für mindestens eine Minute vom Feld; er kehrt bei der ersten Spielunterbrechung danach zurück.',
+    'ロボット全体が進入するとアウトオブバウンズです。ロボットを最低1分間退場させます。その後の最初の試合の中断時に復帰します。',
+  ],
+  [
+    'Kickoff return of a repaired robot',
+    'Návrat opraveného robota pri výkope',
+    'Rückkehr eines reparierten Roboters beim Anstoß',
+    '修理を終えたロボットのキックオフ時の復帰',
+  ],
+  [
+    'A kickoff is now due. Blue 1 was taken off as damaged and is fully repaired after only 25 seconds off the field.',
+    'Teraz má nasledovať výkop. Blue 1 bol odstránený ako poškodený a už po 25 sekundách mimo ihriska je úplne opravený.',
+    'Jetzt steht ein Anstoß an. Blue 1 wurde als beschädigt vom Feld genommen und ist nach nur 25 Sekunden außerhalb des Feldes vollständig repariert.',
+    'これからキックオフを行います。Blue 1は故障扱いで退場し、場外でわずか25秒のうちに完全に修理されました。',
+  ],
+  [
+    'A repaired robot may return before a kickoff without waiting for the full minute. This exception is for damaged robots; an out-of-bounds robot serves its whole minute.',
+    'Opravený robot sa môže vrátiť pred výkopom bez čakania na celú minútu. Táto výnimka platí pre poškodené roboty; robot mimo ihriska si odpyká celú minútu.',
+    'Ein reparierter Roboter darf vor einem Anstoß zurückkehren, ohne die volle Minute abzuwarten. Diese Ausnahme gilt für beschädigte Roboter; ein Roboter im Aus verbüßt seine ganze Minute.',
+    '修理を終えたロボットは、1分を待たずにキックオフ前に復帰できます。この例外は故障ロボットのためのもので、アウトオブバウンズのロボットは1分を完全に終える必要があります。',
+  ],
+  [
+    'The defender reached the pushing line during contact with an opponent, directly or through the ball. Under the 2027 draft that is pushing: move the ball to the furthest free neutral spot.',
+    'Obranca počas kontaktu so súperom, priameho alebo cez loptu, dosiahol čiaru tlačenia. Podľa návrhu 2027 je to tlačenie: presuňte loptu na najvzdialenejší voľný neutrálny bod.',
+    'Der Verteidiger hat im Kontakt mit einem Gegner, direkt oder über den Ball, die Pushing-Linie erreicht. Nach dem Entwurf 2027 ist das Pushing: Lege den Ball auf den am weitesten entfernten freien Neutralpunkt.',
+    '守備ロボットが、直接またはボールを介した相手との接触中にプッシングラインに達しました。2027年ドラフトではこれはプッシングです。ボールを最も遠い空きニュートラルスポットへ移します。',
+  ],
+  [
+    'Pushing is established by the pushing line. Resolve its ball placement first, then reassess multiple defense from the new ball position.',
+    'O tlačení rozhodla čiara tlačenia. Najprv vyriešte s ním súvisiaci presun lopty a potom znova posúďte viacnásobnú obranu podľa novej polohy lopty.',
+    'Pushing ist durch die Pushing-Linie festgestellt. Löse zuerst die zugehörige Ballplatzierung und beurteile dann die Mehrfachverteidigung von der neuen Ballposition aus neu.',
+    'プッシングはプッシングラインによって成立しています。まずボールの移動を行い、その後、新しいボールの位置をもとに複数守備を改めて判断します。',
+  ],
+  [
+    'Remove the identified out-of-bounds robot. Its penalty of at least one minute starts at removal; after the minute it returns at the next game interruption.',
+    'Odstráňte označeného robota mimo ihriska. Jeho trest najmenej jednej minúty sa začína odstránením; po uplynutí minúty sa vráti pri najbližšom prerušení hry.',
+    'Nimm den festgestellten Roboter im Aus vom Feld. Seine Strafe von mindestens einer Minute beginnt mit dem Entfernen; nach der Minute kehrt er bei der nächsten Spielunterbrechung zurück.',
+    '特定したアウトオブバウンズのロボットを退場させます。最低1分のペナルティは退場の時点から始まり、1分経過後、次の試合の中断時に復帰します。',
+  ],
+  [
+    'A goal scored by a robot that is out of bounds and still on the field is not granted. Disallow it, then remove that robot.',
+    'Gól, ktorý strelí robot, ktorý je mimo ihriska a ešte je na ploche, sa neuzná. Neuznajte ho a potom tohto robota odstráňte.',
+    'Ein Tor eines Roboters, der im Aus und noch auf dem Feld ist, wird nicht gegeben. Erkenne es ab und nimm dann diesen Roboter vom Feld.',
+    'アウトオブバウンズでまだフィールド上にいるロボットによるゴールは認められません。ゴールを取り消し、その後そのロボットを退場させます。',
+  ],
+
+  // Detailed study: illegal ball holding
+  [
+    'The 2027 draft states the consequence during gameplay; this scene teaches recognition of the condition.',
+    'Návrh 2027 stanovuje následok počas hry; táto scéna učí rozpoznať samotný stav.',
+    'Der Entwurf 2027 legt die Folge im laufenden Spiel fest; diese Szene schult das Erkennen des Zustands.',
+    '2027年ドラフトは試合中の処置を定めています。この場面では、その状態を見分けることを学びます。',
+  ],
+  [
+    'Call ball holding: the robot is damaged and loses its inspection sticker',
+    'Odpískam držanie lopty: robot je poškodený a stráca nálepku z technickej kontroly',
+    'Ballhalten pfeifen: Der Roboter ist beschädigt und verliert seinen Inspektionsaufkleber',
+    'ボール保持を判定する：ロボットは故障扱いとなり、検査ステッカーを失う',
+  ],
+  [
+    'Correct. The ball remains inaccessible during a genuine challenge. Under the 2027 draft the robot is deemed damaged and stays out until its mechanism complies and passes inspection again.',
+    'Správne. Lopta zostáva neprístupná aj pri skutočnom súboji. Podľa návrhu 2027 sa robot považuje za poškodeného a zostáva mimo ihriska, kým jeho mechanizmus nevyhovie pravidlám a znova neprejde technickou kontrolou.',
+    'Richtig. Der Ball bleibt auch bei einem echten Zweikampf unzugänglich. Nach dem Entwurf 2027 gilt der Roboter als beschädigt und bleibt draußen, bis sein Mechanismus regelkonform ist und die Inspektion erneut besteht.',
+    '正解です。相手が実際に奪いに来ても、ボールには届きません。2027年ドラフトでは、このロボットは故障扱いとなり、機構が適合して再検査に合格するまで場外にとどまります。',
+  ],
+  [
+    'Let the robot play on and have it checked after the game',
+    'Nechám robota hrať ďalej a po zápase ho dám skontrolovať',
+    'Den Roboter weiterspielen lassen und ihn nach dem Spiel prüfen lassen',
+    'ロボットにプレーを続けさせ、試合後に検査させる',
+  ],
+  [
+    'Recognizing the mechanism problem is useful, but during gameplay the 2027 draft removes the robot as damaged until it complies.',
+    'Rozpoznať problém mechanizmu je užitočné, no návrh 2027 počas hry odstraňuje robota ako poškodeného, kým nevyhovie pravidlám.',
+    'Das Problem mit dem Mechanismus zu erkennen ist hilfreich, aber im laufenden Spiel entfernt der Entwurf 2027 den Roboter als beschädigt, bis er regelkonform ist.',
+    '機構の問題に気づいたのは良い点ですが、2027年ドラフトでは、試合中のこのロボットは適合するまで故障扱いで退場となります。',
+  ],
+];
+
+export default rows;
