@@ -1,13 +1,5 @@
-// Reviewed translations for the rules-version selector, the Version comparison
-// tab and the rule-set aware messages of the referee trainer.
-//
-// Rows are [English, Slovak, German, Japanese]. The English text must match the
-// source exactly. Terminology follows the reviewed clip-question translations:
-// tlačenie / Pushing / プッシング, viacnásobná obrana / Mehrfachverteidigung /
-// 複数守備, mimo ihriska / Aus / アウトオブバウンズ, výkop / Anstoß / キックオフ.
-// Robot names (Blue 1, Yellow 2) stay as they are labelled on the field.
+// Reviewed English, Slovak, German and Japanese copy; draft refreshed 2026-09-24.
 const rows = [
-  // Header, tabs and shared labels
   ['Rules version', 'Verzia pravidiel', 'Regelversion', 'ルールのバージョン'],
   [
     'Version comparison',
@@ -67,8 +59,6 @@ const rows = [
     'KI-SPIEL / SCHIEDSRICHTER / {0}',
     'AI試合・審判 / {0}',
   ],
-
-  // Rules tab
   [
     'Changed from {0}',
     'Zmena oproti {0}',
@@ -99,8 +89,6 @@ const rows = [
     'Dies ist ein zur Kommentierung veröffentlichter Entwurf. Er kann sich vor der Saison noch ändern.',
     'これは意見募集のために公開されたドラフトです。シーズン開始までに変更される可能性があります。',
   ],
-
-  // Play and Referee tabs
   [
     'The field shows the pushing line.',
     'Na ihrisku je zobrazená čiara tlačenia.',
@@ -155,8 +143,6 @@ const rows = [
     'Holding · als beschädigt entfernen',
     'Holding · 故障扱いで退場',
   ],
-
-  // Version comparison tab
   [
     'What changed between two versions of the rules',
     'Čo sa zmenilo medzi dvoma verziami pravidiel',
@@ -376,8 +362,6 @@ const rows = [
     'Offizielles Dokument {0}',
     '{0}年の公式文書',
   ],
-
-  // Vertical kicker test bench
   [
     'Vertical kicker test bench',
     'Stanovisko pre vertikálny test kopacieho mechanizmu',
@@ -434,9 +418,6 @@ const rows = [
     'Verwende den Turnierball der Unterliga des Roboters und miss neben einer Wand mit einem Maßband. Das Verfahren der Hauptliga ersetzt nicht den separaten Entry-Anhang.',
     'そのロボットのサブリーグの大会球を使い、壁際でメジャーを当てて測ります。メインリーグの手順は、別に定められたEntryの付録の代わりにはなりません。',
   ],
-
-  // Referee trainer: facts, hints and applied rules
-  // An existing frame that the new return messages are embedded in.
   [
     '{0} requests return. {1}',
     '{0} žiada o návrat. {1}',
@@ -455,8 +436,6 @@ const rows = [
     '; der anstehende Anstoß verkürzt sie nicht',
     '。予定されているキックオフでも短縮されません',
   ],
-  // Starts with fixed words on purpose: a template that begins with a
-  // placeholder would also swallow the sentence in front of it at runtime.
   [
     'Its minimum penalty runs for another {0} seconds{1}.',
     'Jeho minimálny trest potrvá ešte {0} sekúnd{1}.',
@@ -536,10 +515,10 @@ const rows = [
     '押し出しを宣告しました。ロボットはプレーを続け、他に触れない小さな位置修正でスロープから戻します。',
   ],
   [
-    '{0} returned in the area of its own corner. The rules name no orientation; it faces the center of the field.',
-    '{0} sa vrátil do priestoru vlastného rohu. Pravidlá neurčujú natočenie; je otočený k stredu ihriska.',
-    '{0} ist im Bereich seiner eigenen Ecke zurückgekehrt. Die Regeln nennen keine Ausrichtung; er zeigt zur Feldmitte.',
-    '{0}は自陣コーナー付近に復帰しました。ルールに向きの指定はなく、フィールド中央を向いています。',
+    '{0} returned in the area of its own corner, clear of the white lines and facing its own goal.',
+    '{0} sa vrátil pri vlastnom rohu, bez dotyku bielych čiar a čelom k vlastnej bráne.',
+    '{0} kehrte nahe seiner eigenen Ecke zurück, ohne die weißen Linien zu berühren und zum eigenen Tor ausgerichtet.',
+    '{0}は自陣コーナー付近で、白線に触れず自陣ゴールに向けて復帰しました。',
   ],
   [
     'Neutral kickoff called with no robot on the field. It is arranged as soon as each team has a robot that may return.',
@@ -548,10 +527,10 @@ const rows = [
     'フィールドにロボットがいない状態でニュートラルキックオフを宣告しました。各チームに復帰可能なロボットがそろい次第、配置します。',
   ],
   [
-    'This robot has served at least one minute and a game interruption has occurred. Place it in the area of its own corner.',
-    'Tento robot si odpykal najmenej jednu minútu a nastalo prerušenie hry. Umiestnite ho do priestoru jeho vlastného rohu.',
-    'Dieser Roboter hat mindestens eine Minute verbüßt, und es gab eine Spielunterbrechung. Setze ihn in den Bereich seiner eigenen Ecke.',
-    'このロボットは1分以上のペナルティを終え、試合の中断も発生しました。自陣コーナー付近に置きます。',
+    'This robot has served at least one minute and a game interruption has occurred. Return it near an own corner, clear of white lines and facing its own goal.',
+    'Tento robot si odpykal aspoň minútu a nastalo prerušenie hry. Vráť ho pri vlastnom rohu, bez dotyku bielych čiar a čelom k vlastnej bráne.',
+    'Dieser Roboter hat mindestens eine Minute verbüßt und das Spiel wurde unterbrochen. Bringe ihn nahe einer eigenen Ecke zurück, ohne Berührung weißer Linien und zum eigenen Tor ausgerichtet.',
+    'このロボットは1分以上の罰則時間を終え、試合も中断されました。自陣コーナー付近で、白線に触れず自陣ゴールに向けて復帰させます。',
   ],
   [
     '{0} has served its minute, a game interruption allows its return, and its corner area is clear. You may permit its return now.',
@@ -656,13 +635,11 @@ const rows = [
     '試合中のボール保持：故障扱いとなり、検査ステッカーを失う',
   ],
   [
-    'The position of the pushing line has not been published yet. The line in this Lab is a provisional placeholder at mid-depth of the penalty area.',
-    'Poloha čiary tlačenia zatiaľ nebola zverejnená. Čiara v tomto Labe je predbežná a nachádza sa v polovici hĺbky pokutového územia.',
-    'Die Position der Pushing-Linie wurde noch nicht veröffentlicht. Die Linie in diesem Lab ist ein vorläufiger Platzhalter auf halber Tiefe des Strafraums.',
-    'プッシングラインの位置はまだ公表されていません。このLabのラインは、ペナルティエリアの奥行きの中間に置いた暫定的なものです。',
+    'The pushing line in this Lab copies the curved white penalty-area line 16 cm towards the goal. This is provisional: do not draw it on real fields yet.',
+    'Čiara tlačenia v tomto Labe kopíruje zakrivenú bielu čiaru pokutového územia o 16 cm smerom k bráne. Je predbežná: zatiaľ ju nekreslite na skutočné ihriská.',
+    'Die Pushing-Linie in diesem Lab ist eine um 16 cm zum Tor verschobene Kopie der gekrümmten weißen Strafraumlinie. Sie ist vorläufig: Zeichnet sie noch nicht auf echte Spielfelder.',
+    'このLabのプッシングラインは、白いペナルティエリアの曲線をゴール方向へ16 cm移したものです。暫定的な配置のため、まだ実際のフィールドには描かないでください。',
   ],
-  // Identifiers that the catalog extractor also collects. They are not shown
-  // on their own today; the rows keep a sensible meaning if they ever are.
   ['Pushing lines', 'Čiary tlačenia', 'Pushing-Linien', 'プッシングライン'],
   ['draft', 'návrh', 'Entwurf', 'ドラフト'],
   ['final', 'konečná verzia', 'endgültig', '確定版'],
@@ -688,5 +665,4 @@ const rows = [
   ['explanation', 'vysvetlenie', 'Erklärung', '解説'],
   ['ruleset', 'verzia pravidiel', 'Regelversion', 'ルールのバージョン'],
 ];
-
 export default rows;

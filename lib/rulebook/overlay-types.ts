@@ -1,6 +1,6 @@
 import type { RefereeCase } from '../simulator/referee-cases';
 import type { RefereeChoice, RuleReference } from '../simulator/types';
-import type { RuleClip } from './animations';
+import type { Keyframe, RuleClip } from './animations';
 import type { RuleQuestion } from './questions';
 
 /** Where a new situation appears in the list of its rule set. */
@@ -49,8 +49,11 @@ export type LearningOverlay = {
     Record<
       string,
       Partial<Pick<RuleClip, 'title' | 'question' | 'options' | 'feedback'>> & {
-        /** Replacement frame labels/readouts by frame index. */
-        frames?: Record<number, { label?: string; readout?: string }>;
+        /** Replacement labels and geometry when the answer stays unchanged. */
+        frames?: Record<
+          number,
+          Partial<Pick<Keyframe, 'label' | 'readout' | 'poses'>>
+        >;
       }
     >
   >;

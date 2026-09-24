@@ -459,22 +459,47 @@ export function penaltyEvidenceSegments(pose: Pose, visual: RobotVisualId) {
 }
 
 /**
- * Z coordinate (positive towards `end`) of a pushing line drawn `depth` metres
- * behind the outer front edge of the penalty area. The line spans the inside
- * of the area between its two side stripes.
+ * Front of the white penalty marking's centreline translated goalwards.
+ * The provisional offset is centreline-to-centreline, not from a stripe edge.
  */
 export function pushingLineZ(depth: number) {
-  return front + depth;
+  return FIELD.penaltyFrontCenterZ + depth;
 }
-export function pushingLineSegment(
+const pushingPaths = new Map<string, PointXZ[]>();
+/** Shared by rendering and touch detection; this is also provisional. */
+export const PUSHING_LINE_WIDTH = 0.01;
+/** Copy the curved white marking, shift goalwards, and clip at the goal line. */
+export function pushingLinePath(
   end: number,
   depth: number,
-): [PointXZ, PointXZ] {
-  const inner = halfWidth - SPEC.markings.whiteLineWidth;
-  return [
-    [-inner, end * pushingLineZ(depth)],
-    [inner, end * pushingLineZ(depth)],
-  ];
+): readonly PointXZ[] {
+  const key = `${end}:${depth}`;
+  const cached = pushingPaths.get(key);
+  if (cached) return cached;
+  const r = FIELD.penaltyStrokeRadius;
+  const cz = FIELD.penaltyArcCenterZ + depth;
+  const limit = FIELD.penaltyBackEdgeZ;
+  if (pushingLineZ(depth) >= limit) return [];
+  const firstAngle = Math.asin(Math.max(0, Math.min(1, (cz - limit) / r)));
+  const points: PointXZ[] = [];
+  if (cz < limit) points.push([-FIELD.penaltySideCenterX, end * limit]);
+  for (let i = 0; i <= 32; i++) {
+    const angle = firstAngle + ((Math.PI / 2 - firstAngle) * i) / 32;
+    points.push([
+      -FIELD.penaltyArcCenterX - r * Math.cos(angle),
+      end * (cz - r * Math.sin(angle)),
+    ]);
+  }
+  for (let i = 32; i >= 0; i--) {
+    const angle = firstAngle + ((Math.PI / 2 - firstAngle) * i) / 32;
+    points.push([
+      FIELD.penaltyArcCenterX + r * Math.cos(angle),
+      end * (cz - r * Math.sin(angle)),
+    ]);
+  }
+  if (cz < limit) points.push([FIELD.penaltySideCenterX, end * limit]);
+  pushingPaths.set(key, points);
+  return points;
 }
 
 /**
@@ -491,19 +516,35 @@ export function robotReachesPushingLine(
   const line = pushingLineZ(depth);
   const bound = footprintRadius(visual);
   if (
-    pose.z * end < line - bound - EPS ||
+    pose.z * end < line - bound - PUSHING_LINE_WIDTH / 2 - EPS ||
     Math.abs(pose.x) > halfWidth + bound + EPS
   )
     return false;
-  const [a, b] = pushingLineSegment(end, depth);
+  const path = pushingLinePath(end, depth);
+  if (!path.length) return false;
+  const width = Math.abs(path[0][0]);
+  const behindCurve = (p: PointXZ) => {
+    const x = Math.abs(p[0]);
+    if (x > width + EPS) return false;
+    const dx = Math.max(0, x - FIELD.penaltyArcCenterX);
+    const boundary =
+      FIELD.penaltyArcCenterZ +
+      depth -
+      Math.sqrt(Math.max(0, FIELD.penaltyStrokeRadius ** 2 - dx ** 2));
+    return p[1] * end >= boundary - EPS;
+  };
   for (const polygon of projectRobotFootprint(pose, visual)) {
     const ring = polygon.outer;
     for (let i = 0; i < ring.length; i++) {
       const p = ring[i],
         q = ring[(i + 1) % ring.length];
-      if (Math.abs(p[0]) <= halfWidth + EPS && p[1] * end >= line - EPS)
-        return true;
-      if (segmentsIntersect(p, q, a, b)) return true;
+      if (behindCurve(p)) return true;
+      for (let j = 1; j < path.length; j++)
+        if (
+          segmentDistance(p, q, path[j - 1], path[j]) <=
+          PUSHING_LINE_WIDTH / 2 + EPS
+        )
+          return true;
     }
   }
   return false;
@@ -530,7 +571,7 @@ export function ownCornerSpots(ownEnd: number): Pose[] {
   return [-1, 1].map((side) => ({
     x: side * x,
     z,
-    // Turned towards the centre of the field; the rules name no orientation.
-    yaw: Math.atan2(-side * x, -z),
+    // September 24 draft: clear of white lines and facing its own goal.
+    yaw: Math.atan2(-side * x, ownEnd * FIELD.goalBackInnerFaceZ - z),
   }));
 }

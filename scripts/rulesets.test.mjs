@@ -332,9 +332,20 @@ test('the 2027 draft index uses the intended gameplay numbering', () => {
   assert.equal(numbers['lack-of-progress'], '2.7');
   assert.equal(numbers['out-of-bounds'], '2.8');
   assert.equal(numbers['damaged-robots'], '2.9');
-  assert.match(getRuleset('2027').index.note ?? '', /\S/);
+  assert.equal(getRuleset('2027').index.checkedOn, '2026-09-24');
+  assert.equal(
+    getRuleset('2027').index.note,
+    undefined,
+    'published numbering is fixed; no local correction is needed',
+  );
   const gameplay = catalog.sectionByAnchor('soccer', 'out-of-bounds');
-  assert.ok(catalog.noticesFor(gameplay).length > 0);
+  assert.deepEqual(catalog.noticesFor(gameplay), []);
+  assert.match(
+    catalog.noticesFor(
+      catalog.sectionByAnchor('soccer', 'inside-penalty-area'),
+    )[0].text,
+    /Do not draw it on real fields/,
+  );
   assert.deepEqual(
     catalog.noticesFor(
       catalog.sectionByAnchor('soccer', 'kicker-power-measuring'),
@@ -447,12 +458,18 @@ test('comparing two versions works in both directions and for one version', () =
           '_changes_from_the_2026_robocupjunior_soccer_rules',
     ),
   );
-  for (const document of forward.documents.filter(
-    (item) => item.id !== 'soccer',
+  for (const document of forward.documents.filter((item) =>
+    ['field', 'entry'].includes(item.id),
   )) {
     assert.equal(document.contentChanged, false, document.id);
     assert.deepEqual(document.sections, [], document.id);
   }
+  for (const id of ['ball', 'scoring', 'superteam'])
+    assert.equal(
+      forward.documents.find((item) => item.id === id).contentChanged,
+      true,
+      id,
+    );
   // Every change of the soccer rules sits in a document whose text differs.
   for (const change of forward.changes)
     assert.equal(

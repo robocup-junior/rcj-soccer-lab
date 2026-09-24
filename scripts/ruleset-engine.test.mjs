@@ -70,6 +70,8 @@ const { RCJ_FIELD_DERIVED: FIELD, RCJ_FIELD_SPEC_2026: SPEC } =
 const {
   clampRobotToField,
   ownCornerSpots,
+  projectRobotFootprint,
+  pushingLinePath,
   pushingLineZ,
   robotOnRamp,
   robotPenaltyOverlap,
@@ -77,7 +79,8 @@ const {
   robotTouchesFieldWall,
 } = await import('../lib/simulator/referee-geometry.ts');
 const { ROBOT_VISUALS } = await import('../lib/simulator/robot-models.ts');
-const { NEUTRAL_SPOTS } = await import('../lib/rulebook/animations.ts');
+const { NEUTRAL_SPOTS, sampleClip } =
+  await import('../lib/rulebook/animations.ts');
 const { learningBank } = await import('../lib/rulebook/learning-bank.ts');
 const { gameplayRulesFor, CERTIFICATION_RULESET_ID } =
   await import('../lib/rulesets/gameplay.ts');
@@ -228,10 +231,7 @@ test('2027 only overrides what the draft changes', () => {
 test('pushing-line geometry follows the visible body of every robot model', () => {
   const depth = gameplayRulesFor('2027').pushing.lineDepth;
   const line = pushingLineZ(depth);
-  assert.ok(
-    Math.abs(line - (FIELD.penaltyBackEdgeZ - SPEC.penaltyArea.depth + depth)) <
-      1e-12,
-  );
+  assert.ok(Math.abs(line - (FIELD.penaltyFrontCenterZ + depth)) < 1e-12);
   for (const { id: visual } of ROBOT_VISUALS)
     for (const end of [-1, 1]) {
       const at = (z, x = 0, yaw = end === 1 ? Math.PI : 0) => ({
@@ -274,6 +274,36 @@ test('pushing-line geometry follows the visible body of every robot model', () =
     }
 });
 
+test('provisional curve is the white centreline translated 16 cm and clipped at each goal', () => {
+  const depth = gameplayRulesFor('2027').pushing.lineDepth;
+  assert.equal(depth, 0.16);
+  for (const end of [-1, 1]) {
+    const path = pushingLinePath(end, depth);
+    assert.ok(path.length > 60);
+    for (const [x, z] of path) {
+      assert.ok(z * end <= FIELD.penaltyBackEdgeZ + 1e-12);
+      const dx = Math.max(0, Math.abs(x) - FIELD.penaltyArcCenterX);
+      const whiteZ =
+        FIELD.penaltyArcCenterZ -
+        Math.sqrt(FIELD.penaltyStrokeRadius ** 2 - dx ** 2);
+      assert.ok(Math.abs(z * end - whiteZ - 0.16) < 1e-12);
+    }
+    assert.ok(Math.abs(path[0][1] * end - FIELD.penaltyBackEdgeZ) < 1e-12);
+    assert.ok(Math.abs(path.at(-1)[1] * end - FIELD.penaltyBackEdgeZ) < 1e-12);
+    // Same depth, but a body near the curved side has not reached it yet.
+    const pose = {
+      x: 0,
+      z: end * (pushingLineZ(depth) - 0.08),
+      yaw: end === 1 ? Math.PI : 0,
+    };
+    assert.equal(robotReachesPushingLine(pose, end, depth, 'lab'), true);
+    assert.equal(
+      robotReachesPushingLine({ ...pose, x: 0.36 }, end, depth, 'lab'),
+      false,
+    );
+  }
+});
+
 test('ramp and own-corner helpers', () => {
   for (const { id: visual } of ROBOT_VISUALS) {
     const touching = clampRobotToField(
@@ -302,13 +332,27 @@ test('ramp and own-corner helpers', () => {
         assert.equal(Math.sign(spot.z), end);
         assert.equal(robotOnRamp(spot, visual), false);
         assert.equal(robotTouchesFieldWall(spot, visual), false);
+        for (const polygon of projectRobotFootprint(spot, visual))
+          for (const [x, z] of polygon.outer) {
+            assert.ok(
+              Math.abs(x) <
+                FIELD.playingHalfWidth - SPEC.markings.whiteLineWidth,
+            );
+            assert.ok(
+              Math.abs(z) <
+                FIELD.playingHalfLength - SPEC.markings.whiteLineWidth,
+            );
+          }
         for (const area of [-1, 1])
           assert.equal(robotPenaltyOverlap(spot, area, visual), false);
         for (const neutral of NEUTRAL_SPOTS)
           assert.ok(distance(spot, neutral) > 0.205);
-        // Facing the centre of the field.
+        // Facing its own goal, as specified by the September 24 draft.
         assert.ok(
-          Math.sin(spot.yaw) * -spot.x + Math.cos(spot.yaw) * -spot.z > 0,
+          Math.abs(
+            spot.yaw -
+              Math.atan2(-spot.x, end * FIELD.goalBackInnerFaceZ - spot.z),
+          ) < 1e-9,
         );
       }
   }
@@ -633,6 +677,14 @@ test('lack of progress 2027: a waiting robot returns before the ball moves', () 
     ball,
     'ball still not moved',
   );
+  session.continue();
+  assert.deepEqual(
+    session.acceptedCalls(),
+    [{ action: 'lack-progress' }],
+    'returning the robot preserves the completed count',
+  );
+  assert.equal(submit(session, 'lack-progress').verdict, 'correct');
+  assert.ok(distance(session.match.state.actors.ball, ball) > 0.01);
   // With nobody waiting, 2027 moves the ball exactly as before.
   const empty = drill('2027', 'deadlock');
   submit(empty, 'count');
@@ -654,6 +706,45 @@ test('lack of progress 2027: a waiting robot returns before the ball moves', () 
   for (let i = 0; i < 1200 && serving.snapshot().count !== null; i++)
     serving.step();
   assert.deepEqual(serving.acceptedCalls(), [{ action: 'lack-progress' }]);
+});
+
+test('continuous 2027 returns every eligible robot without losing the completed count', () => {
+  const session = continuous('2027');
+  session.match.place({
+    ball: { x: 0, z: 0, yaw: 0 },
+    'blue-1': { x: -0.5, z: 0, yaw: 0 },
+    'yellow-1': { x: 0.5, z: 0, yaw: 0 },
+    'blue-2': { x: -0.4, z: 0.4, yaw: 0 },
+    'yellow-2': { x: 0.4, z: -0.4, yaw: 0 },
+  });
+  // Stage genuine immobility without changing the referee's count or incidents.
+  const physicsStep = session.match.step.bind(session.match);
+  session.match.step = (options) =>
+    physicsStep({
+      ...options,
+      controls: { blue: 'off', yellow: 'off' },
+    });
+  for (const id of ['blue-2', 'yellow-2']) {
+    session.remove(id, 'Out of bounds');
+    session.bench[id].eligibleAt = session.clock - 1;
+  }
+  advance(session, 1.2);
+  assert.equal(submit(session, 'count').verdict, 'correct');
+  advance(session, 3.1);
+  const ball = { ...session.match.state.actors.ball };
+  assert.equal(session.snapshot().count, null);
+  for (const id of ['yellow-2', 'blue-2']) {
+    assert.ok(
+      session
+        .acceptedCalls()
+        .some((call) => call.action === 'return' && call.target === id),
+    );
+    assert.equal(submit(session, 'return', id).verdict, 'correct');
+    assert.deepEqual(session.match.state.actors.ball, ball);
+  }
+  assert.deepEqual(session.acceptedCalls(), [{ action: 'lack-progress' }]);
+  assert.equal(submit(session, 'lack-progress').verdict, 'correct');
+  assert.ok(distance(session.match.state.actors.ball, ball) > 0.01);
 });
 
 test('all robots out: 2027 calls a neutral kickoff that waits for returning robots', () => {
@@ -816,7 +907,7 @@ test('2027 drills resolve to the calls the draft prescribes', () => {
   assert.deepEqual(calls('all-out-2027'), ['neutral']);
   assert.equal(calls('pushed-ramp-2027')[0], 'waive-out:blue-1');
   const progress = calls('progress-return-first-2027');
-  assert.deepEqual(progress.slice(0, 2), ['count', 'return:blue-2']);
+  assert.deepEqual(progress, ['count', 'return:blue-2', 'lack-progress']);
   // The same return drills under 2026 semantics would be answered differently,
   // which is why they are not part of the 2026 bank.
   assert.equal(bankCase('2026', 'out-return-kickoff-2027'), undefined);
@@ -851,6 +942,23 @@ test('the authored 2027 pushing scenes sit on the intended side of the line', ()
         true,
         `${visual} ${id}`,
       );
+    for (const [id, robot] of [
+      ['pushing-call', 'blue-1'],
+      ['combined-order', 'blue-2'],
+    ]) {
+      const clip = learningBank('2027').clips.find((item) => item.id === id);
+      const defender = sampleClip(clip, 2.5).poses[robot];
+      assert.equal(
+        robotReachesPushingLine(defender, -1, depth, visual),
+        true,
+        `${visual} ${id}`,
+      );
+      assert.equal(
+        robotPenaltyOverlap(defender, -1, visual, true),
+        false,
+        `${visual} ${id} is not fully out`,
+      );
+    }
   }
   // The 2026 combined scene stops before its defender would reach the line,
   // so 2027 replaces it rather than rewording it.

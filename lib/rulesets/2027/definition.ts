@@ -8,7 +8,7 @@ import {
 } from './changes';
 
 /**
- * Draft published 2026-09-18 for comment. When the committee publishes the
+ * Draft published 2026-09-18, refreshed from the 2026-09-24 pages. When the committee publishes the
  * final text: re-run `python scripts/sync-rulebook.py 2027`, review
  * ./changes.ts and ./gameplay.ts against it, and set `status` to 'final'.
  */

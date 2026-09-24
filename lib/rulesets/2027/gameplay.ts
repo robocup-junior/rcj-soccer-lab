@@ -1,7 +1,7 @@
 import type { DeepPartial, GameplayRules } from '../types';
 
 /**
- * What the 2027 draft (revision 2026-09-18) changes for the match engines,
+ * What the 2027 draft (revision 2026-09-24) changes for the match engines,
  * relative to 2026. Every value follows the draft's own change list.
  *
  * Three values rest on a documented training assumption because the draft
@@ -11,7 +11,7 @@ import type { DeepPartial, GameplayRules } from '../types';
  *   minimum while section 2.3 still lets out-of-bounds robots return before
  *   a kick-off;
  * - outOfBounds.returnPlacement: "the general area of its own corner" names
- *   neither which own-half corner nor an orientation.
+ *   neither which own-half corner nor an exact position.
  * See TRAINING_ASSUMPTIONS_2027 in ./definition.ts.
  */
 export const GAMEPLAY_2027: DeepPartial<GameplayRules> = {
@@ -25,9 +25,9 @@ export const GAMEPLAY_2027: DeepPartial<GameplayRules> = {
   multipleDefense: { areas: 'own' },
   pushing: {
     basis: 'line',
-    // Placeholder: mid-depth of the 25 cm penalty area. Replace with the
-    // published dimension and set lineProvisional to false.
-    lineDepth: 0.125,
+    // Committee-requested visual placeholder: translate the curved white
+    // centreline 16 cm towards the goal. Not a published field dimension.
+    lineDepth: 0.16,
     lineProvisional: true,
   },
   holding: { consequence: 'damaged' },

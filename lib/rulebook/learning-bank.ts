@@ -242,10 +242,14 @@ export function learningBank(rulesetId?: string | null): LearningBank {
           ? [entry.item as Extract<Entry, { kind: K }>['item']]
           : [],
       );
+    const clips = of('clip');
     bank = {
       rulesetId: ruleset.id,
-      cases: of('case'),
-      clips: of('clip'),
+      cases: of('case').map((item) => {
+        const evidence = clips.find((clip) => clip.id === item.clip);
+        return evidence ? { ...item, evidence } : item;
+      }),
+      clips,
       scenarios: of('scenario'),
       questions: of('question'),
       situations,

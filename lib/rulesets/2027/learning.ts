@@ -8,10 +8,7 @@ import {
 import type { LearningOverlay } from '../../rulebook/overlay-types';
 import type { RuleQuestion } from '../../rulebook/questions';
 import type { RefereeCase } from '../../simulator/referee-cases';
-import {
-  RCJ_FIELD_DERIVED as FIELD,
-  RCJ_FIELD_SPEC_2026 as SPEC,
-} from '../../simulator/field-spec';
+import { RCJ_FIELD_DERIVED as FIELD } from '../../simulator/field-spec';
 import { GAMEPLAY_2027 } from './gameplay';
 
 /**
@@ -35,18 +32,20 @@ const relabel = (
   frames.map((frame, index) => ({ ...frame, ...changes[index] }));
 
 // Blue defends the goal at negative z in every authored scene.
-const LINE_DEPTH = GAMEPLAY_2027.pushing?.lineDepth ?? 0.125;
-const AREA_FRONT =
-  FIELD.penaltyBackEdgeZ - SPEC.penaltyArea.depth; /* outer front edge */
-/** Defender centre whose 85 mm chassis is 30 mm past the pushing line. */
-const DEFENDER_AT_LINE = -(AREA_FRONT + LINE_DEPTH - 0.085 + 0.03);
+const LINE_DEPTH = GAMEPLAY_2027.pushing?.lineDepth ?? 0.16;
+const AREA_FRONT = FIELD.penaltyFrontCenterZ;
+/** Rear touches the 10 mm black stripe; front remains outside the white area. */
+const DEFENDER_AT_LINE = -(AREA_FRONT + LINE_DEPTH - 0.085 - 0.002);
 /** Defender centre whose chassis is still 25 mm short of the line. */
 const DEFENDER_SHORT = -(AREA_FRONT + LINE_DEPTH - 0.085 - 0.025);
 const TOUCH = 0.122; // robot centre to ball centre while touching
 const OWN_CORNER = pose(
   FIELD.playingHalfWidth - 0.2,
   -(FIELD.playingHalfLength - 0.2),
-  Math.atan2(-(FIELD.playingHalfWidth - 0.2), FIELD.playingHalfLength - 0.2),
+  Math.atan2(
+    -(FIELD.playingHalfWidth - 0.2),
+    -FIELD.goalBackInnerFaceZ + FIELD.playingHalfLength - 0.2,
+  ),
 );
 
 const CLIPS_2027: RuleClip[] = [
@@ -439,7 +438,7 @@ const QUESTIONS_2027: RuleQuestion[] = [
     ],
     answer: 1,
     feedback:
-      'The draft describes an extra black line inside the penalty area and announces its position for an updated field specification. The line drawn in this Lab is a provisional placeholder.',
+      'The pushing line is provisional: the draft says not to draw it on real fields yet. The Lab uses a curved white-line copy shifted 16 cm towards the goal for simulation only.',
   },
   {
     id: 'progress-return-first-2027',
@@ -514,7 +513,7 @@ const QUESTIONS_2027: RuleQuestion[] = [
     ],
     answer: 1,
     feedback:
-      'The draft states the exception explicitly: an own goal by the penalized robot counts against it.',
+      'The draft explicitly awards an own goal by the penalized robot to the opposing team.',
   },
   {
     id: 'out-corner-2027',
@@ -525,11 +524,11 @@ const QUESTIONS_2027: RuleQuestion[] = [
     options: [
       'On the unoccupied neutral spot furthest from the ball, facing its own goal',
       'Where it left the field',
-      'In the general area of its own corner',
+      'Near either own corner, clear of white lines and facing its own goal',
     ],
     answer: 2,
     feedback:
-      'The neutral-spot search is gone for out-of-bounds returns. A repaired damaged robot is different: it still returns on the furthest unoccupied neutral spot, facing its own goal.',
+      'Return an out-of-bounds robot near either own corner, clear of all white lines and facing its own goal. A repaired damaged robot still returns on the furthest unoccupied neutral spot, facing its own goal.',
   },
   {
     id: 'kicker-vertical-setup-2027',
@@ -728,7 +727,7 @@ const CASES_2027: RefereeCase[] = [
     bench: [{ robot: 'blue-2', waited: 75, ready: true, reason: OUT }],
     steps: [[{ action: 'count' }], [{ action: 'lack-progress' }]],
     explanation:
-      'Count first. Under the 2027 draft a waiting robot whose minute has passed returns before the ball is moved; only if play stays stuck do you count again and place the ball on the nearest free neutral spot.',
+      'Count first, then return waiting robots whose minute has passed. If play stays stuck, place the ball on the nearest free neutral spot; a second count is not required.',
   },
   {
     id: 'all-out-2027',
@@ -817,12 +816,34 @@ export const LEARNING_2027: LearningOverlay = {
     },
     'pushing-call': {
       frames: {
-        1: { readout: 'Defender at the pushing line' },
+        0: {
+          poses: {
+            [B]: pose(-0.08, DEFENDER_AT_LINE),
+            [Y]: pose(0.25, DEFENDER_AT_LINE + 0.27, P),
+            ball: pose(-0.051475, DEFENDER_AT_LINE + 0.119647),
+            [B2]: pose(0.6, 0.2),
+          },
+        },
+        1: {
+          readout: 'Defender at the pushing line',
+          poses: {
+            [Y]: pose(0.071, DEFENDER_AT_LINE + 0.131, P),
+          },
+        },
         2: { label: 'Pushing called' },
       },
     },
     'pushing-goal': {
-      frames: { 0: { label: 'Contact with the defender at the pushing line' } },
+      frames: {
+        0: {
+          label: 'Contact with the defender at the pushing line',
+          poses: {
+            [B]: pose(-0.08, DEFENDER_AT_LINE),
+            [Y]: pose(0.071, DEFENDER_AT_LINE + 0.131, P),
+            ball: pose(-0.051475, DEFENDER_AT_LINE + 0.119647),
+          },
+        },
+      },
     },
     'two-defenders': {
       question:
@@ -831,6 +852,23 @@ export const LEARNING_2027: LearningOverlay = {
         'For two same-team robots partly inside their own penalty area, move the one farther from the ball. Here that is Blue 2.',
     },
     'combined-order': {
+      frames: {
+        0: {
+          poses: {
+            [B]: pose(-0.22, DEFENDER_AT_LINE),
+            [B2]: pose(0.18, DEFENDER_SHORT),
+            [Y]: pose(0.331, DEFENDER_SHORT + 0.131, P),
+            ball: pose(0.208525, DEFENDER_SHORT + 0.119647),
+          },
+        },
+        1: {
+          poses: {
+            [B2]: pose(0.18, DEFENDER_AT_LINE),
+            [Y]: pose(0.331, DEFENDER_AT_LINE + 0.131, P),
+            ball: pose(0.208525, DEFENDER_AT_LINE + 0.119647),
+          },
+        },
+      },
       question:
         'You call pushing while two Blue robots also partly overlap their own penalty area. Which correction should you make first?',
     },

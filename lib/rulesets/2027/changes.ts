@@ -12,7 +12,7 @@ export const TRAINING_ASSUMPTIONS_2027: readonly TrainingAssumption[] = [
     question:
       'The draft announces the pushing line for an updated field specification but does not give its position yet.',
     choice:
-      'The Lab draws a provisional line at mid-depth of the penalty area, 12.5 cm behind its front edge, and labels it provisional. One value in the 2027 rule set moves it.',
+      'The Lab copies the curved white penalty-area centreline 16 cm towards the goal, clipped at the goal line. This is a provisional simulation setting, not a published field dimension.',
     anchors: ['inside-penalty-area'],
   },
   {
@@ -35,25 +35,16 @@ export const TRAINING_ASSUMPTIONS_2027: readonly TrainingAssumption[] = [
   },
   {
     id: 'own-corner',
-    title: 'Which corner, facing where',
+    title: 'Which own corner',
     question:
-      'The draft places a returning out-of-bounds robot in “the general area of its own corner” without naming one of the two own-half corners or an orientation.',
+      'The draft allows either own corner, clear of the white lines and facing its own goal. It does not specify an exact position or which corner to use.',
     choice:
-      'The simulator uses the free own-half corner farther from the ball and turns the robot toward the center of the field.',
+      'The simulator chooses the free own-half corner farther from the ball, clear of white lines, and faces the robot towards its own goal.',
     anchors: ['out-of-bounds'],
-  },
-  {
-    id: 'lack-of-progress-recount',
-    title: 'Counting again after robots return',
-    question:
-      'The draft does not say whether a new count is needed when returning the waiting robots does not resolve the lack of progress.',
-    choice:
-      'The trainer asks for a new visible count before the ball is moved.',
-    anchors: ['lack-of-progress'],
   },
 ];
 
-/** Changes from the 2026 rules (2026-06-03) to the 2027 draft (2026-09-18). */
+/** Changes from the 2026 rules (2026-06-03) to the 2027 draft (2026-09-24). */
 export const CHANGES_2027: readonly RuleChange[] = [
   {
     id: 'late-team',
@@ -169,8 +160,7 @@ export const CHANGES_2027: readonly RuleChange[] = [
       'If robots are out of bounds and their penalty time has passed, the referee returns them first and leaves the ball. Only if that does not resolve the lack of progress is the ball moved as before.',
     effect: 'Check the bench before touching the ball.',
     simulator:
-      'With a time-served robot waiting, the trainer expects Permit return first and then a new count before the ball is moved.',
-    assumptions: ['lack-of-progress-recount'],
+      'After the count, return eligible robots first. If play is still stuck, move the ball to the nearest free neutral spot without starting another count.',
     practice: [
       'case:progress-return-first-2027',
       'question:progress-return-first-2027',
@@ -233,7 +223,7 @@ export const CHANGES_2027: readonly RuleChange[] = [
     before:
       'After the penalty the robot is placed on the unoccupied neutral spot furthest from the ball, facing its own goal.',
     after:
-      'After the penalty the robot is placed in the general area of its own corner. Repaired damaged robots still return on the furthest unoccupied neutral spot, facing their own goal.',
+      'After the penalty the robot returns near either own corner, without touching white lines and facing its own goal. Repaired damaged robots still use the furthest unoccupied neutral spot.',
     effect:
       'No neutral-spot search for an out-of-bounds return. Keep it for damaged robots.',
     simulator:
@@ -328,23 +318,9 @@ export const CHANGES_2027: readonly RuleChange[] = [
  */
 export const SOURCE_NOTICES_2027: readonly SourceNotice[] = [
   {
-    id: 'gameplay-headings',
+    id: 'provisional-pushing-line',
     document: 'soccer',
-    anchors: [
-      'gameplay',
-      'game-procedure-and-length-of-a-game',
-      'pre-match-meeting',
-      'kick-off',
-      'neutral-kickoff',
-      'scoring',
-      'ball-movement',
-      'inside-penalty-area',
-      'lack-of-progress',
-      'out-of-bounds',
-      'damaged-robots',
-      'human-interference',
-      'interruption-of-game-ref-interruption',
-    ],
-    text: 'In the draft page published on 2026-09-18, sections 2.2 to 2.6 appear without headings inside section 2.1, and the sections after them are numbered 2.2 to 2.6. The Lab uses the intended numbering 2.1 to 2.11. Until the page is corrected, the text of the sections without a heading is part of one long paragraph in section 2.1.',
+    anchors: ['inside-penalty-area'],
+    text: 'The pushing-line implementation may change. Do not draw it on real fields yet. The Lab’s 16 cm curved offset is a provisional simulation setting.',
   },
 ];

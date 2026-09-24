@@ -1,12 +1,5 @@
-// Reviewed translations for lib/rulesets/2027/learning.ts: replay questions,
-// knowledge checks, referee drills and the reworded 2026 situations.
-// Rows are [English, Slovak, German, Japanese]; see interface.mjs for the terms.
-//
-// A row that names a team is written once. The index derives the mirrored row
-// (Blue <-> Yellow) in every language, so team words must use the stems
-// modr-/žlt-, Blau/Gelb (blau-/gelb-) and 青/黄.
+// Reviewed English, Slovak, German and Japanese copy; draft refreshed 2026-09-24.
 const rows = [
-  // Replay: contact at the pushing line
   [
     'Contact at the pushing line',
     'Kontakt na čiare tlačenia',
@@ -79,8 +72,6 @@ const rows = [
     'Im Entwurf 2027 ist Kontakt Roboter–Roboter oder Roboter–Ball–Roboter, bei dem der Verteidiger die Pushing-Linie erreicht, Pushing. Die Entscheidung hängt nicht mehr vom Ermessen ab. Die hier gezeigte Linienposition ist vorläufig.',
     '2027年ドラフトでは、ロボット同士またはロボット・ボール・ロボットの接触で守備ロボットがプッシングラインに達するとプッシングです。判定は裁量によらなくなりました。ここに表示しているラインの位置は暫定です。',
   ],
-
-  // Replay: the same contact at midfield
   [
     'The same approach at midfield',
     'Rovnaký nábeh v strede ihriska',
@@ -117,8 +108,6 @@ const rows = [
     'Die Pushing-Regel 2027 hängt davon ab, dass der Verteidiger die Pushing-Linie in seinem Strafraum erreicht. Kontakt im Mittelfeld kann diese Bedingung nicht erfüllen; beurteile andere Verstöße getrennt.',
     '2027年のプッシング規則は、守備ロボットが自陣ペナルティエリア内のプッシングラインに達することが条件です。中盤での接触はこの条件を満たしません。他の反則は別に判断します。',
   ],
-
-  // Replay: two attackers in the opponent's area
   [
     'Two attackers in the opponent’s area',
     'Dvaja útočníci v súperovom území',
@@ -173,8 +162,6 @@ const rows = [
     'Der Entwurf 2027 beschränkt Mehrfachverteidigung auf zwei Roboter, die teilweise im eigenen Strafraum stehen. Angreifer werden nicht versetzt; ein Roboter, der vollständig in einem Strafraum steht, ist weiterhin im Aus.',
     '2027年ドラフトでは、複数守備は自陣のペナルティエリアに一部入った2台に限られます。攻撃側のロボットは移動させません。どちらのペナルティエリアでも、完全に入ったロボットは引き続きアウトオブバウンズです。',
   ],
-
-  // Replay: a locked ball under challenge
   [
     'Blue 1 leaves the field as damaged',
     'Blue 1 opúšťa ihrisko ako poškodený',
@@ -205,8 +192,6 @@ const rows = [
     'Ein am fahrenden Roboter fixierter, für Gegner unzugänglicher Ball ist Ballhalten, nicht die Ausnahme für Dribbler mit Rückwärtsdrall. Im laufenden Spiel gilt der Roboter nach dem Entwurf 2027 als beschädigt; vor der Rückkehr braucht er einen regelkonformen Mechanismus und eine neue Inspektion.',
     '動いているロボットに固定され、相手が届かないボールはボール保持であり、バックスピンドリブラーの例外には当たりません。2027年ドラフトでは、試合中のこのロボットは故障扱いとなり、復帰には適合した機構と再検査が必要です。',
   ],
-
-  // Replay: wall contact
   [
     'At least 60 s · match continues',
     'Najmenej 60 s · zápas pokračuje',
@@ -249,8 +234,6 @@ const rows = [
     'Wandkontakt ist Aus. Im Entwurf 2027 ist die Minute eine Mindestdauer: Die Spieluhr läuft weiter, und nach der Minute kehrt der Roboter bei der nächsten Spielunterbrechung im Bereich seiner eigenen Ecke zurück.',
     '壁への接触はアウトオブバウンズです。2027年ドラフトでは1分は最低時間です。試合時計は進み続け、1分経過後、ロボットは次の試合の中断時に自陣コーナー付近へ復帰します。',
   ],
-
-  // Replay: pushed onto the ramp
   [
     'An opponent pushes a robot onto the ramp',
     'Súper zatlačí robota na rampu',
@@ -311,8 +294,6 @@ const rows = [
     'Der Entwurf 2027 erweitert Hinausgeschoben auf einen Roboter, den ein Gegner auf die Rampe schiebt. Der Schiedsrichter darf es ansagen und den Roboter leicht zurückschieben; eine Strafe gibt es nicht.',
     '2027年ドラフトは、相手にスロープへ押し上げられたロボットにも押し出しを適用します。審判は押し出しを宣告してロボットを少し戻すことができ、ペナルティはありません。',
   ],
-
-  // Replay: the penalized robot scores
   [
     'The penalized robot scores',
     'Skóruje potrestaný robot',
@@ -374,8 +355,6 @@ const rows = [
     'Ein Tor des bestraften Roboters wird nicht gegeben. Ein Tor seines Teamkollegen würde zählen, und ein Eigentor des bestraften Roboters würde für den Gegner zählen.',
     'ペナルティを受けたロボットによるゴールは認められません。チームメイトのゴールであれば有効で、ペナルティを受けたロボットのオウンゴールは相手の得点になります。',
   ],
-
-  // Scene of the combined drill, and the reworded order lesson
   [
     'Pushing at the line and two defenders',
     'Tlačenie na čiare a dvaja obrancovia',
@@ -424,8 +403,6 @@ const rows = [
     'Du pfeifst Pushing, während zugleich zwei blaue Roboter teilweise im eigenen Strafraum stehen. Welche Korrektur führst du zuerst aus?',
     'プッシングを判定し、同時に青の2台が一部ずつ自陣のペナルティエリアに入っています。どちらを先に処置しますか？',
   ],
-
-  // Knowledge check: late team
   [
     'Late team: the 10–0 limit',
     'Meškajúci tím: limit 10–0',
@@ -468,8 +445,6 @@ const rows = [
     'Die Schiedsrichter können Verspätung mit einem Tor je 30 Sekunden bestrafen. Die Strafe liegt in ihrem Ermessen und ist nicht automatisch; nach dem Entwurf 2027 endet sie bei 10–0 mit einer automatischen Niederlage.',
     '審判は遅刻30秒ごとに1点のペナルティを科すことができます。これは審判の裁量であり、自動適用ではありません。2027年ドラフトでは、10–0に達すると自動的な敗戦で終わります。',
   ],
-
-  // Knowledge check: nobody left on the field
   [
     'Nobody left on the field',
     'Na ihrisku nikto nezostal',
@@ -506,8 +481,6 @@ const rows = [
     'Der Entwurf 2027 ergänzt diesen Fall beim neutralen Anstoß. Roboter kommen dafür zurück, sobald sie zurückkehren dürfen.',
     '2027年ドラフトは、この場合をニュートラルキックオフに追加しました。ロボットは、復帰が認められ次第、そのために戻ります。',
   ],
-
-  // Knowledge check: consequence of ball holding
   [
     'Consequence of ball holding',
     'Následok držania lopty',
@@ -544,8 +517,6 @@ const rows = [
     'Ballhalten im laufenden Spiel hat jetzt eine festgelegte Folge. Der Roboter verlässt das Feld als beschädigt und braucht vor der Rückkehr einen regelkonformen Mechanismus und eine neue Inspektion. Ein rotierender Dribbler, der den Ball zugänglich lässt, bleibt erlaubt.',
     '試合中のボール保持への処置が明記されました。ロボットは故障扱いで退場し、復帰には適合した機構と再検査が必要です。ボールに相手が届く状態を保つ回転式ドリブラーは、引き続き認められます。',
   ],
-
-  // Knowledge check: whose penalty area
   [
     'Multiple defense: whose penalty area?',
     'Viacnásobná obrana: čie pokutové územie?',
@@ -582,8 +553,6 @@ const rows = [
     'Der Entwurf 2027 ergänzt die Regel zur Mehrfachverteidigung um „their own“. Angreifer, die teilweise im gegnerischen Strafraum stehen, werden nicht versetzt. Vollständiges Eindringen in einen Strafraum ist weiterhin Aus.',
     '2027年ドラフトは、複数守備の規則に「their own」（自陣の）を加えました。相手のエリアに一部入っている攻撃側のロボットは移動させません。どちらのペナルティエリアでも、完全に入ると引き続きアウトオブバウンズです。',
   ],
-
-  // Knowledge checks: pushing line
   [
     'What makes contact pushing',
     'Čo robí z kontaktu tlačenie',
@@ -651,13 +620,11 @@ const rows = [
     'ポスト間のゴールラインである',
   ],
   [
-    'The draft describes an extra black line inside the penalty area and announces its position for an updated field specification. The line drawn in this Lab is a provisional placeholder.',
-    'Návrh opisuje ďalšiu čiernu čiaru vnútri pokutového územia a jej polohu avizuje v aktualizovanej špecifikácii ihriska. Čiara nakreslená v tomto Labe je predbežná.',
-    'Der Entwurf beschreibt eine zusätzliche schwarze Linie im Strafraum und kündigt ihre Position für eine aktualisierte Spielfeldspezifikation an. Die in diesem Lab gezeichnete Linie ist ein vorläufiger Platzhalter.',
-    'ドラフトは、ペナルティエリア内に追加される黒い線について述べ、その位置は改訂版のフィールド仕様書で示すとしています。このLabに描かれているラインは暫定的なものです。',
+    'The pushing line is provisional: the draft says not to draw it on real fields yet. The Lab uses a curved white-line copy shifted 16 cm towards the goal for simulation only.',
+    'Čiara tlačenia je predbežná: návrh hovorí, aby sa zatiaľ nekreslila na skutočné ihriská. Lab používa kópiu zakrivenej bielej čiary posunutú o 16 cm k bráne iba v simulácii.',
+    'Die Pushing-Linie ist vorläufig: Laut Entwurf soll sie noch nicht auf echte Felder gezeichnet werden. Nur in der Simulation nutzt das Lab eine um 16 cm zum Tor verschobene Kopie der gebogenen weißen Linie.',
+    'プッシングラインは暫定です。ドラフトでは、まだ実際のフィールドに描かないよう求めています。Labはシミュレーション限定で、白い曲線をゴール方向へ16 cm移動した線を使います。',
   ],
-
-  // Knowledge check: lack of progress with a robot waiting
   [
     'Lack of progress with a robot waiting',
     'Nedostatok pokroku, keď čaká robot',
@@ -694,8 +661,6 @@ const rows = [
     'Wartende Roboter, deren Strafzeit abgelaufen ist, kommen zurück, bevor der Ball versetzt wird. Hält der mangelnde Spielfortschritt an, folgt die übliche Platzierung auf dem nächsten freien Neutralpunkt.',
     'ペナルティ時間が経過した待機中のロボットは、ボールを移す前に復帰します。それでも進行の停滞が続く場合は、通常どおり最寄りの空きニュートラルスポットへボールを置きます。',
   ],
-
-  // Knowledge checks: out-of-bounds minute and interruption
   [
     'Out of bounds: a kick-off before the minute',
     'Mimo ihriska: výkop pred uplynutím minúty',
@@ -768,8 +733,6 @@ const rows = [
     'Nach der Mindestminute wartet der Roboter auf die nächste Spielunterbrechung. Der Schiedsrichter setzt ihn dann in den Bereich seiner eigenen Ecke.',
     '最低時間の1分が過ぎると、ロボットは次の試合の中断を待ちます。その後、審判がロボットを自陣コーナー付近に置きます。',
   ],
-
-  // Knowledge checks: goals while a robot is out of bounds
   [
     'A teammate scores while a robot is out',
     'Spoluhráč skóruje, kým je robot mimo ihriska',
@@ -837,13 +800,11 @@ const rows = [
     'ゴールを認めずニュートラルキックオフ',
   ],
   [
-    'The draft states the exception explicitly: an own goal by the penalized robot counts against it.',
-    'Návrh túto výnimku uvádza výslovne: vlastný gól potrestaného robota sa počíta v jeho neprospech.',
-    'Der Entwurf nennt die Ausnahme ausdrücklich: Ein Eigentor des bestraften Roboters zählt gegen ihn.',
-    'ドラフトはこの例外を明記しています。ペナルティを受けたロボットのオウンゴールは、そのチームの失点になります。',
+    'The draft explicitly awards an own goal by the penalized robot to the opposing team.',
+    'Návrh výslovne priznáva vlastný gól potrestaného robota súperovmu tímu.',
+    'Der Entwurf schreibt ein Eigentor des bestraften Roboters ausdrücklich der gegnerischen Mannschaft gut.',
+    'ドラフトでは、罰則対象のロボットによるオウンゴールは相手チームの得点になると明記しています。',
   ],
-
-  // Knowledge check: return position
   [
     'Return position after out of bounds',
     'Miesto návratu po opustení ihriska',
@@ -869,19 +830,17 @@ const rows = [
     'フィールドを出た場所',
   ],
   [
-    'In the general area of its own corner',
-    'Do priestoru jeho vlastného rohu',
-    'In den allgemeinen Bereich seiner eigenen Ecke',
-    '自陣コーナーのおおよその位置',
+    'Near either own corner, clear of white lines and facing its own goal',
+    'Pri jednom z vlastných rohov, bez dotyku bielych čiar a čelom k vlastnej bráne',
+    'Nahe einer eigenen Ecke, ohne weiße Linien zu berühren und zum eigenen Tor ausgerichtet',
+    '自陣のいずれかのコーナー付近で、白線に触れず自陣ゴールに向ける',
   ],
   [
-    'The neutral-spot search is gone for out-of-bounds returns. A repaired damaged robot is different: it still returns on the furthest unoccupied neutral spot, facing its own goal.',
-    'Pri návratoch po opustení ihriska sa už neutrálny bod nehľadá. Pri opravenom poškodenom robotovi je to inak: naďalej sa vracia na najvzdialenejší neobsadený neutrálny bod, otočený k vlastnej bránke.',
-    'Bei der Rückkehr aus dem Aus wird kein Neutralpunkt mehr gesucht. Bei einem reparierten beschädigten Roboter ist das anders: Er kehrt weiterhin auf dem am weitesten entfernten freien Neutralpunkt zurück, mit Blick zum eigenen Tor.',
-    'アウトオブバウンズからの復帰では、ニュートラルスポットを探さなくなりました。修理を終えた故障ロボットは別で、引き続き最も遠い空きニュートラルスポットに、自陣ゴールを向けて復帰します。',
+    'Return an out-of-bounds robot near either own corner, clear of all white lines and facing its own goal. A repaired damaged robot still returns on the furthest unoccupied neutral spot, facing its own goal.',
+    'Robot po out of bounds sa vracia pri jednom z vlastných rohov, bez dotyku všetkých bielych čiar a čelom k vlastnej bráne. Opravený damaged robot sa stále vracia na najvzdialenejší voľný neutrálny bod, čelom k vlastnej bráne.',
+    'Ein Roboter nach out of bounds kehrt nahe einer eigenen Ecke zurück, ohne weiße Linien zu berühren und zum eigenen Tor ausgerichtet. Ein reparierter damaged Roboter kommt weiterhin auf den entferntesten freien neutralen Punkt, ebenfalls zum eigenen Tor ausgerichtet.',
+    'out of boundsのロボットは、自陣のいずれかのコーナー付近で、どの白線にも触れず自陣ゴールに向けて復帰させます。修理済みdamagedロボットは最も遠い空いているニュートラルスポットで自陣ゴールに向けます。',
   ],
-
-  // Knowledge checks: vertical kicker test
   [
     'Vertical kicker test setup',
     'Príprava vertikálneho testu kopacieho mechanizmu',
@@ -954,8 +913,6 @@ const rows = [
     'Der Test ist bestanden, wenn die Ballhöhe 100 cm nicht übersteigt. Beim Messen neben einer Wand mit einem Maßband lässt sich die Höhe leicht ablesen.',
     'ボールの高さが100 cmを超えなければ合格です。壁際でメジャーを当てて測ると、高さを読み取りやすくなります。',
   ],
-
-  // Referee drills
   [
     'Blue 2 has already been called out of bounds but is still on the field when its teammate Blue 1 scores.',
     'Blue 2 už bol potrestaný za opustenie ihriska, ale je ešte na ihrisku, keď jeho spoluhráč Blue 1 skóruje.',
@@ -1113,10 +1070,10 @@ const rows = [
     'ボールと相手同士のロボットは動かないままです。Blue 2は75秒前にアウトオブバウンズとなり、待機中です。審判のカウントはまだ行われていません。',
   ],
   [
-    'Count first. Under the 2027 draft a waiting robot whose minute has passed returns before the ball is moved; only if play stays stuck do you count again and place the ball on the nearest free neutral spot.',
-    'Najprv odpočítajte. Podľa návrhu 2027 sa čakajúci robot, ktorému uplynula minúta, vracia skôr, než sa presunie lopta; až keď hra zostane zablokovaná, odpočítajte znova a umiestnite loptu na najbližší voľný neutrálny bod.',
-    'Zähle zuerst. Nach dem Entwurf 2027 kehrt ein wartender Roboter, dessen Minute abgelaufen ist, zurück, bevor der Ball versetzt wird; nur wenn das Spiel festgefahren bleibt, zählst du erneut und legst den Ball auf den nächsten freien Neutralpunkt.',
-    'まずカウントします。2027年ドラフトでは、1分が経過した待機中のロボットは、ボールを移す前に復帰します。それでもプレーが動かない場合にのみ、もう一度カウントして、ボールを最寄りの空きニュートラルスポットに置きます。',
+    'Count first, then return waiting robots whose minute has passed. If play stays stuck, place the ball on the nearest free neutral spot; a second count is not required.',
+    'Najprv počítaj, potom vráť čakajúce roboty po uplynutí minúty. Ak hra stále viazne, presuň loptu na najbližší voľný neutrálny bod; druhé počítanie sa nevyžaduje.',
+    'Zuerst zählen, dann wartende Roboter nach Ablauf ihrer Minute zurückbringen. Stockt das Spiel weiter, den Ball auf den nächsten freien neutralen Punkt setzen; ein zweites Zählen ist nicht nötig.',
+    '先にカウントし、1分を終えた待機ロボットを戻します。それでも膠着が続けば、ボールを最寄りの空いているニュートラルスポットへ移します。2回目のカウントは不要です。',
   ],
   [
     'All four robots have been called out of bounds at different times. No robot is left on the field.',
@@ -1160,8 +1117,6 @@ const rows = [
     'Der Entwurf 2027 erlaubt dem Schiedsrichter, für einen Roboter, den ein Gegner auf die Rampe schiebt, Hinausgeschoben anzusagen und ihn leicht zurück aufs Feld zu schieben. Das Spiel weiterlaufen zu lassen liegt ebenfalls im Ermessen des Schiedsrichters.',
     '2027年ドラフトでは、相手にスロープへ押し上げられたロボットについて、審判は押し出しを宣告し、少しだけフィールド内へ戻すことができます。そのままプレーを続けさせることも、審判の裁量に含まれます。',
   ],
-
-  // Reworded 2026 situations
   [
     'Which limits apply to a main-league Soccer Infrared robot in 2027?',
     'Ktoré limity platia v roku 2027 pre robota hlavnej ligy Soccer Infrared?',
@@ -1276,8 +1231,6 @@ const rows = [
     'Ein Tor eines Roboters, der im Aus und noch auf dem Feld ist, wird nicht gegeben. Erkenne es ab und nimm dann diesen Roboter vom Feld.',
     'アウトオブバウンズでまだフィールド上にいるロボットによるゴールは認められません。ゴールを取り消し、その後そのロボットを退場させます。',
   ],
-
-  // Detailed study: illegal ball holding
   [
     'The 2027 draft states the consequence during gameplay; this scene teaches recognition of the condition.',
     'Návrh 2027 stanovuje následok počas hry; táto scéna učí rozpoznať samotný stav.',
@@ -1309,5 +1262,4 @@ const rows = [
     '機構の問題に気づいたのは良い点ですが、2027年ドラフトでは、試合中のこのロボットは適合するまで故障扱いで退場となります。',
   ],
 ];
-
 export default rows;

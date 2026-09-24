@@ -18,7 +18,8 @@ import { createDamageEffects } from './damage-effects';
 import { createPenaltyEvidence } from './penalty-evidence';
 import {
   penaltyAreaOutline,
-  pushingLineSegment,
+  pushingLinePath,
+  PUSHING_LINE_WIDTH,
 } from '@/lib/simulator/referee-geometry';
 import { useRuleset } from '@/components/rulesets/RulesetProvider';
 
@@ -1553,17 +1554,20 @@ function buildScene(
     // destroy() removes the child from the list it is iterating over.
     for (const child of pushingLines.children.slice()) child.destroy();
     for (const end of [-1, 1] as const) {
-      const [from, to] = pushingLineSegment(end, depth);
-      const line = addSegment(
-        pc,
-        pushingLines,
-        pushingLineMaterial,
-        from,
-        to,
-        0.01,
-      );
-      // Just above the turf and the white stripes it meets at both ends.
-      line.setLocalPosition((from[0] + to[0]) / 2, 0.0012, from[1]);
+      const path = pushingLinePath(end, depth);
+      for (let i = 1; i < path.length; i++) {
+        const from = path[i - 1], to = path[i];
+        const line = addSegment(
+          pc,
+          pushingLines,
+          pushingLineMaterial,
+          from,
+          to,
+          PUSHING_LINE_WIDTH,
+        );
+        // Just above the turf and the white stripes it meets at both ends.
+        line.setLocalPosition((from[0] + to[0]) / 2, 0.0012, (from[1] + to[1]) / 2);
+      }
     }
   };
   app.start();

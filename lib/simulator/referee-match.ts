@@ -2215,7 +2215,7 @@ export class RefereeMatch {
         this.rules.outOfBounds.returnPlacement === 'own-corner')
     )
       return this.canReturn(returning)
-        ? 'This robot has served at least one minute and a game interruption has occurred. Place it in the area of its own corner.'
+        ? 'This robot has served at least one minute and a game interruption has occurred. Return it near an own corner, clear of white lines and facing its own goal.'
         : 'An out-of-bounds robot stays off for at least one minute and then returns at the next game interruption, such as a kickoff, lack of progress or pushing. Keep it off until then and until its corner area is clear.';
     if (returning)
       return this.canReturn(returning)
@@ -2491,7 +2491,29 @@ export class RefereeMatch {
     this.active = item;
     if (item.replay) this.recorder.last = item.replay;
   }
+  private returnBeforePlacement(item: ActiveIncident, call: RefereeCall) {
+    return (
+      this.rules.lackOfProgress.returnServedRobotsFirst &&
+      call.action === 'return' &&
+      item.definition.steps[item.step]?.some(
+        (entry) => entry.action === 'lack-progress',
+      )
+    );
+  }
   private selectReturnRequest(id: string) {
+    // A return inside an already-counted lack-of-progress incident is an
+    // intermediate action, not a separate incident that discards the count.
+    if (
+      this.active &&
+      this.returnBeforePlacement(this.active, {
+        action: 'return',
+        target: id,
+      }) &&
+      this.expectedFor(this.active).some(
+        (call) => call.action === 'return' && call.target === id,
+      )
+    )
+      return;
     const findRequest = () =>
       [this.active, ...this.pending].find(
         (item) => item && !item.finished && this.returnRequest(item) === id,
@@ -2720,9 +2742,11 @@ export class RefereeMatch {
     const replayAt = this.capture(true);
     if (correct) {
       item.initial = clonePoses(this.match.state.actors);
-      item.step = match?.complete
-        ? item.definition.steps.length
-        : item.step + 1;
+      item.step = this.returnBeforePlacement(item, submitted)
+        ? item.step
+        : match?.complete
+          ? item.definition.steps.length
+          : item.step + 1;
       for (const resolved of matchingIncidents) {
         if (resolved.item === item || resolved.item.finished) continue;
         if (
@@ -2734,9 +2758,14 @@ export class RefereeMatch {
           )
         )
           continue;
-        resolved.item.step = resolved.call.complete
-          ? resolved.item.definition.steps.length
-          : resolved.item.step + 1;
+        resolved.item.step = this.returnBeforePlacement(
+          resolved.item,
+          submitted,
+        )
+          ? resolved.item.step
+          : resolved.call.complete
+            ? resolved.item.definition.steps.length
+            : resolved.item.step + 1;
         this.skipResolvedSteps(resolved.item);
         if (resolved.item.step >= resolved.item.definition.steps.length)
           this.finishIncident(resolved.item);
@@ -2968,9 +2997,11 @@ export class RefereeMatch {
           ? explanation
           : `Expected ${choices.map((entry) => `${refereeActionLabel(entry.action, this.rulesetId)}${entry.target ? ` (${robotName(entry.target)})` : ''}`).join(' or ')}. ${explanation}`;
     if (correct)
-      item.step = match?.complete
-        ? item.definition.steps.length
-        : item.step + 1;
+      item.step = this.returnBeforePlacement(item, submitted)
+        ? item.step
+        : match?.complete
+          ? item.definition.steps.length
+          : item.step + 1;
     if (correct) this.skipResolvedSteps(item);
     const final = correct && item.step >= item.definition.steps.length;
     if (final) this.finishCase();
@@ -3243,7 +3274,7 @@ export class RefereeMatch {
         this.observations.delete(`ready::${this.kickoffSerial}`);
       }
       if (ownCorner)
-        return `${robotName(target)} returned in the area of its own corner. The rules name no orientation; it faces the center of the field.`;
+        return `${robotName(target)} returned in the area of its own corner, clear of the white lines and facing its own goal.`;
       return `${robotName(target)} ${action === 'return' ? 'returned facing its own goal' : 'relocated'} at the furthest clear neutral spot.`;
     }
     if (action === 'keep-out')

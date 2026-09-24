@@ -437,12 +437,16 @@ neutral kickoff when no robot is left on the field.
 
 A draft can leave points open. The Lab then needs a working answer, states it
 as a **training assumption** in the comparison tab, and keeps it behind a single
-setting in `lib/rulesets/2027/gameplay.ts`. For the draft of 2026-09-18 these
-are: the position of the pushing line (provisionally at mid-depth of the
-penalty area, and labelled as provisional on the field), the conflict between
+setting in `lib/rulesets/2027/gameplay.ts`. For the draft of 2026-09-24 these
+are: the position of the pushing line (a copy of the curved white penalty
+marking, translated 16 cm towards the goal centreline-to-centreline and clipped
+at the goal line; explicitly provisional and not to be drawn on real fields),
+the conflict between
 sections 2.3 and 2.8 on returning at a kick-off (the changed section 2.8 is
 followed), what counts as a game interruption, which own corner a robot returns
-to and how it faces, and whether to count again after waiting robots return.
+to. Returning robots now face their own goal and do not touch white lines.
+After a lack-of-progress count, return eligible robots first; if play remains
+stuck, move the ball without requiring another count.
 Training assumptions are not rules; the final text and the event organizers
 decide.
 

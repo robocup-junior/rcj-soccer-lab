@@ -107,7 +107,7 @@ function lessonUrl(sectionId: string, rulesetId: string) {
   );
 }
 const PROVISIONAL_LINE_NOTE =
-  'The position of the pushing line has not been published yet. The line in this Lab is a provisional placeholder at mid-depth of the penalty area.';
+  'The pushing line in this Lab copies the curved white penalty-area line 16 cm towards the goal. This is provisional: do not draw it on real fields yet.';
 
 function reference(
   key: Provision,

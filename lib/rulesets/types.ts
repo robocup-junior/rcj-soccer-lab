@@ -88,8 +88,8 @@ export type GameplayRules = {
     /** A referee judgment, or an objective line the defender reaches. */
     basis: 'discretion' | 'line';
     /**
-     * Distance of the pushing line behind the outer front edge of the penalty
-     * area, in metres. Null when the rule set has no pushing line.
+     * Goalwards translation of the curved white penalty marking's centreline,
+     * in metres. Null when the rule set has no pushing line.
      */
     lineDepth: number | null;
     /** The published documents do not state the position yet. */

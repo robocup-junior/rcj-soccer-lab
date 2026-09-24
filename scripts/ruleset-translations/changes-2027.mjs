@@ -1,8 +1,5 @@
-// Reviewed translations for lib/rulesets/2027/changes.ts: the change list of
-// the Version comparison tab, the training assumptions and the source notice.
-// Rows are [English, Slovak, German, Japanese]; see interface.mjs for the terms.
+// Reviewed English, Slovak, German and Japanese copy; draft refreshed 2026-09-24.
 const rows = [
-  // Headings of the official 2027 soccer rules that differ from 2026
   [
     'Changes from the 2026 RoboCupJunior Soccer Rules',
     'Zmeny oproti pravidlám RoboCupJunior Soccer 2026',
@@ -15,8 +12,6 @@ const rows = [
     'Ballwechsel in der Soccer Infrared Liga ab 2026',
     'Soccer Infrared リーグのボール変更（2026年以降）',
   ],
-
-  // Training assumptions
   [
     'Position of the pushing line',
     'Poloha čiary tlačenia',
@@ -30,10 +25,10 @@ const rows = [
     'ドラフトは、プッシングラインを改訂版のフィールド仕様書で示すとしていますが、その位置はまだ示していません。',
   ],
   [
-    'The Lab draws a provisional line at mid-depth of the penalty area, 12.5 cm behind its front edge, and labels it provisional. One value in the 2027 rule set moves it.',
-    'Lab kreslí predbežnú čiaru v polovici hĺbky pokutového územia, 12,5 cm za jeho prednou hranou, a označuje ju ako predbežnú. Posunúť ju možno jedinou hodnotou v sade pravidiel 2027.',
-    'Das Lab zeichnet eine vorläufige Linie auf halber Tiefe des Strafraums, 12,5 cm hinter dessen Vorderkante, und kennzeichnet sie als vorläufig. Ein einziger Wert im Regelsatz 2027 verschiebt sie.',
-    'Labはペナルティエリアの奥行きの中間、前端から12.5 cm奥に暫定的なラインを描き、暫定であることを表示します。2027年ルールセットの値を1つ変えるだけで移動できます。',
+    'The Lab copies the curved white penalty-area centreline 16 cm towards the goal, clipped at the goal line. This is a provisional simulation setting, not a published field dimension.',
+    'Lab kopíruje stred zakrivenej bielej čiary pokutového územia o 16 cm smerom k bráne a ukončí ho na bránkovej čiare. Ide o predbežné nastavenie simulácie, nie publikovaný rozmer ihriska.',
+    'Das Lab verschiebt die Mittellinie der gebogenen weißen Strafraummarkierung um 16 cm zum Tor und beschneidet sie an der Torlinie. Dies ist eine vorläufige Simulationseinstellung, kein veröffentlichter Spielfeldmaßwert.',
+    'Labでは、曲がった白いペナルティエリア線の中心線をゴール方向へ16 cm移動し、ゴールラインで切り取っています。これはシミュレーション用の暫定設定であり、公表されたフィールド寸法ではありません。',
   ],
   [
     'Out-of-bounds robots at a kick-off',
@@ -72,43 +67,23 @@ const rows = [
     'このトレーニングでは、審判による中断と、フィールド外に出たボールを戻す場合も中断として数えます。ロボットの退場や移動だけでは中断に数えません。',
   ],
   [
-    'Which corner, facing where',
-    'Ktorý roh a aké natočenie',
-    'Welche Ecke, welche Ausrichtung',
-    'どのコーナーに、どの向きで',
+    'Which own corner',
+    'Ktorý vlastný roh',
+    'Welche eigene Ecke',
+    'どちらの自陣コーナーか',
   ],
   [
-    'The draft places a returning out-of-bounds robot in “the general area of its own corner” without naming one of the two own-half corners or an orientation.',
-    'Návrh umiestňuje vracajúceho sa robota do „priestoru jeho vlastného rohu“, no neurčuje, ktorý z dvoch rohov vlastnej polovice to je, ani natočenie robota.',
-    'Der Entwurf setzt einen zurückkehrenden Roboter in „den allgemeinen Bereich seiner eigenen Ecke“, ohne eine der beiden Ecken der eigenen Hälfte oder eine Ausrichtung zu nennen.',
-    'ドラフトは、復帰するロボットを「自陣コーナーのおおよその位置」に置くとしていますが、自陣に2つあるコーナーのどちらか、またロボットの向きは示していません。',
+    'The draft allows either own corner, clear of the white lines and facing its own goal. It does not specify an exact position or which corner to use.',
+    'Návrh povoľuje oba vlastné rohy, bez dotyku bielych čiar a čelom k vlastnej bráne. Neurčuje presnú polohu ani výber rohu.',
+    'Der Entwurf erlaubt beide eigenen Ecken, ohne Berührung der weißen Linien und zum eigenen Tor ausgerichtet. Die genaue Position und die Wahl der Ecke bleiben offen.',
+    'ドラフトでは自陣のどちらかのコーナー付近で、白線に触れず自陣ゴールに向けて復帰させます。正確な位置とコーナーの選択は指定されていません。',
   ],
   [
-    'The simulator uses the free own-half corner farther from the ball and turns the robot toward the center of the field.',
-    'Simulátor použije voľný roh vlastnej polovice, ktorý je ďalej od lopty, a otočí robota k stredu ihriska.',
-    'Der Simulator nutzt die freie Ecke der eigenen Hälfte, die weiter vom Ball entfernt ist, und dreht den Roboter zur Feldmitte.',
-    'シミュレーターは、自陣の空いているコーナーのうちボールから遠いほうを使い、ロボットをフィールド中央に向けます。',
+    'The simulator chooses the free own-half corner farther from the ball, clear of white lines, and faces the robot towards its own goal.',
+    'Simulátor vyberie voľný vlastný roh ďalej od lopty, mimo bielych čiar, a otočí robota k vlastnej bráne.',
+    'Der Simulator wählt die freie eigene Ecke weiter vom Ball entfernt, hält Abstand zu den weißen Linien und richtet den Roboter zum eigenen Tor aus.',
+    'シミュレーターはボールから遠い空いている自陣コーナーを選び、白線に触れない位置でロボットを自陣ゴールに向けます。',
   ],
-  [
-    'Counting again after robots return',
-    'Nové odpočítavanie po návrate robotov',
-    'Erneutes Zählen nach der Rückkehr von Robotern',
-    'ロボット復帰後の再カウント',
-  ],
-  [
-    'The draft does not say whether a new count is needed when returning the waiting robots does not resolve the lack of progress.',
-    'Návrh neuvádza, či je potrebné nové odpočítavanie, keď návrat čakajúcich robotov nedostatok pokroku nevyrieši.',
-    'Der Entwurf sagt nicht, ob neu gezählt werden muss, wenn die Rückkehr der wartenden Roboter den mangelnden Spielfortschritt nicht auflöst.',
-    'ドラフトは、待機中のロボットを復帰させても進行の停滞が解消しない場合に、改めてカウントが必要かどうかを示していません。',
-  ],
-  [
-    'The trainer asks for a new visible count before the ball is moved.',
-    'Trenažér vyžaduje nové viditeľné odpočítavanie pred presunom lopty.',
-    'Das Training verlangt ein neues sichtbares Zählen, bevor der Ball versetzt wird.',
-    'このトレーニングでは、ボールを移す前に、見える形でのカウントをもう一度求めます。',
-  ],
-
-  // Late teams
   [
     'Late teams: a definition, and an automatic loss at 10–0',
     'Meškajúce tímy: definícia a automatická prehra pri stave 10–0',
@@ -139,8 +114,6 @@ const rows = [
     'Die Zeit vor einem Spiel wird nicht simuliert. Im Tab „Regeln“ gibt es eine 2027er Frage zum neuen Limit.',
     '試合前の時間はシミュレーションしません。ルールタブに、この新しい上限についての2027年版の問題があります。',
   ],
-
-  // Neutral kick-off with an empty field
   [
     'Neutral kick-off when every robot is off the field',
     'Neutrálny výkop, keď sú všetky roboty mimo ihriska',
@@ -171,8 +144,6 @@ const rows = [
     'Der Schiedsrichtermodus löst die Situation aus, wenn der letzte Roboter das Feld verlässt, und erwartet die Entscheidung Neutral kickoff. Der Anstoß wartet dann, bis jedes Team einen Roboter hat, der zurückkehren darf.',
     '審判モードでは、最後のロボットが場外に出た時点でこの状況が発生し、Neutral kickoff の判定が求められます。キックオフは、各チームに復帰可能なロボットがそろうまで待ちます。',
   ],
-
-  // Holding
   [
     'Ball holding during play makes the robot damaged',
     'Držanie lopty počas hry znamená, že robot je poškodený',
@@ -203,8 +174,6 @@ const rows = [
     'Die Entscheidung Holding entfernt den Roboter als beschädigt. Er darf nach der Wartezeit und einer simulierten Nachinspektion zurückkehren.',
     'Holding の判定で、ロボットは故障扱いで退場します。待機時間とシミュレーション上の再検査の後に復帰できます。',
   ],
-
-  // Multiple defense
   [
     'Multiple defense only in a team’s own penalty area',
     'Viacnásobná obrana len vo vlastnom pokutovom území tímu',
@@ -235,8 +204,6 @@ const rows = [
     'Das Training prüft jedes Team nur an dem Tor, das es verteidigt – egal, welche Seite das nach dem Münzwurf ist.',
     'このトレーニングでは、コイントス後にどちらのエンドになっても、各チームを自分が守るゴールでのみ確認します。',
   ],
-
-  // Pushing line
   [
     'Pushing is decided by a pushing line, not by discretion',
     'O tlačení rozhoduje čiara tlačenia, nie uváženie rozhodcu',
@@ -267,8 +234,6 @@ const rows = [
     'Das Spielfeld zeigt eine vorläufige Pushing-Linie, und das Training verlangt die Entscheidung, sobald der Körper des Verteidigers sie im Kontakt erreicht.',
     'フィールドには暫定的なプッシングラインを表示し、接触中に守備ロボットの機体がラインに達した時点で判定を求めます。',
   ],
-
-  // Lack of progress
   [
     'Lack of progress: return waiting robots before moving the ball',
     'Nedostatok pokroku: pred presunom lopty vráťte čakajúce roboty',
@@ -294,13 +259,11 @@ const rows = [
     'ボールに触れる前に、場外のロボットを確認します。',
   ],
   [
-    'With a time-served robot waiting, the trainer expects Permit return first and then a new count before the ball is moved.',
-    'Ak čaká robot s odpykaným trestom, trenažér očakáva najprv povolenie návratu a potom nové odpočítavanie pred presunom lopty.',
-    'Wartet ein Roboter mit verbüßter Strafe, erwartet das Training zuerst „Rückkehr erlauben“ und dann ein neues Zählen, bevor der Ball versetzt wird.',
-    'ペナルティ時間を終えたロボットが待機している場合、このトレーニングではまず復帰の許可を、その後ボールを移す前に新たなカウントを求めます。',
+    'After the count, return eligible robots first. If play is still stuck, move the ball to the nearest free neutral spot without starting another count.',
+    'Po počítaní najprv vráť oprávnené roboty. Ak hra stále viazne, presuň loptu na najbližší voľný neutrálny bod bez nového počítania.',
+    'Nach dem Zählen zuerst berechtigte Roboter zurückbringen. Stockt das Spiel weiterhin, den Ball ohne erneutes Zählen auf den nächsten freien neutralen Punkt setzen.',
+    'カウント後、復帰可能なロボットを先に戻します。それでも膠着が続く場合は、再カウントせずボールを最寄りの空いているニュートラルスポットへ移します。',
   ],
-
-  // Out of bounds: minimum and interruption
   [
     'Out of bounds: at least one minute, then back at an interruption',
     'Mimo ihriska: najmenej jedna minúta, potom návrat pri prerušení hry',
@@ -331,8 +294,6 @@ const rows = [
     'Die Liste der Roboter außerhalb des Feldes zeigt die Minute und wartet dann auf eine Unterbrechung. Es zählen Anstöße, Entscheidungen auf mangelnden Spielfortschritt und Pushing, das Zurückholen eines Balls, der das Feld verlassen hat, und Schiedsrichterunterbrechungen.',
     '場外ロボットの一覧は1分を表示し、その後は中断を待ちます。キックオフ、進行の停滞とプッシングの判定、フィールド外に出たボールを戻す場合、審判による中断が対象です。',
   ],
-
-  // Out of bounds: goals
   [
     'Only the penalized robot’s own goals are void',
     'Neplatné sú len góly samotného potrestaného robota',
@@ -363,8 +324,6 @@ const rows = [
     'Das Training betrachtet den Roboter, der den Ball zuletzt berührt hat, als Torschützen.',
     'このトレーニングでは、最後にボールに触れたロボットを得点者として扱います。',
   ],
-
-  // Out of bounds: return position
   [
     'Out-of-bounds robots return in their own corner',
     'Roboty mimo ihriska sa vracajú do vlastného rohu',
@@ -378,10 +337,10 @@ const rows = [
     'ペナルティの後、ロボットはボールから最も遠い空きニュートラルスポットに、自陣ゴールを向けて置かれます。',
   ],
   [
-    'After the penalty the robot is placed in the general area of its own corner. Repaired damaged robots still return on the furthest unoccupied neutral spot, facing their own goal.',
-    'Po treste sa robot umiestni do priestoru svojho vlastného rohu. Opravené poškodené roboty sa naďalej vracajú na najvzdialenejší neobsadený neutrálny bod, otočené k vlastnej bránke.',
-    'Nach der Strafe wird der Roboter in den allgemeinen Bereich seiner eigenen Ecke gesetzt. Reparierte beschädigte Roboter kehren weiterhin auf dem am weitesten entfernten freien Neutralpunkt zurück, mit Blick zum eigenen Tor.',
-    'ペナルティの後、ロボットは自陣コーナーのおおよその位置に置かれます。修理を終えた故障ロボットは、引き続き最も遠い空きニュートラルスポットに、自陣ゴールを向けて復帰します。',
+    'After the penalty the robot returns near either own corner, without touching white lines and facing its own goal. Repaired damaged robots still use the furthest unoccupied neutral spot.',
+    'Po treste sa robot vráti pri jednom z vlastných rohov, bez dotyku bielych čiar a čelom k vlastnej bráne. Opravené damaged roboty naďalej používajú najvzdialenejší voľný neutrálny bod.',
+    'Nach der Strafe kehrt der Roboter nahe einer eigenen Ecke zurück, ohne weiße Linien zu berühren und zum eigenen Tor ausgerichtet. Reparierte damaged Roboter nutzen weiterhin den entferntesten freien neutralen Punkt.',
+    '罰則後は自陣のいずれかのコーナー付近で、白線に触れず自陣ゴールに向けて復帰させます。修理済みのdamagedロボットは引き続き最も遠い空いているニュートラルスポットを使います。',
   ],
   [
     'No neutral-spot search for an out-of-bounds return. Keep it for damaged robots.',
@@ -395,8 +354,6 @@ const rows = [
     'Der Roboter wird in die freie Ecke der eigenen Hälfte gesetzt, die weiter vom Ball entfernt ist.',
     'ロボットは、自陣の空いているコーナーのうちボールから遠いほうに置かれます。',
   ],
-
-  // Pushed onto the ramp
   [
     'Pushed out also covers being pushed onto the ramp',
     'Vytlačenie zahŕňa aj zatlačenie na rampu',
@@ -427,8 +384,6 @@ const rows = [
     'Im laufenden Spiel löst ein vom Gegner auf den Keil geschobener Roboter eine optionale Entscheidung Pushed out aus. Sie auszulassen wird nicht als verpasste Entscheidung gewertet.',
     '進行中の試合では、相手にスロープへ押し上げられたロボットについて、任意の Pushed out 判定が発生します。何もしなくても、見逃しとしては採点されません。',
   ],
-
-  // Kicker test
   [
     'Kicker power: a vertical test is piloted',
     'Sila kopacieho mechanizmu: pilotne sa skúša vertikálny test',
@@ -459,8 +414,6 @@ const rows = [
     'Der Kickertest-Prüfstand im Tab „Regeln“ zeigt den vertikalen Test.',
     'ルールタブのキッカーテスト検証台は、垂直テストを表示します。',
   ],
-
-  // Team size and editorial changes
   [
     'Team size note reworded',
     'Preformulovaná poznámka o veľkosti tímu',
@@ -515,14 +468,11 @@ const rows = [
     'Die früheren Markierungen sind entfernt. Roter Text und die Änderungsliste markieren jetzt nur, was sich von 2026 zu 2027 geändert hat.',
     '以前のマークはなくなりました。赤字と変更点一覧は、2026年から2027年への変更だけを示しています。',
   ],
-
-  // Source notice of the published draft page
   [
-    'In the draft page published on 2026-09-18, sections 2.2 to 2.6 appear without headings inside section 2.1, and the sections after them are numbered 2.2 to 2.6. The Lab uses the intended numbering 2.1 to 2.11. Until the page is corrected, the text of the sections without a heading is part of one long paragraph in section 2.1.',
-    'Na stránke návrhu zverejnenej 2026-09-18 sa časti 2.2 až 2.6 zobrazujú bez nadpisov vnútri časti 2.1 a časti za nimi sú očíslované 2.2 až 2.6. Lab používa zamýšľané číslovanie 2.1 až 2.11. Kým stránka nebude opravená, text častí bez nadpisu je súčasťou jedného dlhého odseku v časti 2.1.',
-    'Auf der am 2026-09-18 veröffentlichten Entwurfsseite erscheinen die Abschnitte 2.2 bis 2.6 ohne Überschriften innerhalb von Abschnitt 2.1, und die folgenden Abschnitte sind mit 2.2 bis 2.6 nummeriert. Das Lab verwendet die beabsichtigte Nummerierung 2.1 bis 2.11. Bis die Seite korrigiert ist, steht der Text der Abschnitte ohne Überschrift in einem langen Absatz in Abschnitt 2.1.',
-    '2026-09-18に公開されたドラフトのページでは、2.2〜2.6節が見出しのないまま2.1節の中に表示され、それ以降の節に2.2〜2.6の番号が付いています。Labは本来意図された2.1〜2.11の番号を使用します。ページが修正されるまで、見出しのない節の本文は2.1節の長い1段落の一部として表示されます。',
+    'The pushing-line implementation may change. Do not draw it on real fields yet. The Lab’s 16 cm curved offset is a provisional simulation setting.',
+    'Podoba čiary pushing sa môže zmeniť. Zatiaľ ju nekreslite na skutočné ihriská. Zakrivená čiara posunutá o 16 cm v Lab je predbežné nastavenie simulácie.',
+    'Die Umsetzung der Pushing-Linie kann sich ändern. Zeichnet sie noch nicht auf echte Spielfelder. Die gebogene, um 16 cm versetzte Linie im Lab ist eine vorläufige Simulationseinstellung.',
+    'プッシングラインの方式は変更される可能性があります。まだ実際のフィールドには描かないでください。Labの16 cm移動した曲線はシミュレーション用の暫定設定です。',
   ],
 ];
-
 export default rows;

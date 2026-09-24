@@ -141,6 +141,8 @@ export type RefereeCase = {
   title: string;
   family: string;
   clip: string;
+  /** Resolved rule-set-specific animation, supplied by the learning bank. */
+  evidence?: RuleClip;
   start?: number;
   end: number;
   /** First observable incident; end still preserves the interpolation keyframes. */
@@ -680,7 +682,8 @@ export function transformPose(value: Pose, variant: Variant): Pose {
   return { x, z, yaw: Math.atan2(Math.sin(yaw), Math.cos(yaw)) };
 }
 export function evidenceClip(item: RefereeCase): RuleClip {
-  const source = (RULE_CLIPS.find((clip) => clip.id === item.clip) ??
+  const source = (item.evidence ??
+    RULE_CLIPS.find((clip) => clip.id === item.clip) ??
     OVERLAY_CLIPS.find((clip) => clip.id === item.clip))!;
   // Cutting the timeline also prevents interpolation toward a later referee action.
   return {
