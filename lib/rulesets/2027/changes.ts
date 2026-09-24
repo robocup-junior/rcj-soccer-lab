@@ -197,7 +197,7 @@ export const CHANGES_2027: readonly RuleChange[] = [
     kind: 'changed',
     area: 'out-of-bounds',
     impact: 'referee',
-    title: 'Only the penalized robot’s own goals are void',
+    title: 'Penalized robot: goals for its team are void; own goals count',
     before:
       'No goal of the penalized team is granted while its penalized robot is still on the field.',
     after:

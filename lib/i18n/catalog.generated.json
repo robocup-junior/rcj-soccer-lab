@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T07:19:25.005Z",
+  "generatedAt": "2026-09-24T07:20:53.007Z",
   "locales": {
     "sk": {
       "exact": {
@@ -2116,7 +2116,6 @@
         "Only if the robot loses a visible part": "Iba ak robot stratí viditeľnú časť",
         "Only if Yellow has no other robot on the field": "Len ak žltý tím nemá na ihrisku iného robota",
         "Only the entangled pair separated, just enough to move freely.": "Len zapletený pár sa oddelil, len toľko, aby sa mohol voľne pohybovať.",
-        "Only the penalized robot’s own goals are void": "Neplatné sú len góly samotného potrestaného robota",
         "Only the team that did not take the previous kickoff": "Iba tím, ktorý nemal predchádzajúci výkop",
         "Only two robots partly inside their own penalty area are multiple defense.": "Viacnásobnou obranou sú len dva roboty čiastočne vo vlastnom pokutovom území.",
         "Only Yellow 1 partly overlaps the area; the rest of its footprint remains outside. No wall contact.": "Iba Yellow 1 čiastočne prekrýva oblasť; zvyšok jeho stopy zostáva vonku. Žiadny kontakt so stenou.",
@@ -2246,6 +2245,7 @@
         "payload": "užitočné zaťaženie",
         "Penalise Blue because it entered the area first": "Penalize Blue, pretože vstúpil do oblasti ako prvý",
         "Penalise Yellow because it entered the area first": "Penalizovať žltú, pretože vstúpila do oblasti ako prvá",
+        "Penalized robot: goals for its team are void; own goals count": "Potrestaný robot: góly pre svoj tím neplatia; vlastné góly platia",
         "Penalties such as out of bounds, pushing and multiple defense are judged in Referee mode under the same rules version.": "Tresty ako opustenie ihriska, tlačenie a viacnásobná obrana sa posudzujú v režime Rozhodca podľa rovnakej verzie pravidiel.",
         "penalty": "pokuta",
         "Penalty area": "Pokutové územie",
@@ -6725,7 +6725,6 @@
         "Only if the robot loses a visible part": "Nur wenn der Roboter ein sichtbares Teil verliert",
         "Only if Yellow has no other robot on the field": "Nur wenn Gelb keinen anderen Roboter auf dem Feld hat",
         "Only the entangled pair separated, just enough to move freely.": "Nur das verschlungene Paar trennte sich gerade so weit, dass es sich frei bewegen konnte.",
-        "Only the penalized robot’s own goals are void": "Nur die Tore des bestraften Roboters selbst sind ungültig",
         "Only the team that did not take the previous kickoff": "Nur das Team ohne den vorherigen Anstoß",
         "Only two robots partly inside their own penalty area are multiple defense.": "Nur zwei Roboter, die teilweise im eigenen Strafraum stehen, sind Mehrfachverteidigung.",
         "Only Yellow 1 partly overlaps the area; the rest of its footprint remains outside. No wall contact.": "Lediglich Yellow 1 überlappt den Bereich teilweise; der Rest seines Fußabdrucks bleibt draußen. Kein Wandkontakt.",
@@ -6855,6 +6854,7 @@
         "payload": "Nutzlast",
         "Penalise Blue because it entered the area first": "Blau wird bestraft, weil es den Bereich zuerst betreten hat",
         "Penalise Yellow because it entered the area first": "Gelb wird bestraft, weil es zuerst den Strafraum betreten hat",
+        "Penalized robot: goals for its team are void; own goals count": "Bestrafter Roboter: Tore für sein Team sind ungültig; Eigentore zählen",
         "Penalties such as out of bounds, pushing and multiple defense are judged in Referee mode under the same rules version.": "Strafen wie Aus, Pushing und Mehrfachverteidigung werden im Schiedsrichtermodus nach derselben Regelversion beurteilt.",
         "penalty": "Strafe",
         "Penalty area": "Strafraum",
@@ -11334,7 +11334,6 @@
         "Only if the robot loses a visible part": "ロボットが目に見える部分を失った場合のみ",
         "Only if Yellow has no other robot on the field": "黄のロボットがフィールドに他にいない場合のみ",
         "Only the entangled pair separated, just enough to move freely.": "絡み合ったペアだけが離れ、自由に動けるようになりました。",
-        "Only the penalized robot’s own goals are void": "無効になるのはペナルティを受けたロボット自身のゴールだけ",
         "Only the team that did not take the previous kickoff": "直前のキックオフをしなかったチームだけ",
         "Only two robots partly inside their own penalty area are multiple defense.": "複数守備になるのは、2台が一部でも自陣のペナルティエリアに入っている場合だけです。",
         "Only Yellow 1 partly overlaps the area; the rest of its footprint remains outside. No wall contact.": "Yellow 1 のみが領域と部分的に重なっています。残りのフットプリントは外側に残ります。壁との接触はありません。",
@@ -11464,6 +11463,7 @@
         "payload": "ペイロード",
         "Penalise Blue because it entered the area first": "先にエリアに入った青にペナルティを与える",
         "Penalise Yellow because it entered the area first": "黄色が先にエリアに入ったためペナルティを与える",
+        "Penalized robot: goals for its team are void; own goals count": "ペナルティ中のロボット：自チームの得点は無効、オウンゴールは有効",
         "Penalties such as out of bounds, pushing and multiple defense are judged in Referee mode under the same rules version.": "アウトオブバウンズ、プッシング、複数守備などの反則は、審判モードで同じバージョンのルールに基づいて判定します。",
         "penalty": "ペナルティ",
         "Penalty area": "ペナルティエリア",

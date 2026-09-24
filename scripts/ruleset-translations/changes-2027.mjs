@@ -295,10 +295,10 @@ const rows = [
     '場外ロボットの一覧は1分を表示し、その後は中断を待ちます。キックオフ、進行の停滞とプッシングの判定、フィールド外に出たボールを戻す場合、審判による中断が対象です。',
   ],
   [
-    'Only the penalized robot’s own goals are void',
-    'Neplatné sú len góly samotného potrestaného robota',
-    'Nur die Tore des bestraften Roboters selbst sind ungültig',
-    '無効になるのはペナルティを受けたロボット自身のゴールだけ',
+    'Penalized robot: goals for its team are void; own goals count',
+    'Potrestaný robot: góly pre svoj tím neplatia; vlastné góly platia',
+    'Bestrafter Roboter: Tore für sein Team sind ungültig; Eigentore zählen',
+    'ペナルティ中のロボット：自チームの得点は無効、オウンゴールは有効',
   ],
   [
     'No goal of the penalized team is granted while its penalized robot is still on the field.',
